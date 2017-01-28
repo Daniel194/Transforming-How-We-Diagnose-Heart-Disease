@@ -8,13 +8,31 @@ Bolile de inim\u{a} sunt principala cauz\u{a} de deces la nivel mondial, acestea
 \par 
 Din fericire, progresul tehnologic din ultimii ani ne-a adus posibilitatea de a crea noi metode mai eficiente de identificare a simptomelor bolilor cardiace, astfel \^{i}nc\^{a}t acestea s\u{a} pot fi tratate \^{i}nc\u{a} de la apari\c{t}ia lor. O astfel de metod\u{a}, care presupune identificarea bolilor cardiace folosind \^{i}nregistrarile RMN (Rezonan\c{t}\u{a} Magnetic\u{a} Nuclear\u{a}) a unei persoane, preprocesarea lor \c{s}i utilizarea unei re\c{t}ele neuronale pentru stabilirea faptului dac\u{a} persoana respectiv\u{a} prezint\u{a} simptome ale bolilor cardiace, va fi prezentat\u{a} \^{i}n paginile de mai jos. 
 
-\section{Imaginea}
-
-TODO
-
 \subsection{Rezonan\c{t}\u{a} Magnetic\u{a} Nuclear\u{a}}
 
 Rezonan\c{t}a Magnetic\u{a} Nuclear\u{a} se folose\c{s}te de un c\^{a}mp magnetic \c{s}i de unde de radiofrecven\c{t}\u{a} pentru vizualizarea diferitelor organe \c{s}i \c{t}esuturi ale corpului omenesc. Undele de radiofrecven\c{t}\u{a} sunt apoi traduse \^{i}ntr-o imagine.
+
+\section{Imaginea digital\u{a}}
+
+O imagine digital\u{a} este \^{i}mp\u{a}r\c{t}it\u{a} \^{i}n mai multe blocuri infime ca suprafa\c{t}\u{a} numite pixeli. Fiecare pixel are dou\u{a} coordonate care \^{i}i definesc pozi\c{t}ia in imagine \c{s}i o caracteristic\u{a} de luminozitate \c{s}i culoare care este codificat\u{a} conform unui anumit sistem ales. \^{I}n lucrarea de fa\c{t}\u{a} vom folosii sistemul RGB.
+
+\subsection{RGB}
+
+\^{I}n sistemul RGB (Red Green Blue) fiecare pixel este caracterizat prin trei valori, c\^{a}te una pentru fiecare canal, astfle inc\^{a}t valoare reprezint\u{a} intensitatea pe care pixel-ul o are la un canal. RGB fiind un model aditiv de culoare, \^{i}n care culorile ro\c{s}u, verde \c{s}i albastru sunt amestecate pentru a produce o gam\u{a} larg\u{a} de culori, fiecare valoare a pixel-ului va determina culoarea sa.
+
+\par
+
+\^{I}n sistemul RGB, valorea pe care un canal le poate lua trebuie s\u{a} fie mai mic\u{a} sau egal\u{a} dec\^{a}t 255 \c{s}i mai mare sau egal\u{a} dec\^{a}t 0. \^{I}n acest tip de reprezentare valoarea 0 este asociat\u{a} culorii negre iar valoarea 255 este asociat\u{a} culorii albe. 
+
+\par
+
+Av\^{a}nd \^{i}n vedere cele scrise mai sus, pentru a reprezenta o culoare \^{i}n sistemul RGB, s\u{a} lu\u{a}m spre exemplu culoarea galben\u{a}, fiecare canal va primii c\^{a}te o valoare din intervalul \^{i}nchis 0 \c{s}i 255, \^{i}n cazul nostru canalul ro\c{s}u va primii valoare 255, canalul verde va primii valoarea 255 iar canalul albastru va primii valoarea 0.
+
+\subsection{Cum vede calculatorul o imagine ?}
+
+Pentru oameni, o imagine este alcatuit\u{a} din obiecte, din peisaje, con\c{t}ine o ac\c{t}iune, un fapt, starne\c{s}te emo\c{t}ii \c{s}i amintiri. Pentru un calculator o imagine este un lung \c{s}ir de numere far\u{a} in\c{t}eles pentru un om din care nu se poate descifra mare lucru. Astfel c\u{a} ne putem pune \^{i}ntrebarea "Cum putem rezolva problema din lucrarea de fa\c{t}\u{a} cu un calculator care nu poate s\u{a} \^{i}n\c{t}eleag\u{a} con\c{t}inutul unei imagini ?" 
+
+TODO
 
 \section{Re\c{t}elele neuronale}
 
@@ -28,4 +46,5 @@ Fiecare neuron prime\c{s}te impulsuri prin dedridele sale de la al\c{t}i neuroni
 
 \par
 
-Acest model biologic a incercat sa fie imitat de c\u{a}tre Warren McCulloch \c{s}i Walter Pitts \^{i}n anul 1943, astfle \^{i}ncat ace\c{s}tia au creat un model matematic care s\u{a} semene c\^{a}t mai mult cu varianta biologic\u{a}. \^{I}n modelul matematic propus de ace\c{s}tia datele de intrare primite prin dendrive ( s\u{a} le not\u{a}m cu \textbf{\textit{x}} ) sunt multiplicate cu ni\c{s}te \^{i}nt\u{a}riri ( s\u{a} le not\u{a}m cu \textbf{\textit{w}} ) pentru a se imita transferul facut prin sinapse \^{i}ntre axonul neuronului care transmite datle \c{s}i dendrivele neuronului care prime\c{s}te datele. Corpul neuronului a devenit un sumator care \^{i}nsumeaza produsul primit de la dendrive, astfel c\u{a} acesta se poate definii prin func\c{t}ia  $$ f = \sum_{i=1}^{n} x_i w_i $$ unde \textbf{\textit{n}} reprezinta numarul de dendrive. 
+Acest model biologic a incercat sa fie imitat de c\u{a}tre Warren McCulloch \c{s}i Walter Pitts \^{i}n anul 1943, astfle \^{i}ncat ace\c{s}tia au creat un model matematic care s\u{a} semene c\^{a}t mai mult cu varianta biologic\u{a}. \^{I}n modelul matematic propus de ace\c{s}tia datele de intrare primite prin dendrive ( s\u{a} le not\u{a}m cu \textbf{\textit{x}} ) sunt multiplicate cu ni\c{s}te \^{i}nt\u{a}riri ( s\u{a} le not\u{a}m cu \textbf{\textit{w}} ) pentru a se imita transferul facut prin sinapse \^{i}ntre axonul neuronului care transmite datle \c{s}i dendrivele neuronului care prime\c{s}te datele. Corpul neuronului a devenit un sumator care \^{i}nsumeaza produsul primit de la dendrive, astfel c\u{a} acesta se poate definii prin urm\u{a}toarea formul\u{a}  $$ \sum_{i=1}^{n} x_i w_i $$ unde \textbf{\textit{n}} reprezint\u{a} num\u{a}rul de dendrive. La aceast\u{a} formul\u{a} se mai insumeaz\u{a} un \textit{biases} ( s\u{a} \^{i}l not\u{a}m cu \textbf{\textit{b}} ) pentru a reprezenta caracteristicile neliniare ale neuronului. Cu aceast\u{a} nou\u{a} \^{i}nsumare formula va devenii $$ \sum_{i=1}^{n} x_i w_i + b $$
+Dac\u{a} rezultatul ob\c{t}inut este mai mare dec\^{a}t un prag acesta va trece mai departe prin axon spre al\c{t}i neuroni. S\u{a} definim acest efect printr-o func\c{t}ie \textbf{\textit{f}} pe care o vom numii \textit{func\c{t}ie de activare} care stabile\c{s}te dac\u{a} un semnal trece mai departe sau nu, vom descrie mai pe larg aceast\u{a} func\c{t}ie in capitolele de mai jos, astfel c\u{a} modelul matematic a neuronului se poate rezuma la urm\u{a}toarea formul\u{a} $$f( \sum_{i=1}^{n} x_i w_i + b ) $$
