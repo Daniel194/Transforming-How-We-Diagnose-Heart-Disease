@@ -1,0 +1,16 @@
+\chapter{Re\c{t}elele neuronale}
+
+\section{Re\c{t}elele neuronale}
+
+Re\c{t}elele Neuronale au pornit de la ideea de a crea un model matematic care s\u{a} imite structura \c{s}i comportamentul unui creier uman.
+\par
+Creierul este compus din mai multe unit\u{a}\c{t}i numi\c{t}i neuroni, care comunic\u{a} \^{i}ntre ei prin sinapse, se aproximeaz\u{a} faptul c\u{a} creierul uman are aproximativ 86 de miliarde de neuroni \c{s}i 10^{14} - 10^{15}  sinapse.
+
+\includegraphics[width=300]{neuron_small.png}
+
+Fiecare neuron prime\c{s}te impulsuri prin dedridele sale de la al\c{t}i neuroni \c{s}i produce impulsuri prin axon pe care il transmite mai departe la al\c{t}i neuroni prin sinapse.
+
+\par
+
+Acest model biologic a incercat sa fie imitat de c\u{a}tre Warren McCulloch \c{s}i Walter Pitts \^{i}n anul 1943, astfle \^{i}ncat ace\c{s}tia au creat un model matematic care s\u{a} semene c\^{a}t mai mult cu varianta biologic\u{a}. \^{I}n modelul matematic propus de ace\c{s}tia datele de intrare primite prin dendrive ( s\u{a} le not\u{a}m cu \textbf{\textit{x}} ) sunt multiplicate cu ni\c{s}te \^{i}nt\u{a}riri ( s\u{a} le not\u{a}m cu \textbf{\textit{w}} ) pentru a se imita transferul facut prin sinapse \^{i}ntre axonul neuronului care transmite datle \c{s}i dendrivele neuronului care prime\c{s}te datele. Corpul neuronului a devenit un sumator care \^{i}nsumeaza produsul primit de la dendrive, astfel c\u{a} acesta se poate definii prin urm\u{a}toarea formul\u{a}  $$ \sum_{i=1}^{n} x_i w_i $$ unde \textbf{\textit{n}} reprezint\u{a} num\u{a}rul de dendrive. La aceast\u{a} formul\u{a} se mai insumeaz\u{a} un \textit{biases} ( s\u{a} \^{i}l not\u{a}m cu \textbf{\textit{b}} ) pentru a reprezenta caracteristicile neliniare ale neuronului. Cu aceast\u{a} nou\u{a} \^{i}nsumare formula va devenii $$ \sum_{i=1}^{n} x_i w_i + b $$
+Dac\u{a} rezultatul ob\c{t}inut este mai mare dec\^{a}t un prag acesta va trece mai departe prin axon spre al\c{t}i neuroni. S\u{a} definim acest efect printr-o func\c{t}ie \textbf{\textit{f}} pe care o vom numii \textit{func\c{t}ie de activare} care stabile\c{s}te dac\u{a} un semnal trece mai departe sau nu, vom descrie mai pe larg aceast\u{a} func\c{t}ie in capitolele de mai jos, astfel c\u{a} modelul matematic a neuronului se poate rezuma la urm\u{a}toarea formul\u{a} $$f( \sum_{i=1}^{n} x_i w_i + b ) $$

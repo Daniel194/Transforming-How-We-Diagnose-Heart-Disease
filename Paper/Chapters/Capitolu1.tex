@@ -8,9 +8,33 @@ Bolile de inim\u{a} sunt principala cauz\u{a} de deces la nivel mondial, acestea
 \par 
 Din fericire, progresul tehnologic din ultimii ani ne-a adus posibilitatea de a crea noi metode mai eficiente de identificare a simptomelor bolilor cardiace, astfel \^{i}nc\^{a}t acestea s\u{a} pot fi tratate \^{i}nc\u{a} de la apari\c{t}ia lor. O astfel de metod\u{a}, care presupune identificarea bolilor cardiace folosind \^{i}nregistrarile RMN (Rezonan\c{t}\u{a} Magnetic\u{a} Nuclear\u{a}) a unei persoane, preprocesarea lor \c{s}i utilizarea unei re\c{t}ele neuronale pentru stabilirea faptului dac\u{a} persoana respectiv\u{a} prezint\u{a} simptome ale bolilor cardiace, va fi prezentat\u{a} \^{i}n paginile de mai jos. 
 
-\subsection{Rezonan\c{t}\u{a} Magnetic\u{a} Nuclear\u{a}}
+\subsection{Prezentarea problemei}
 
 Rezonan\c{t}a Magnetic\u{a} Nuclear\u{a} se folose\c{s}te de un c\^{a}mp magnetic \c{s}i de unde de radiofrecven\c{t}\u{a} pentru vizualizarea diferitelor organe \c{s}i \c{t}esuturi ale corpului omenesc. Undele de radiofrecven\c{t}\u{a} sunt apoi traduse \^{i}ntr-o imagine.
+\par
+Imaginea de mai jos reprezint\u{a} un exemplu de vizualizare pe care RMN-ul \^{i}l face asupra cutiei toratice. Se poate observa foarte clar inima in aceast\u{a} poz\u{a}.
+
+\includegraphics[width=300]{exemple.png}
+
+Cu asemenea tipuri de imagini vom lucra in lucrarea de fa\c{t}\u{a} pentru a determina volumul de s\^{a}nge care curge prin ventriculul st\^{a}ng al inimii la dou\u{a} timpuri, dup\u{a} sistol\u{a} c\^{a}nd inima este contractat\u{a} iar prin ventricule curge o cantitate de s\^{a}nge foarte mic\u{a} \c{s}i dup\u{a} diastol\u{a} c\^{a}nd inima este expandat\u{a} iar prin ventricule curge cantitatea cea mai mare de s\^{a}nge.
+\par
+Dup\u{a} aflarea volumului de s\^{a}nge care curge la sistol\u{a} ( o vom nota cu \textbf{\textit{$V_D$}} ) \c{s}i la diastol\u{a} ( o vom nota cu \textbf{\textit{$V_S$}} ) putem calcula frac\c{t}ia de ejec\c{t}ie a inimii care este definit\u{a} prin urm\u{a}toarea formul\u{a}
+
+$$100 * \frac{V_D - V_S}{V_D}$$
+
+care ne spune proncentajul de s\^{a}nge pe care inima il pompeaz\u{a} prin corp la o b\u{a}taie de a sa.
+\par
+Pe baza rezultatului ob\c{t}inut de la frac\c{t}ia de ejec\c{t}ie putem stabilii dac\u{a} persoana respectiv\u{a} sufera sau nu de o posibil\u{a} boal\u{a} cardiac\u{a}. Dac\u{a} frac\c{t}ia de ejec\c{t}ie este intre 55 \c{s}i 65\% atunci persoana nu prezint\u{a} posibilitatea de a avea vreo boal\u{a} cardiac\u{a} ins\u{a} dac\u{a} frac\c{t}ia de ejec\c{t}ie nu se incadreaz\u{a} \^{i}n acel interval atunci perosna sufer\u{a} de o boal\u{a} cardiac\u{a}.
+\par
+\^{I}n mod normal unui medic specialist \^{i}i ia aproximativ 20 de minute s\u{a} caluleze frac\c{t}ia de ejec\c{t}ie la un pacient pe baza radiografiei RMN. Scopul nostru este acela de a automatiza acest proces, de al calcula imediat \c{s}i de al face mai accesibil spitalelor, astfle \^{i}nc\^{a} medicul s\u{a} nu mai fie nevoie sa efectueze acest proces manual \c{s}i s\u{a} poat\u{a} pune mai repede un diagnostic unui pacient.
+
+\subsection{Datele folosite}
+
+Pentru rezolvarea acestei probleme vom avea desigur nevoie de o cantitate destul de mare de date, \^{i}ns\u{a} acest lucru este rezolvat datorit\u{a} Institutului Na\c{t}ional pentru Inim\u{a}, Plam\^{a}ni \c{s}i S\^{a}nge din America ( The National Heart, Lung, and Blood Institute ) care au pus la dispozi\c{t}ie sute de radiografii RMN ale inimii in format DICOM ( Digital Imaging and Communications in Medicine ), acestea con\c{t}in\^{a}nd aproximativ 30 de cadre care surprind ciclul cardiac al inimii, acest num\u{a}r poate varia de la caz la caz, imaginile sunt luate din planul perpendicular de-a lungul corpului. Imaginile sunt provenite at\^{a}t de la pacien\c{t}i tineri c\^{a}t \c{s}i de la pacien\c{t}i batr\^{a}ni, pentru c\u{a} bolile inimii pot ap\u{a}rea la orice v\^{a}rst\u{a}, de asemenea imaginile provine de la o multitudine de spitale \c{s}i RMN-uri, astfel c\u{a} calitatea imaginii poate varia.
+
+\par
+
+Din cauza variet\u{a}\c{t}ilor de pozi\c{t}ii prin care un pacient poate sta \^{i}ntr-un RMN, a multitudinilor de anatomii ale corpului \c{s}i a calit\u{a}\c{t}ii imaginii surprinse de RMN, fac ca masurarea cantita\c{t}ii de s\^{a}nge care curege prin ventriculul s\^{a}ng s\u{a} fie o adev\u{a}rat\u{a} provocare.
 
 \section{Imaginea digital\u{a}}
 
@@ -30,21 +54,4 @@ Av\^{a}nd \^{i}n vedere cele scrise mai sus, pentru a reprezenta o culoare \^{i}
 
 \subsection{Cum vede calculatorul o imagine ?}
 
-Pentru oameni, o imagine este alcatuit\u{a} din obiecte, din peisaje, con\c{t}ine o ac\c{t}iune, un fapt, starne\c{s}te emo\c{t}ii \c{s}i amintiri. Pentru un calculator o imagine este un lung \c{s}ir de numere far\u{a} in\c{t}eles pentru un om din care nu se poate descifra mare lucru. Astfel c\u{a} ne putem pune \^{i}ntrebarea "Cum putem rezolva problema din lucrarea de fa\c{t}\u{a} cu un calculator care nu poate s\u{a} \^{i}n\c{t}eleag\u{a} con\c{t}inutul unei imagini ?" 
-
-TODO
-
-\section{Re\c{t}elele neuronale}
-
-Re\c{t}elele Neuronale au pornit de la ideea de a crea un model matematic care s\u{a} imite structura \c{s}i comportamentul unui creier uman.
-\par
-Creierul este compus din mai multe unit\u{a}\c{t}i numi\c{t}i neuroni, care comunic\u{a} \^{i}ntre ei prin sinapse, se aproximeaz\u{a} faptul c\u{a} creierul uman are aproximativ 86 de miliarde de neuroni \c{s}i 10^{14} - 10^{15}  sinapse.
-
-\includegraphics[width=300]{neuron_small.png}
-
-Fiecare neuron prime\c{s}te impulsuri prin dedridele sale de la al\c{t}i neuroni \c{s}i produce impulsuri prin axon pe care il transmite mai departe la al\c{t}i neuroni prin sinapse.
-
-\par
-
-Acest model biologic a incercat sa fie imitat de c\u{a}tre Warren McCulloch \c{s}i Walter Pitts \^{i}n anul 1943, astfle \^{i}ncat ace\c{s}tia au creat un model matematic care s\u{a} semene c\^{a}t mai mult cu varianta biologic\u{a}. \^{I}n modelul matematic propus de ace\c{s}tia datele de intrare primite prin dendrive ( s\u{a} le not\u{a}m cu \textbf{\textit{x}} ) sunt multiplicate cu ni\c{s}te \^{i}nt\u{a}riri ( s\u{a} le not\u{a}m cu \textbf{\textit{w}} ) pentru a se imita transferul facut prin sinapse \^{i}ntre axonul neuronului care transmite datle \c{s}i dendrivele neuronului care prime\c{s}te datele. Corpul neuronului a devenit un sumator care \^{i}nsumeaza produsul primit de la dendrive, astfel c\u{a} acesta se poate definii prin urm\u{a}toarea formul\u{a}  $$ \sum_{i=1}^{n} x_i w_i $$ unde \textbf{\textit{n}} reprezint\u{a} num\u{a}rul de dendrive. La aceast\u{a} formul\u{a} se mai insumeaz\u{a} un \textit{biases} ( s\u{a} \^{i}l not\u{a}m cu \textbf{\textit{b}} ) pentru a reprezenta caracteristicile neliniare ale neuronului. Cu aceast\u{a} nou\u{a} \^{i}nsumare formula va devenii $$ \sum_{i=1}^{n} x_i w_i + b $$
-Dac\u{a} rezultatul ob\c{t}inut este mai mare dec\^{a}t un prag acesta va trece mai departe prin axon spre al\c{t}i neuroni. S\u{a} definim acest efect printr-o func\c{t}ie \textbf{\textit{f}} pe care o vom numii \textit{func\c{t}ie de activare} care stabile\c{s}te dac\u{a} un semnal trece mai departe sau nu, vom descrie mai pe larg aceast\u{a} func\c{t}ie in capitolele de mai jos, astfel c\u{a} modelul matematic a neuronului se poate rezuma la urm\u{a}toarea formul\u{a} $$f( \sum_{i=1}^{n} x_i w_i + b ) $$
+Pentru oameni, o imagine este alcatuit\u{a} din obiecte, din peisaje, con\c{t}ine o ac\c{t}iune, un fapt, starne\c{s}te emo\c{t}ii \c{s}i amintiri. Pentru un calculator o imagine este un lung \c{s}ir de numere far\u{a} in\c{t}eles pentru un om din care nu se poate descifra mare lucru. Astfel c\u{a} ne putem pune \^{i}ntrebarea "Cum putem rezolva problema din lucrarea de fa\c{t}\u{a} cu un calculator care nu poate s\u{a} \^{i}n\c{t}eleag\u{a} con\c{t}inutul unei imagini ?". Din fericire exist\u{a} o multitudine de solu\c{t}ii dezvoltate de-a lungul anilor care ne pot ajuta la rezolvarea acestei probleme, \^{i}ns\u{a} cele mai eficiente dintre ele la ora actual\u{a} sunt re\c{t}elele neuronale.
