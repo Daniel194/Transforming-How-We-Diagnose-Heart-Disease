@@ -1,6 +1,6 @@
 \chapter{Re\c{t}elele neuronale}
 
-\section{Re\c{t}elele neuronale}
+\section{Neuronul}
 
 Re\c{t}elele Neuronale au pornit de la ideea de a crea un model matematic care s\u{a} imite structura \c{s}i comportamentul unui creier uman.
 \par
@@ -13,4 +13,39 @@ Fiecare neuron prime\c{s}te impulsuri prin dedridele sale de la al\c{t}i neuroni
 \par
 
 Acest model biologic a incercat sa fie imitat de c\u{a}tre Warren McCulloch \c{s}i Walter Pitts \^{i}n anul 1943, astfle \^{i}ncat ace\c{s}tia au creat un model matematic care s\u{a} semene c\^{a}t mai mult cu varianta biologic\u{a}. \^{I}n modelul matematic propus de ace\c{s}tia datele de intrare primite prin dendrive ( s\u{a} le not\u{a}m cu \textbf{\textit{x}} ) sunt multiplicate cu ni\c{s}te \^{i}nt\u{a}riri ( s\u{a} le not\u{a}m cu \textbf{\textit{w}} ) pentru a se imita transferul facut prin sinapse \^{i}ntre axonul neuronului care transmite datle \c{s}i dendrivele neuronului care prime\c{s}te datele. Corpul neuronului a devenit un sumator care \^{i}nsumeaza produsul primit de la dendrive, astfel c\u{a} acesta se poate definii prin urm\u{a}toarea formul\u{a}  $$ \sum_{i=1}^{n} x_i w_i $$ unde \textbf{\textit{n}} reprezint\u{a} num\u{a}rul de dendrive. La aceast\u{a} formul\u{a} se mai insumeaz\u{a} un \textit{biases} ( s\u{a} \^{i}l not\u{a}m cu \textbf{\textit{b}} ) pentru a reprezenta caracteristicile neliniare ale neuronului. Cu aceast\u{a} nou\u{a} \^{i}nsumare formula va devenii $$ \sum_{i=1}^{n} x_i w_i + b $$
-Dac\u{a} rezultatul ob\c{t}inut este mai mare dec\^{a}t un prag acesta va trece mai departe prin axon spre al\c{t}i neuroni. S\u{a} definim acest efect printr-o func\c{t}ie \textbf{\textit{f}} pe care o vom numii \textit{func\c{t}ie de activare} care stabile\c{s}te dac\u{a} un semnal trece mai departe sau nu, vom descrie mai pe larg aceast\u{a} func\c{t}ie in capitolele de mai jos, astfel c\u{a} modelul matematic a neuronului se poate rezuma la urm\u{a}toarea formul\u{a} $$f( \sum_{i=1}^{n} x_i w_i + b ) $$
+Dac\u{a} rezultatul ob\c{t}inut este mai mare dec\^{a}t un prag acesta va trece mai departe prin axon spre al\c{t}i neuroni. S\u{a} definim acest efect printr-o func\c{t}ie \textbf{\textit{f}} pe care o vom numii \textit{func\c{t}ie de activare} care stabile\c{s}te dac\u{a} un semnal trece mai departe sau nu, vom descrie mai pe larg aceast\u{a} func\c{t}ie in capitolele de mai jos, astfel c\u{a} modelul matematic a neuronului se poate rezuma la urm\u{a}toarea formul\u{a} 
+$$f( \sum_{i=1}^{n} x_i w_i + b ) $$
+
+\par
+
+Trebuie precizat faptul c\u{a} modelul matematic al neuronului prezentat mai sus nici mac\u{a} nu se apropie de adevaratul comportament al unui neuron, acesta din urm\u{a} av\^{a}nd \^{i}n creierul uman un rol mult prea complex pentru a putea fi exprimat printr-o simpl\u{a} func\c{t}ie. 
+
+
+\section{Fun\c{t}ia de activare}
+
+A\c{s}a cum am specificat \c{s}i mai sus, o re\c{t}ea neuronala are nevoie de o fun\c{t}ie de activare care s\u{a} decid\u{a} dac\u{a} datele pot trece mai departe la urmatorii neuroni sau nu. De-a lungu istoriei s-au folosit mai multe tipuri de fun\c{t}ii de activare la re\c{t}elele neuronale, \^{i}nsa cea care d\u{a} cel mai bun randament at\^{a}t la timpul de antrenare c\^{a}t \c{s}i la acurate\c{t}ea final\u{a} este func\c{t}ia de activare ReLU (Rectified Linear Unit).
+
+\subsection{Rectified Linear Unit}
+
+Rectified Linear Unit, sau mai pe scurt ReLU, este la ora actual\u{a} cea mai folosit\u{a} fun\c{t}ie de activare, ea av\^{a}nd urm\u{a}toarea formul\u{a}
+
+\[ f(x) =
+  \begin{cases}
+    0       & \quad \text{dac\u{a} } x \leq 0\\
+    x  & \quad \text{dac\u{a} } x > 0\\
+  \end{cases}
+\]
+
+Cu alte cuvinte func\c{t}ia pur \c{s}i simplu nu las\u{a} s\u{a} treac\u{a} mai departe rezultatele negative in urma efectu\u{a}rii opera\c{t}iilor din corpul neuronului.
+
+\section{Arhitectura unei re\c{t}ele neuronale}
+
+Acum c\u{a} am aflat ce este un neuron \c{s}i cum este simulat acesta din punct de vedere matematic trebuie s\u{a} discut\u{a}m cum sunt structura\c{t}i ace\c{s}tia \^{i}ntr-o re\c{t}ea neuronal\u{a}, pentru c\u{a} o re\c{t}ea nuronal\u{a} este compus\u{a} din milioane sau chiar sute de milioane de neuroni iar structurarea acestora este foarte important\u{a}.
+
+\includegraphics[width=300]{image10.png}
+
+Re\c{t}elele neuronale sunt modelate ca o cole\c{t}ie de neuroni pe nivele, unde datele calculate de un nivel devin datele de intrare pentru urmatorul nivel de neuroni. Dupa cum se vede \c{s}i in imaginea de mai sus, neuronii afla\c{t}i pe acela\c{s}i nivel nu comunic\u{a} direct unii cu ceilal\c{t}i, comunicarea realiz\^{a}nduse doar cu nivelul inferior de neuroni \c{s}i cu nivelul superior de neuroni.
+\par
+Primul nivel al unei re\c{t}ele neuronale se nume\c{s}te nivelu input, deoarece acesta reprezint\u{a} doar date de intrare, iar ultimul nivel al unei re\c{t}ele neuronale se nume\c{s}te nivelul output, doarece acesta intoarce valoarea final\u{a}, nivelele dintre primul \c{s}i ultimul nivel se numesc nivelele ascunse ( hidden layers ).
+\par
+Re\c{t}elele neuronale, ca cea de mai sus, se numesc re\c{t}ele feedforward, deoarece outputul unui nivel merge tot timpul la urm\u{a}torul nivel, nu se intoarce niciodat\u{a} la un nivel anterior.
