@@ -12,9 +12,9 @@ Fiecare neuron prime\c{s}te impulsuri prin dedridele sale de la al\c{t}i neuroni
 
 \par
 
-Acest model biologic a incercat sa fie imitat de c\u{a}tre Warren McCulloch \c{s}i Walter Pitts \^{i}n anul 1943, astfle \^{i}ncat ace\c{s}tia au creat un model matematic care s\u{a} semene c\^{a}t mai mult cu varianta biologic\u{a}. \^{I}n modelul matematic propus de ace\c{s}tia datele de intrare primite prin dendrive ( s\u{a} le not\u{a}m cu \textbf{\textit{x}} ) sunt multiplicate cu ni\c{s}te \^{i}nt\u{a}riri ( s\u{a} le not\u{a}m cu \textbf{\textit{w}} ) pentru a se imita transferul facut prin sinapse \^{i}ntre axonul neuronului care transmite datle \c{s}i dendrivele neuronului care prime\c{s}te datele. Corpul neuronului a devenit un sumator care \^{i}nsumeaza produsul primit de la dendrive, astfel c\u{a} acesta se poate definii prin urm\u{a}toarea formul\u{a}  $$ \sum_{i=1}^{n} x_i w_i $$ unde \textbf{\textit{n}} reprezint\u{a} num\u{a}rul de dendrive. La aceast\u{a} formul\u{a} se mai insumeaz\u{a} un \textit{biases} ( s\u{a} \^{i}l not\u{a}m cu \textbf{\textit{b}} ) pentru a reprezenta caracteristicile neliniare ale neuronului. Cu aceast\u{a} nou\u{a} \^{i}nsumare formula va devenii $$ \sum_{i=1}^{n} x_i w_i + b $$
+Acest model biologic a incercat sa fie imitat de c\u{a}tre Warren McCulloch \c{s}i Walter Pitts \^{i}n anul 1943, astfle \^{i}ncat ace\c{s}tia au creat un model matematic care s\u{a} semene c\^{a}t mai mult cu varianta biologic\u{a}. \^{I}n modelul matematic propus de ace\c{s}tia datele de intrare primite prin dendrive ( s\u{a} le not\u{a}m cu \textbf{\textit{x}} ) sunt multiplicate cu ni\c{s}te \^{i}nt\u{a}riri ( s\u{a} le not\u{a}m cu \textbf{\textit{W}} ) pentru a se imita transferul facut prin sinapse \^{i}ntre axonul neuronului care transmite datle \c{s}i dendrivele neuronului care prime\c{s}te datele. Corpul neuronului a devenit un sumator care \^{i}nsumeaza produsul primit de la dendrive, astfel c\u{a} acesta se poate definii prin urm\u{a}toarea formul\u{a}  $$ \sum_{i=1}^{n} W_i x_i $$ unde \textbf{\textit{n}} reprezint\u{a} num\u{a}rul de dendrive. La aceast\u{a} formul\u{a} se mai insumeaz\u{a} un \textit{biases} ( s\u{a} \^{i}l not\u{a}m cu \textbf{\textit{b}} ) pentru a reprezenta caracteristicile neliniare ale neuronului. Cu aceast\u{a} nou\u{a} \^{i}nsumare formula va devenii $$ \sum_{i=1}^{n} W_i x_i + b $$
 Dac\u{a} rezultatul ob\c{t}inut este mai mare dec\^{a}t un prag acesta va trece mai departe prin axon spre al\c{t}i neuroni. S\u{a} definim acest efect printr-o func\c{t}ie \textbf{\textit{f}} pe care o vom numii \textit{func\c{t}ie de activare} care stabile\c{s}te dac\u{a} un semnal trece mai departe sau nu, vom descrie mai pe larg aceast\u{a} func\c{t}ie in capitolele de mai jos, astfel c\u{a} modelul matematic a neuronului se poate rezuma la urm\u{a}toarea formul\u{a} 
-$$f( \sum_{i=1}^{n} x_i w_i + b ) $$
+$$f( \sum_{i=1}^{n} W_i x_i + b ) $$
 
 \par
 
@@ -49,3 +49,19 @@ Re\c{t}elele neuronale sunt modelate ca o cole\c{t}ie de neuroni pe nivele, unde
 Primul nivel al unei re\c{t}ele neuronale se nume\c{s}te nivelu input, deoarece acesta reprezint\u{a} doar date de intrare, iar ultimul nivel al unei re\c{t}ele neuronale se nume\c{s}te nivelul output, doarece acesta intoarce valoarea final\u{a}, nivelele dintre primul \c{s}i ultimul nivel se numesc nivelele ascunse ( hidden layers ).
 \par
 Re\c{t}elele neuronale, ca cea de mai sus, se numesc re\c{t}ele feedforward, deoarece outputul unui nivel merge tot timpul la urm\u{a}torul nivel, nu se intoarce niciodat\u{a} la un nivel anterior.
+\par 
+Pentru a se in\c{t}elege mai bine cum lucreaz\u{a} o re\c{t}ea neuronal\u{a} vom nota cu \textbf{\textit{x}} datele de intrare de la nivelul input, cu \textbf{\textit{h}} fiecare hidden layer, cu \textbf{\textit{W}} \^{i}ntaririle, cu \textbf{\textit{b}} bias-ul si cu \textbf{\textit{f}} func\c{t}ia de activare, astfle c\u{a} modelul de mai sus cu dou\u{a} niveluri hidden se poate exprima prin urm\u{a}torul algoritm:
+
+$$h_1 = f( \sum_{i=1}^{n} W_1_i x_i + b_1 ) $$
+$$h_2 = f( \sum_{i=1}^{n} W_2_i h_1_i + b_2 ) $$
+$$out = f( \sum_{i=1}^{n} W_3_i h_2_i + b_3 ) $$
+
+\par
+
+Unul dintre motivele pentru care re\c{t}elele neuronale sunt organizate pe nivele este acela c\u{a} pe acest timp de structur\u{a} este mai u\c{s}or s\u{a} se efectueze opera\c{t}ii pe matrici, astfel inc\^{a}t sa nu mai fim nevoi\c{t}i s\u{a} facem multiplic\u{a}ri individuale. Spre exemplu, s\u{a} lu\u{a}m un \textbf{\textit{x}} de dimeniusne [10x10], $W_1, W_2 $ \c{s}i $W_3$ de dimensiune [5x10], [3x5], respectiv [1x3], iar $b_1, b_2 $ \c{s}i $b_3$ de dimensiune [5x1], [3x1] \c{s}i [1x1], atunci algoritmul de mai sus se poate rescrie in felul urmator: 
+
+$$h_1 = f( W_1 x + b_1 ) $$
+$$h_2 = f( W_2 h_1 + b_2 ) $$
+$$out = f( W_3 h_2 + b_3 ) $$
+
+unde $h_1$ este de dimensiune [5x10], $h_2$ de dimensiune [3x10], iar out de dimensiune [1x10]. Parametrii $W_1, W_2, W_3, b_1, b_2, b_3$ sunt paramterii pe care re\c{t}eaua neuronal\u{a} \^{i}i inva\c{t}\u{a} pentru a atinge o accurate\c{t}e c\^{a}t mai mare. Despre procesul de inv\u{a}\c{t}are a parametrilor \c{s}i despre cum trebuie s\u{a} \^{i}i set\u{a}m la inceput vom discuta \^{i}n capitolele ce urmeaz\u{a}.
