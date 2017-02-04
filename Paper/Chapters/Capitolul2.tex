@@ -65,3 +65,15 @@ $$h_2 = f( W_2 h_1 + b_2 ) $$
 $$out = f( W_3 h_2 + b_3 ) $$
 
 unde $h_1$ este de dimensiune [5x10], $h_2$ de dimensiune [3x10], iar out de dimensiune [1x10]. Parametrii $W_1, W_2, W_3, b_1, b_2, b_3$ sunt paramterii pe care re\c{t}eaua neuronal\u{a} \^{i}i inva\c{t}\u{a} pentru a atinge o accurate\c{t}e c\^{a}t mai mare. Despre procesul de inv\u{a}\c{t}are a parametrilor \c{s}i despre cum trebuie s\u{a} \^{i}i set\u{a}m la inceput vom discuta \^{i}n capitolele ce urmeaz\u{a}.
+
+\section{Initializarea parametrilor}
+
+Am v\u{a}zut mai sus cum s\u{a} construim o re\c{t}ea neuronal\u{a}. \^{I}nainte ca s\u{a} discut\u{a}m descpre cum se antreneaz\u{a} o re\c{t}ea neuronal\u{a} trebuie s\u{a} discumta cum ini\c{t}ializ\u{a}m cele dou\u{a} tipuri de parametrii (\^{i}nt\u{a}ririle \c{s}i bias - urile). 
+
+\subsection{Initializarea \^{i}nt\u{a}ririlor}
+
+Av\^{a}nd in vedere c\u{a} nu \c{s}tiim valorile finale pe care o s\u{a} le aibe \^{i}nt\u{a}ririle la finalul procesului de antrenare a re\c{t}elei neuronale, deoarece aceste valori se actualizeaz\u{a} la fiecare pas de antrenare, va trebuii s\u{a} ini\c{t}ializ\u{a}m \^{i}nt\u{a}ririle astfle \^{i}nc\^{a}t o jum\u{a}tate din valori s\u{a} aibe valori negative iar cealalt\u{a} jum\u{a}tate valori pozitive, vom dorii valori unice pentru fiecare \^{i}ntarire pentru a acoperii o gam\u{a} c\^{a}t mai larg\u{a} de valori posibile pentru \^{i}nt\u{a}riri iar acestea s\u{a} fiu c\^{a}t mai aproape de valorea zero dar diferite de zero astfle \^{i}nc\^{a}t s\u{a} fiu mai u\c{s}or de actualizat.
+
+\par
+
+Pentru a \^{i}ndeplinii condi\c{t}iile de mai sus vom folosii o distribu\c{t}ie normal\u{a} cu media zero \c{s}i cu varian\c{t}a $\frac{1}{\sqrt{n}}$ , unde n reprezint\u{a} numarul de variabile pe care \^{i}nt\u{a}rirea o are. Acest lucru asigur\u{a} faptul c\u{a} to\c{t}i neuronii din re\c{t}eaua neuronal\u{a} au la inceput
