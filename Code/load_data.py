@@ -1,6 +1,7 @@
 import dicom, lmdb, cv2, re
 import os, fnmatch, shutil
 import numpy as np
+import tensorflow as tf
 import matplotlib.pyplot as plt
 
 SAX_SERIES = {
@@ -24,11 +25,9 @@ SAX_SERIES = {
 
 SUNNYBROOK_ROOT_PATH = "./data/"
 
-TRAIN_CONTOUR_PATH = os.path.join(SUNNYBROOK_ROOT_PATH,
-                                  "Sunnybrook Cardiac MR Database ContoursPart3",
+TRAIN_CONTOUR_PATH = os.path.join(SUNNYBROOK_ROOT_PATH, "Sunnybrook Cardiac MR Database ContoursPart3",
                                   "TrainingDataContours")
-TRAIN_IMG_PATH = os.path.join(SUNNYBROOK_ROOT_PATH,
-                              "challenge_training")
+TRAIN_IMG_PATH = os.path.join(SUNNYBROOK_ROOT_PATH, "challenge_training")
 
 
 def shrink_case(case):
@@ -58,6 +57,12 @@ class Contour(object):
 
 
 def load_contour(contour, img_path):
+    """
+    Function maps each contour file to a DICOM image, according to a case study number,
+    using the SAX_SERIES dictionary and the extracted image number.
+    Upon successful mapping, the function returns NumPy arrays for a pair of DICOM image and contour file, or label.
+    """
+
     filename = "IM-%s-%04d.dcm" % (SAX_SERIES[contour.case], contour.img_no)
     full_path = os.path.join(img_path, contour.case, filename)
     f = dicom.read_file(full_path)
@@ -65,64 +70,89 @@ def load_contour(contour, img_path):
     ctrs = np.loadtxt(contour.ctr_path, delimiter=" ").astype(np.int)
     label = np.zeros_like(img, dtype="uint8")
     cv2.fillPoly(label, [ctrs], 1)
+
     return img, label
 
 
 def get_all_contours(contour_path):
+    """
+    Function walks through a directory containing contour files,
+    and extracts the necessary case study number and image number from a contour filename using the Contour class.
+    """
+
     contours = [os.path.join(dirpath, f)
                 for dirpath, dirnames, files in os.walk(contour_path)
                 for f in fnmatch.filter(files, 'IM-0001-*-icontour-manual.txt')]
+
     print("Shuffle data")
     np.random.shuffle(contours)
     print("Number of examples: {:d}".format(len(contours)))
     extracted = map(Contour, contours)
+
     return extracted
 
 
 def export_all_contours(contours, img_path, lmdb_img_name, lmdb_label_name):
+    """
+    Function leverages TensorFlow's Python API to load a pair of image and label NumPy arrays into a pair of LMDB databases.
+    This technique is useful for constructing ground truth databases from any scalar, vector, or matrix data.
+    During training and testing, TensorFlow will traverse the LMDB databases in lockstep to sync the loading of image and label data.
+    """
+
     for lmdb_name in [lmdb_img_name, lmdb_label_name]:
         db_path = os.path.abspath(lmdb_name)
         if os.path.exists(db_path):
             shutil.rmtree(db_path)
+
     counter_img = 0
     counter_label = 0
     batchsz = 100
+
     print("Processing {:d} images and labels...".format(len(contours)))
+
     for i in range(int(np.ceil(len(contours) / float(batchsz)))):
         batch = contours[(batchsz * i):(batchsz * (i + 1))]
+
         if len(batch) == 0:
             break
+
         imgs, labels = [], []
+
         for idx, ctr in enumerate(batch):
             try:
                 img, label = load_contour(ctr, img_path)
                 imgs.append(img)
                 labels.append(label)
                 if idx % 20 == 0:
-                    print
-                    ctr
+                    print(ctr)
                     plt.imshow(img)
                     plt.show()
                     plt.imshow(label)
                     plt.show()
             except IOError:
                 continue
+
         db_imgs = lmdb.open(lmdb_img_name, map_size=1e12)
+
         with db_imgs.begin(write=True) as txn_img:
             for img in imgs:
                 datum = caffe.io.array_to_datum(np.expand_dims(img, axis=0))
                 txn_img.put("{:0>10d}".format(counter_img), datum.SerializeToString())
                 counter_img += 1
+
         print("Processed {:d} images".format(counter_img))
         db_labels = lmdb.open(lmdb_label_name, map_size=1e12)
+
         with db_labels.begin(write=True) as txn_label:
             for lbl in labels:
                 datum = caffe.io.array_to_datum(np.expand_dims(lbl, axis=0))
                 txn_label.put("{:0>10d}".format(counter_label), datum.SerializeToString())
                 counter_label += 1
+
         print("Processed {:d} labels".format(counter_label))
-    db_imgs.close()
-    db_labels.close()
+
+        db_imgs.close()
+        db_labels.close()
 
 
 if __name__ == "__main__":
