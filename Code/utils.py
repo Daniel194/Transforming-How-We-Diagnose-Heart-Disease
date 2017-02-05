@@ -3,7 +3,7 @@ import numpy
 import glob
 import os
 import cv2
-import settings
+import Code.settings as settings
 from Code.utils_dicom import DicomWrapper
 from scipy.ndimage.interpolation import map_coordinates
 from scipy.ndimage.filters import gaussian_filter
