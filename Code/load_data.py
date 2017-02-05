@@ -1,37 +1,74 @@
-import dicom, lmdb, cv2, re
-import os, fnmatch, shutil
+import os, re, cv2, dicom, fnmatch
 import numpy as np
-import tensorflow as tf
-import matplotlib.pyplot as plt
+import dsb_utils as du
+import utils as u
+import config as c
 
-SAX_SERIES = {
-    # challenge training
-    "SC-HF-I-1": "0004",
-    "SC-HF-I-2": "0106",
-    "SC-HF-I-4": "0116",
-    "SC-HF-I-40": "0134",
-    "SC-HF-NI-3": "0379",
-    "SC-HF-NI-4": "0501",
-    "SC-HF-NI-34": "0446",
-    "SC-HF-NI-36": "0474",
-    "SC-HYP-1": "0550",
-    "SC-HYP-3": "0650",
-    "SC-HYP-38": "0734",
-    "SC-HYP-40": "0755",
-    "SC-N-2": "0898",
-    "SC-N-3": "0915",
-    "SC-N-40": "0944",
+np.random.seed(1234)
+print('random state seeded sunnybrook')
+img_size = 256
+
+sax_series_dict = {
+    'SC-HF-I-1': '0004',
+    'SC-HF-I-2': '0106',
+    'SC-HF-I-4': '0116',
+    'SC-HF-I-5': '0156',
+    'SC-HF-I-6': '0180',
+    'SC-HF-I-7': '0209',
+    'SC-HF-I-8': '0226',
+    'SC-HF-I-9': '0241',
+    'SC-HF-I-10': '0024',
+    'SC-HF-I-11': '0043',
+    'SC-HF-I-12': '0062',
+    'SC-HF-I-40': '0134',
+    'SC-HF-NI-3': '0379',
+    'SC-HF-NI-4': '0501',
+    'SC-HF-NI-7': '0523',
+    'SC-HF-NI-12': '0286',
+    'SC-HF-NI-11': '0270',
+    'SC-HF-NI-13': '0304',
+    'SC-HF-NI-14': '0331',
+    'SC-HF-NI-15': '0359',
+    'SC-HF-NI-31': '0401',
+    'SC-HF-NI-33': '0424',
+    'SC-HF-NI-34': '0446',
+    'SC-HF-NI-36': '0474',
+    'SC-HYP-1': '0550',
+    'SC-HYP-3': '0650',
+    'SC-HYP-6': '0767',
+    'SC-HYP-7': '0007',
+    'SC-HYP-8': '0796',
+    'SC-HYP-9': '0003',
+    'SC-HYP-10': '0579',
+    'SC-HYP-11': '0601',
+    'SC-HYP-12': '0629',
+    'SC-HYP-37': '0702',
+    'SC-HYP-38': '0734',
+    'SC-HYP-40': '0755',
+    'SC-N-2': '0898',
+    'SC-N-3': '0915',
+    'SC-N-5': '0963',
+    'SC-N-6': '0981',
+    'SC-N-7': '1009',
+    'SC-N-9': '1031',
+    'SC-N-10': '0851',
+    'SC-N-11': '0878',
+    'SC-N-40': '0944',
 }
 
-SUNNYBROOK_ROOT_PATH = "./data/"
-
-TRAIN_CONTOUR_PATH = os.path.join(SUNNYBROOK_ROOT_PATH, "Sunnybrook Cardiac MR Database ContoursPart3",
-                                  "TrainingDataContours")
-TRAIN_IMG_PATH = os.path.join(SUNNYBROOK_ROOT_PATH, "challenge_training")
+onl_contour_path = os.path.join(c.data_sunnybrook, 'Sunnybrook Cardiac MR Database ContoursPart1',
+                                'OnlineDataContours')
+val_contour_path = os.path.join(c.data_sunnybrook, 'Sunnybrook Cardiac MR Database ContoursPart2',
+                                'ValidationDataContours')
+tr_contour_path = os.path.join(c.data_sunnybrook, 'Sunnybrook Cardiac MR Database ContoursPart3',
+                               'TrainingDataContours')
+tr_img_path = os.path.join(c.data_sunnybrook, 'challenge_training')
+val_img_path = os.path.join(c.data_sunnybrook, 'challenge_validation')
+onl_img_path = os.path.join(c.data_sunnybrook, 'challenge_online', 'challenge_online')
 
 
 def shrink_case(case):
-    toks = case.split("-")
+    toks = case.split('-')
 
     def shrink_if_number(x):
         try:
@@ -40,7 +77,7 @@ def shrink_case(case):
         except ValueError:
             return x
 
-    return "-".join([shrink_if_number(t) for t in toks])
+    return '-'.join([shrink_if_number(t) for t in toks])
 
 
 class Contour(object):
@@ -51,118 +88,93 @@ class Contour(object):
         self.img_no = int(match.group(2))
 
     def __str__(self):
-        return "<Contour for case %s, image %d>" % (self.case, self.img_no)
+        return '<Contour for case %s, image %d>' % (self.case, self.img_no)
 
     __repr__ = __str__
 
 
 def load_contour(contour, img_path):
-    """
-    Function maps each contour file to a DICOM image, according to a case study number,
-    using the SAX_SERIES dictionary and the extracted image number.
-    Upon successful mapping, the function returns NumPy arrays for a pair of DICOM image and contour file, or label.
-    """
-
-    filename = "IM-%s-%04d.dcm" % (SAX_SERIES[contour.case], contour.img_no)
+    filename = 'IM-%s-%04d.dcm' % (sax_series_dict[contour.case], contour.img_no)
     full_path = os.path.join(img_path, contour.case, filename)
     f = dicom.read_file(full_path)
-    img = f.pixel_array.astype(np.int)
-    ctrs = np.loadtxt(contour.ctr_path, delimiter=" ").astype(np.int)
-    label = np.zeros_like(img, dtype="uint8")
+    img = f.pixel_array.astype(np.uint8)
+    ctrs = np.loadtxt(contour.ctr_path, delimiter=' ').astype(np.int)
+    label = np.zeros_like(img, dtype='uint8')
     cv2.fillPoly(label, [ctrs], 1)
 
-    return img, label
+    return cv2.resize(img, (img_size, img_size)), cv2.resize(label, (img_size, img_size))
 
 
 def get_all_contours(contour_path):
-    """
-    Function walks through a directory containing contour files,
-    and extracts the necessary case study number and image number from a contour filename using the Contour class.
-    """
-
     contours = [os.path.join(dirpath, f)
                 for dirpath, dirnames, files in os.walk(contour_path)
                 for f in fnmatch.filter(files, 'IM-0001-*-icontour-manual.txt')]
-
-    print("Shuffle data")
     np.random.shuffle(contours)
-    print("Number of examples: {:d}".format(len(contours)))
+    print('Number of examples: {:d}'.format(len(contours)))
     extracted = map(Contour, contours)
 
     return extracted
 
 
-def export_all_contours(contours, img_path, lmdb_img_name, lmdb_label_name):
-    """
-    Function leverages TensorFlow's Python API to load a pair of image and label NumPy arrays into a pair of LMDB databases.
-    This technique is useful for constructing ground truth databases from any scalar, vector, or matrix data.
-    During training and testing, TensorFlow will traverse the LMDB databases in lockstep to sync the loading of image and label data.
-    """
+def process_contours(contours, img_path):
+    n = len(contours)
+    imgs_arr = np.empty((n, 1, img_size, img_size), dtype=np.uint8)
+    labels_arr = np.empty((n, 1, img_size, img_size), dtype=np.uint8)
+    for idx, ctr in enumerate(contours):
+        img, label = load_contour(ctr, img_path)
+        imgs_arr[idx, 0] = img
+        labels_arr[idx, 0] = label
 
-    for lmdb_name in [lmdb_img_name, lmdb_label_name]:
-        db_path = os.path.abspath(lmdb_name)
-        if os.path.exists(db_path):
-            shutil.rmtree(db_path)
-
-    counter_img = 0
-    counter_label = 0
-    batchsz = 100
-
-    print("Processing {:d} images and labels...".format(len(contours)))
-
-    for i in range(int(np.ceil(len(contours) / float(batchsz)))):
-        batch = contours[(batchsz * i):(batchsz * (i + 1))]
-
-        if len(batch) == 0:
-            break
-
-        imgs, labels = [], []
-
-        for idx, ctr in enumerate(batch):
-            try:
-                img, label = load_contour(ctr, img_path)
-                imgs.append(img)
-                labels.append(label)
-                if idx % 20 == 0:
-                    print(ctr)
-                    plt.imshow(img)
-                    plt.show()
-                    plt.imshow(label)
-                    plt.show()
-            except IOError:
-                continue
-
-        db_imgs = lmdb.open(lmdb_img_name, map_size=1e12)
-
-        with db_imgs.begin(write=True) as txn_img:
-            for img in imgs:
-                datum = caffe.io.array_to_datum(np.expand_dims(img, axis=0))
-                txn_img.put("{:0>10d}".format(counter_img), datum.SerializeToString())
-                counter_img += 1
-
-        print("Processed {:d} images".format(counter_img))
-        db_labels = lmdb.open(lmdb_label_name, map_size=1e12)
-
-        with db_labels.begin(write=True) as txn_label:
-            for lbl in labels:
-                datum = caffe.io.array_to_datum(np.expand_dims(lbl, axis=0))
-                txn_label.put("{:0>10d}".format(counter_label), datum.SerializeToString())
-                counter_label += 1
-
-        print("Processed {:d} labels".format(counter_label))
-
-        db_imgs.close()
-        db_labels.close()
+    return imgs_arr, labels_arr
 
 
-if __name__ == "__main__":
-    SPLIT_RATIO = 0.1
-    print("Mapping ground truth contours to images...")
-    ctrs = get_all_contours(TRAIN_CONTOUR_PATH)
-    val_ctrs = ctrs[0:int(SPLIT_RATIO * len(ctrs))]
-    train_ctrs = ctrs[int(SPLIT_RATIO * len(ctrs)):]
-    print("Done mapping ground truth contours to images")
-    print("\nBuilding LMDB for train...")
-    export_all_contours(train_ctrs, TRAIN_IMG_PATH, "train_images_lmdb", "train_labels_lmdb")
-    print("\nBuilding LMDB for val...")
-    export_all_contours(val_ctrs, TRAIN_IMG_PATH, "val_images_lmdb", "val_labels_lmdb")
+def process_data_hdf5():
+    contour_paths = [tr_contour_path, val_contour_path, onl_contour_path]
+    image_paths = [tr_img_path, val_img_path, onl_img_path]
+    all_data = []
+
+    for contour_path, img_path in zip(contour_paths, image_paths):
+        train_ctrs = get_all_contours(contour_path)
+        imgs, labels = process_contours(train_ctrs, img_path)
+        all_data.append([imgs, labels])
+
+    # add in manually segmented images, labels in {0,1}
+    aug_contour_path = os.path.join(c.data_manual, 'manual_contours', 'contours')
+    aug_image_path = os.path.join(c.data_manual, 'manual_contours', 'images')
+    for cfn in [fn_ for fn_ in os.listdir(aug_contour_path) if 'jpg' in fn_]:
+        if 'auto' in cfn:
+            continue
+        dcm_img = cv2.imread(os.path.join(aug_image_path, cfn), 0)
+        dcm_img = cv2.resize(dcm_img, (img_size, img_size)).reshape(1, 1, img_size, img_size)
+        contour_img = cv2.imread(os.path.join(aug_contour_path, cfn), 0)
+        contour_img = cv2.resize(contour_img, (img_size, img_size))
+        _, contour_img = cv2.threshold(contour_img, 127, 255, cv2.THRESH_BINARY_INV)
+        contour_img = contour_img.reshape(1, 1, img_size, img_size) / 255
+        all_data.append([dcm_img, contour_img])
+
+    ##add in no contour images!!
+    with open(os.path.join(c.data_manual, 'nocontour_tencia.csv')) as f:
+        label = np.zeros((1, 1, img_size, img_size), dtype=np.uint8)
+        for l in f:
+            row = [int(x) for x in l.split(',')]
+            case = row[0]
+            s = row[1::2]
+            t = row[2::2]
+            assert (len(s) == len(t));
+            dset = du.CNN_Dataset(case, img_size=img_size)
+            n = len(s)
+            print("add case {} no contour imgs".format(case))
+            for i in range(n):
+                img = dset.images[s[i], t[i], 0].reshape(1, 1, img_size, img_size)
+                all_data.append([img, label])
+
+    np.random.shuffle(all_data)
+
+    all_imgs = np.concatenate([a[0] for a in all_data], axis=0)
+    all_labels = np.concatenate([a[1] for a in all_data], axis=0)
+
+    n = all_imgs.shape[0]
+    fn = os.path.join(c.data_intermediate, 'scd_seg_{}.hdf5'.format(img_size))
+    if os.path.exists(fn):
+        os.remove(fn)
+    u.save_hd5py({'images': all_imgs, 'labels': all_labels}, fn, 5)
