@@ -4,7 +4,7 @@ import glob
 import os
 import cv2
 import settings
-from helpers_dicom import DicomWrapper
+from Code.utils_dicom import DicomWrapper
 from scipy.ndimage.interpolation import map_coordinates
 from scipy.ndimage.filters import gaussian_filter
 
