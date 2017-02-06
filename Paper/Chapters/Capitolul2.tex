@@ -76,4 +76,29 @@ Av\^{a}nd in vedere c\u{a} nu \c{s}tiim valorile finale pe care o s\u{a} le aibe
 
 \par
 
-Pentru a \^{i}ndeplinii condi\c{t}iile de mai sus vom folosii o distribu\c{t}ie normal\u{a} cu media zero \c{s}i cu varian\c{t}a $\frac{1}{\sqrt{n}}$ , unde n reprezint\u{a} numarul de variabile pe care \^{i}nt\u{a}rirea o are. Acest lucru asigur\u{a} faptul c\u{a} to\c{t}i neuronii din re\c{t}eaua neuronal\u{a} au la inceput
+Pentru a \^{i}ndeplinii condi\c{t}iile de mai sus vom folosii o distribu\c{t}ie normal\u{a} cu media zero \c{s}i cu devia\c{t}ia standard $\frac{1}{\sqrt{n}}$ , unde n reprezint\u{a} numarul de variabile pe care \^{i}nt\u{a}rirea o are. Acest lucru asigur\u{a} faptul c\u{a} toate \^{i}nt\u{a}ririle din re\c{t}eaua neuronal\u{a} au la inceput aceea\c{s}i distribu\c{t}ie de numere, lucru care va facilita antrenarea mai rapid\u{a} a re\c{t}elei neuronale.
+
+\par 
+
+Dup\u{a} cum \c{s}tiim, varian\c{t}a reprezint\u{a} media patratic\u{a} a abaterilor in m\u{a}rime absolut\u{a} a valorilor inregistrare fat\u{a} de media aritmetic\u{a} care ne spune c\^{a}t de mare este r\u{a}sp\^{a}ndirea  acestui set. Mai precis, varian\c{t}a m\u{a}soar\u{a} c\^{a}t de apropiate sunt valorile setului de date de valoarea medie a acestuia.
+
+$$Var = \frac{1}{n} \sum_{i=1}^{n} (x_i - m )^2 $$
+
+\^{I}n formula de mai sus m reprezint\u{a} media aritmetic\u{a} iar $x_i$ valaorile date. \^{I}n cazul nostru dorim ca varian\c{t}a datelor de intrare sa nu se schimbe dup\u{a} ce iese din neuron \c{s}i se duce spre func\c{t}ia de activare pentru a nu altera datele foarte tare de la un nivel la altul. \^{I}n acest caz
+
+$$Var(\sum_{i=1}^{n} W_i x_i) = \sum_{i=1}^{n} Var(W_i x_i) = $$
+$$ = \sum_{i=1}^{n} [E(W_i)]^2 Var(x_i) + [E(x_i)]^2 Var(W_i) + Var(x_i) Var(W_i)$$
+
+Presupunem c\u{a} setul de date \c{s}i \^{i}nt\u{a}ririle au media zero \c{s}i sunt distribuite identic, astfel c\u{a} formula de mai sus se transform\u{a} \^{i}n
+
+$$\sum_{i=1}^{n} Var(x_i) Var(W_i) = (n Var(W)) Var(x)$$
+
+care trebuie sa fie egal\u{a} cu varian\c{t}a datelor de intrare, asta \^{i}nseamn\u{a} c\u{a} 
+
+$$n Var(W) = 1 \implies Var(W) =  \frac{1}{n} $$
+
+\c{s}i \c{t}in\^{a}nd cont c\u{a} varian\c{t}a unei distribu\c{t}ii normale este p\u{a}tratul devia\c{t}iei standard, atunci rezult\u{a} c\u{a} devia\c{t}ia standard are valoarea $\frac{1}{\sqrt{n}}$ pentru distribu\c{t}ia normal\u{a} pe care o vom folosii pentru a alege valorile \^{i}nt\u{a}ririlor la ini\c{t}ializare.
+
+\subsection{Initializarea bias}
+
+Pentru bias-uri este comun de a le ini\c{t}ializa cu valorea zero sau cu o valoare foarte mic\u{a} apropiat\u{a} de zero, de exemplu 0.01. Din cauza faptului c\u{a} bias-ul nu joac\u{a} un rol a\c{s}a de important ca \^{i}nt\u{a}ririle \^{i}n re\c{t}eaua neuronal\u{a}, nu este de o importan\c{t}\u{a} foarte mare \^{i}n procesul de \^{i}nv\u{a}\c{t}are valoarea pe care o folosim la ini\c{t}ializarea lor, din acest motiv vom ini\c{t}ializa bias-ul cu valoarea zero.
