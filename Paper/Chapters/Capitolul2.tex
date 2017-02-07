@@ -102,3 +102,23 @@ $$n Var(W) = 1 \implies Var(W) =  \frac{1}{n} $$
 \subsection{Initializarea bias}
 
 Pentru bias-uri este comun de a le ini\c{t}ializa cu valorea zero sau cu o valoare foarte mic\u{a} apropiat\u{a} de zero, de exemplu 0.01. Din cauza faptului c\u{a} bias-ul nu joac\u{a} un rol a\c{s}a de important ca \^{i}nt\u{a}ririle \^{i}n re\c{t}eaua neuronal\u{a}, nu este de o importan\c{t}\u{a} foarte mare \^{i}n procesul de \^{i}nv\u{a}\c{t}are valoarea pe care o folosim la ini\c{t}ializarea lor, din acest motiv vom ini\c{t}ializa bias-ul cu valoarea zero.
+
+\section{Procesul de antrenare}
+
+Procesul de antrenare sau \^{i}nv\u{a}\c{t}are a unei re\c{t}ele neuronale const\u{a} din mai multe componente, prima component\u{a} se numeste func\c{t}ia de pierdere ( loss function \^{i}n englez\u{a} ) care penalizeaz\u{a} corectitudinea predic\c{t}iilor facute de c\u{a}tre re\c{t}eaua neuronal\u{a} fa\c{t}\u{a} de predic\c{t}iile corecte, a doua component\u{a} const\u{a} \^{i}n metode de prevenire a efectului de overfitting \^{i}n re\c{t}eaua neuronal\u{a}, a treia \c{s}i ultima component\u{a} este procesul de propagare \^{i}napoi care actualizeaz\u{a} \^{i}nt\u{a}ririle si bias-urile din re\c{t}eaua neuronal\u{a} astfel \^{i}nc\^{a}t urmatoarele predic\c{t}ii ale re\c{t}elei neuronale s\u{a} fiu mai aproape de adev\u{a}r. \^{I}n continuare vom definii mai detaliat cele trei componente.
+
+\subsection{Func\c{t}ia de pierdere}
+
+Func\c{t}ia de pierdere are rolul de a m\u{a}sura compatibilitatea dintre predic\c{t}iile f\u{a}cute de c\u{a}tre re\c{t}eaua neuronal\u{a} \c{s}i valorile adev\u{a}rate. Aceast\u{a} func\c{t}ie face media \^{i}ntre rezultatele ob\c{t}inute de c\u{a}tre fiecare predic\c{t}ie \^{i}n urma aplicarii unei func\c{t}ii de cost care m\u{a}soar\u{a} c\^{a}t de aproape este predic\c{t}ia de adev\u{a}r.
+
+$$L = \frac{1}{N} \sum_i L_i $$
+
+Exist\u{a} mai multe variante de func\c{t}ii de cost \^{i}ns\u{a} cea mai folosit\u{a} \c{s}i cea mai eficient\u{a} la ora actual\u{a} este func\c{t}ia Softmax, care are urm\u{a}toarea formul\u{a}
+
+$$ L_i = - log \bigg(\frac{e^{f_y_i}}{\sum_j e^{f_j}}\bigg)$$
+
+Unde $f_j$ reprezint\u{a} valoarea preconizat\u{a} de re\c{t}eaua neuronal\u{a} la pozi\c{t}ia j, iar $f_y_i$ reprzint\u{a} valorea preconizat\u{a} pentru valorea adevarat\u{a}.
+
+\par
+
+Pentru a se \^{i}n\c{t}elege mai bine cum func\c{t}ioneaz\u{a} func\c{t}ia Softmax o s\u{a} d\u{a}m un mic exemplu.
