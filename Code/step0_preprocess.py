@@ -1,5 +1,5 @@
-import Code.utils as util
-import Code.settings as settings
+import utils
+import settings
 import csv
 import pandas
 import scipy
@@ -12,14 +12,14 @@ def create_csv_data():
 
     row_no = 0
 
-    with open(settings.BASE_DIR + "dicom_data.csv", "wb") as csv_file:
+    with open(settings.BASE_DIR + "dicom_data.csv", "w") as csv_file:
         csv_writer = csv.writer(csv_file, delimiter=";", quoting=csv.QUOTE_MINIMAL)
         csv_writer.writerow(
             ["patient_id", "slice_no", "frame_no", "rows", "columns", "spacing", "slice_thickness", "slice_location",
              "slice_location2", "plane", "image_position", "sv", "time", "manufact", "modelname", "age", "birth", "sex",
              "file_name", "angle", "o1", "o2", "o3", "o4", "o5", "o6"])
 
-        for dicom_data in util.enumerate_sax_files():
+        for dicom_data in utils.enumerate_sax_files():
             row_no += 1
             if row_no % 1000 == 0:
                 print(row_no)
@@ -188,12 +188,12 @@ def convert_sax_images(rescale=True, base_size=256, crop_size=256):
     target_dir = settings.BASE_PREPROCESSEDIMAGES_DIR
     print("Deleting old files..")
 
-    util.delete_files(target_dir, "*.png")
+    utils.delete_files(target_dir, "*.png")
 
     print("patient\trows\tcols\tspacing\tfile_name")
 
     file_count = 0
-    for dicom_data in util.enumerate_sax_files():
+    for dicom_data in utils.enumerate_sax_files():
         file_count += 1
 
         if dicom_data.in_plane_encoding_direction not in ["ROW", "COL"]:
