@@ -113,12 +113,19 @@ Func\c{t}ia de pierdere are rolul de a m\u{a}sura compatibilitatea dintre predic
 
 $$L = \frac{1}{N} \sum_i L_i $$
 
-Exist\u{a} mai multe variante de func\c{t}ii de cost \^{i}ns\u{a} cea mai folosit\u{a} \c{s}i cea mai eficient\u{a} la ora actual\u{a} este func\c{t}ia Softmax, care are urm\u{a}toarea formul\u{a}
+Exist\u{a} mai multe variante de func\c{t}ii de cost \^{i}ns\u{a} cea mai folosit\u{a} \c{s}i cea mai eficient\u{a} la ora actual\u{a} este func\c{t}ia Softmax, care are urm\u{a}toarea formul\u{a}.
 
 $$ L_i = - log \bigg(\frac{e^{f_y_i}}{\sum_j e^{f_j}}\bigg)$$
 
-Unde $f_j$ reprezint\u{a} valoarea preconizat\u{a} de re\c{t}eaua neuronal\u{a} la pozi\c{t}ia j, iar $f_y_i$ reprzint\u{a} valorea preconizat\u{a} pentru valorea adevarat\u{a}.
+Unde $f_j$ reprezint\u{a} valoarea preconizat\u{a} de re\c{t}eaua neuronal\u{a} pentru clasa j, iar $f_y_i$ reprzint\u{a} valorea preconizat\u{a} pentru clasa corect\u{a}.
 
 \par
 
-Pentru a se \^{i}n\c{t}elege mai bine cum func\c{t}ioneaz\u{a} func\c{t}ia Softmax o s\u{a} d\u{a}m un mic exemplu.
+Pentru a se \^{i}n\c{t}elege mai bine cum func\c{t}ioneaz\u{a} func\c{t}ia Softmax o s\u{a} d\u{a}m un mic exemplu. S\u{a} presupunem c\u{a} re\c{t}eaua neuronal\u{a} \^{i}ntoarce urm\u{a}torul set de date [5,−2,3] unde prima pozi\c{t}ie este valoarea pentru clasa corect\u{a}, astfel c\u{a} $f_y_i = 5$, atunci 
+
+$$L_0 = - log \bigg(\frac{e^{5}}{e^{5} + e^{-2} + e^{3}} \bigg) = - log \bigg(\frac{148,413}{148,413 + 0,135 + 20,085}\bigg) =  $$
+$$ = - log\bigg( \frac{148,413}{168,633} \bigg) = -log(0,88) = 0,055 $$
+
+Func\c{t}ia Softmax penalizeaz\u{a} predic\c{t}iile re\c{t}elei neuronale ( calculeaz\u{a} o valoare mai mare ) atunci c\^{a}nd aceasta atribuie valori mari claselor incorecte iar valoarea calculat\u{a} este mai mic\u{a} atunci c\^{a}nd clasa corect\u{a} are o vloare atribuit\u{a} foarte mare fa\c{t}\u{a} de celelalte clase. A\c{s}a c\u{a} scopul principal al procesului de inv\u{a}\c{t}are este acela de a minimiza scorul pe care func\c{t}ia de pieredere \^{i}l calculeaz\u{a}, deoarece cu c\^{a}t func\c{t}ia de pierdere calculeaz\u{a} un scor mai mic cu at\^{a}t putem s\u{a} fim mai siguri ca re\c{t}eaua neuronal\u{a} a \^{i}nv\u{a}\c{t}at s\u{a} \^{i}ndeplineasc\u{a} mai bine sarcina pentru care a fost conceput\u{a}.
+
+\subsection{Prevenirea efectului de overtfitting}
