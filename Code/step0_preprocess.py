@@ -8,11 +8,16 @@ import cv2
 
 
 def create_csv_data():
+    """
+    Create CSV file
+    :return: nothing
+    """
+
     print("Creating csv file from dicom data")
 
     row_no = 0
 
-    with open(settings.BASE_DIR + "dicom_data.csv", "w") as csv_file:
+    with open(settings.BASE_DIR + settings.RESULT_DIR + "dicom_data.csv", "w") as csv_file:
         csv_writer = csv.writer(csv_file, delimiter=";", quoting=csv.QUOTE_MINIMAL)
         csv_writer.writerow(
             ["patient_id", "slice_no", "frame_no", "rows", "columns", "spacing", "slice_thickness", "slice_location",
@@ -55,28 +60,33 @@ def create_csv_data():
 
 
 def up_down(current_value, previous_value):
-    # previous_value = previous_value.fillna(-99999)
     delta = current_value - previous_value
     delta = delta.fillna(0)
     updown = pandas.Series(delta.apply(lambda x: 0 if x == 0 else 1 if x > 0 else -1))
+
     return updown
 
 
 def slice_delta(current_value, next_value):
-    # previous_value = previous_value.fillna(-99999)
     delta = current_value - next_value
     delta = delta.fillna(999)
     return delta
 
 
 def count_small_deltas(current_value):
-    # previous_value = previous_value.fillna(-99999)
     res = len(current_value[abs(current_value) < 2])
     return res
 
 
 def get_age_years(age_string):
+    """
+    Get patient age
+    :param age_string: string whcich contains age information.
+    :return: paitent age
+    """
+
     res = 0
+
     if "Y" in age_string:
         age_string = age_string.replace("Y", "")
         res = float(age_string)
@@ -86,13 +96,19 @@ def get_age_years(age_string):
     if "W" in age_string:
         age_string = age_string.replace("W", "")
         res = round(float(age_string) / 52., 2)
+
     return res
 
 
 def enrich_dicom_csvdata():
+    """
+    Write in csv file
+    :return: nothing
+    """
+
     print("Enriching dicom csv data with extra columns and stats")
 
-    dicom_data = pandas.read_csv(settings.BASE_DIR + "dicom_data.csv", sep=";")
+    dicom_data = pandas.read_csv(settings.BASE_DIR + settings.RESULT_DIR + "dicom_data.csv", sep=";")
     dicom_data["age_years"] = dicom_data["age"].apply(lambda x: get_age_years(x))
     dicom_data["patient_id_frame"] = dicom_data["patient_id"].map(str) + "_" + dicom_data["frame_no"].map(str)
     dicom_data = dicom_data.sort(["patient_id", "frame_no", "slice_location", "file_name"], ascending=[1, 1, 1, 1])
@@ -119,17 +135,22 @@ def enrich_dicom_csvdata():
     dicom_data['up_down'] = patient_grouped['time'].apply(lambda x: up_down(x, x.shift(1)))
     dicom_data['up_down_agg'] = patient_grouped["up_down"].transform(lambda x: sum(x))
 
-    dicom_data.to_csv(settings.BASE_DIR + "dicom_data_enriched.csv", sep=";")
+    dicom_data.to_csv(settings.BASE_DIR + settings.RESULT_DIR + "dicom_data_enriched.csv", sep=";")
 
     dicom_data = dicom_data[dicom_data["frame_no"] == 1]
-    dicom_data.to_csv(settings.BASE_DIR + "dicom_data_enriched_frame1.csv", sep=";")
+    dicom_data.to_csv(settings.BASE_DIR + settings.RESULT_DIR + "dicom_data_enriched_frame1.csv", sep=";")
 
 
 def enrich_traindata():
+    """
+    Write train data in CSV file
+    :return: nothing
+    """
+
     print("Enriching train data with extra columns and stats")
 
-    train_data = pandas.read_csv(settings.BASE_DIR + "train_validate.csv", sep=",")
-    dicom_data = pandas.read_csv(settings.BASE_DIR + "dicom_data_enriched_frame1.csv", sep=";")
+    train_data = pandas.read_csv(settings.BASE_DIR + settings.RESULT_DIR + "train_validate.csv", sep=",")
+    dicom_data = pandas.read_csv(settings.BASE_DIR + settings.RESULT_DIR + "dicom_data_enriched_frame1.csv", sep=";")
     patient_grouped = dicom_data.groupby("patient_id")
 
     enriched_traindata = patient_grouped.first().reset_index()
@@ -146,22 +167,44 @@ def enrich_traindata():
     enriched_traindata["error_sys"] = 0
     enriched_traindata["abserr_sys"] = 0
 
-    enriched_traindata.to_csv(settings.BASE_DIR + "train_enriched.csv", sep=";")
+    enriched_traindata.to_csv(settings.BASE_DIR + settings.RESULT_DIR + "train_enriched.csv", sep=";")
 
 
 def get_patient_id(dir):
+    """
+    Get patient id
+    :param dir: directory name
+    :return: patient id
+    """
+
     parts = dir.split('\\')
     res = parts[len(parts) - 3]
+
     return res
 
 
 def get_slice_type(dir_name):
-    parts = dir_name.split('\\')
+    """
+    Get slice type
+    :param dir_name: directory name
+    :return: slice type
+    """
+
+    parts = dir_name.split('/')
     res = parts[len(parts) - 1]
+
     return res
 
 
 def get_square_crop(img, base_size=256, crop_size=256):
+    """
+    Crop the img
+    :param img: the img
+    :param base_size: base siez
+    :param crop_size: crop size
+    :return: return the new img
+    """
+
     res = img
     height, width = res.shape
     if height < base_size:
@@ -181,10 +224,19 @@ def get_square_crop(img, base_size=256, crop_size=256):
     crop_y_start = (height - crop_size) / 2
     crop_x_start = (width - crop_size) / 2
     res = res[crop_y_start:(crop_y_start + crop_size), crop_x_start:(crop_x_start + crop_size)]
+
     return res
 
 
 def convert_sax_images(rescale=True, base_size=256, crop_size=256):
+    """
+    Convert dicom format in png images and write them in a specific folder.
+    :param rescale: boolean value for rescaling image.
+    :param base_size:
+    :param crop_size:
+    :return:
+    """
+
     target_dir = settings.BASE_PREPROCESSEDIMAGES_DIR
     print("Deleting old files..")
 
@@ -209,7 +261,6 @@ def convert_sax_images(rescale=True, base_size=256, crop_size=256):
             dicom_data.slice_location) + "\t" + dicom_data.in_plane_encoding_direction)
 
         location_id = int(dicom_data.slice_location) + 10000
-        time_id = dicom_data.create_time
         location_id_str = str(location_id).rjust(5, '0')
 
         img_path = target_dir + str(dicom_data.patient_id).rjust(4, '0') + "_" + dicom_data.series_description.rjust(8,

@@ -63,6 +63,13 @@ def get_patient_files(patient_id, file_type, extension=".png"):
 
 
 def delete_files(target_dir, search_pattern):
+    """
+    Delete file from target_dir which has search_pattern.
+    :param target_dir: the directory path
+    :param search_pattern: pattern
+    :return: nothing
+    """
+
     files = glob.glob(target_dir + search_pattern)
     for f in files:
         os.remove(f)
@@ -74,13 +81,20 @@ def get_files(scan_dir, search_pattern):
 
 
 def enumerate_sax_files(patient_ids=None, filter_slice_type="sax"):
+    """
+    Enumerate sax files.
+    :param patient_ids: the patient ids
+    :param filter_slice_type: filter slice type
+    :return: return enumerate dicom data
+    """
+
     for sub_dir in ["train", "validate", "test"]:
-        for root, _, files in os.walk(settings.BASE_DIR + "\\data_kaggle\\" + sub_dir):
+        for root, _, files in os.walk(settings.BASE_DIR + "data/" + sub_dir):
             # print root
             for file_name in files:
                 if file_name.endswith(".dcm"):
 
-                    parts = root.split('\\')
+                    parts = root.split('/')
                     patient_id = parts[len(parts) - 3]
                     slice_type = parts[len(parts) - 1]
                     if filter_slice_type not in slice_type:
@@ -88,11 +102,10 @@ def enumerate_sax_files(patient_ids=None, filter_slice_type="sax"):
 
                     if patient_ids is not None:
                         if patient_id not in patient_ids:
-                            # print "skip " + patient_id
                             continue
 
-                    file_path = root + "\\" + file_name
-                    dicom_data = DicomWrapper(root + "\\", file_name)
+                    dicom_data = DicomWrapper(root + "/", file_name)
+
                     yield dicom_data
 
 

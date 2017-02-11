@@ -8,7 +8,6 @@ class DicomWrapper:
         self.file_name = file_name
         loc1 = self.get_location()
         loc2 = self.slice_location
-        # print str(loc2) + " - " + str(loc1)
 
     def get_value(self, name):
         res = self.raw_file.data_element(name).value
