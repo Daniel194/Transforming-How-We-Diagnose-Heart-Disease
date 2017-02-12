@@ -149,7 +149,7 @@ def enrich_traindata():
 
     print("Enriching train data with extra columns and stats")
 
-    train_data = pandas.read_csv(settings.BASE_DIR + settings.RESULT_DIR + "train_validate.csv", sep=",")
+    train_data = pandas.read_csv(settings.BASE_DIR + settings.DATA_DIR + "train_validate.csv", sep=",")
     dicom_data = pandas.read_csv(settings.BASE_DIR + settings.RESULT_DIR + "dicom_data_enriched_frame1.csv", sep=";")
     patient_grouped = dicom_data.groupby("patient_id")
 
@@ -209,20 +209,20 @@ def get_square_crop(img, base_size=256, crop_size=256):
     height, width = res.shape
     if height < base_size:
         diff = base_size - height
-        extend_top = diff / 2
+        extend_top = int(diff / 2)
         extend_bottom = diff - extend_top
         res = cv2.copyMakeBorder(res, extend_top, extend_bottom, 0, 0, borderType=cv2.BORDER_CONSTANT, value=0)
         height = base_size
 
     if width < base_size:
         diff = base_size - width
-        extend_top = diff / 2
+        extend_top = int(diff / 2)
         extend_bottom = diff - extend_top
         res = cv2.copyMakeBorder(res, 0, 0, extend_top, extend_bottom, borderType=cv2.BORDER_CONSTANT, value=0)
         width = base_size
 
-    crop_y_start = (height - crop_size) / 2
-    crop_x_start = (width - crop_size) / 2
+    crop_y_start = int((height - crop_size) / 2)
+    crop_x_start = int((width - crop_size) / 2)
     res = res[crop_y_start:(crop_y_start + crop_size), crop_x_start:(crop_x_start + crop_size)]
 
     return res

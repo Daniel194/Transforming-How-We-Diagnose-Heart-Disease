@@ -1,5 +1,6 @@
 BASE_DIR = ""
 RESULT_DIR = "result/"
+DATA_DIR = "data/"
 BASE_PREPROCESSEDIMAGES_DIR = BASE_DIR + RESULT_DIR + "/data_preprocessed_images/"
 BASE_TRAIN_SEGMENT_DIR = BASE_DIR + RESULT_DIR + "data_segmenter_trainset/"
 PATIENT_PRED_DIR = BASE_DIR + RESULT_DIR + "data_patient_predictions/"
