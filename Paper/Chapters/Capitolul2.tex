@@ -105,7 +105,7 @@ Pentru bias-uri este comun de a le ini\c{t}ializa cu valorea zero sau cu o valoa
 
 \section{Procesul de antrenare}
 
-Procesul de antrenare sau \^{i}nv\u{a}\c{t}are a unei re\c{t}ele neuronale const\u{a} din mai multe componente, prima component\u{a} se numeste func\c{t}ia de pierdere ( loss function \^{i}n englez\u{a} ) care penalizeaz\u{a} corectitudinea predic\c{t}iilor facute de c\u{a}tre re\c{t}eaua neuronal\u{a} fa\c{t}\u{a} de predic\c{t}iile corecte, a doua component\u{a} const\u{a} \^{i}n metode de prevenire a efectului de overfitting \^{i}n re\c{t}eaua neuronal\u{a}, a treia \c{s}i ultima component\u{a} este procesul de propagare \^{i}napoi care actualizeaz\u{a} \^{i}nt\u{a}ririle si bias-urile din re\c{t}eaua neuronal\u{a} astfel \^{i}nc\^{a}t urmatoarele predic\c{t}ii ale re\c{t}elei neuronale s\u{a} fiu mai aproape de adev\u{a}r. \^{I}n continuare vom definii mai detaliat cele trei componente.
+Procesul de antrenare sau \^{i}nv\u{a}\c{t}are a unei re\c{t}ele neuronale const\u{a} din mai multe componente, prima component\u{a} se numeste func\c{t}ia de pierdere ( loss function \^{i}n englez\u{a} ) care penalizeaz\u{a} corectitudinea predic\c{t}iilor facute de c\u{a}tre re\c{t}eaua neuronal\u{a} fa\c{t}\u{a} de predic\c{t}iile corecte, a doua component\u{a} const\u{a} \^{i}n metode de prevenire a efectului de overfitting \^{i}n re\c{t}eaua neuronal\u{a}, a treia \c{s}i ultima component\u{a} este procesul de optimizare care actualizeaz\u{a} \^{i}nt\u{a}ririle si bias-urile din re\c{t}eaua neuronal\u{a} astfel \^{i}nc\^{a}t urmatoarele predic\c{t}ii ale re\c{t}elei neuronale s\u{a} fiu mai aproape de adev\u{a}r. \^{I}n continuare vom definii mai detaliat cele trei componente.
 
 \subsection{Func\c{t}ia de pierdere}
 
@@ -128,4 +128,45 @@ $$ = - log\bigg( \frac{148,413}{168,633} \bigg) = -log(0,88) = 0,055 $$
 
 Func\c{t}ia Softmax penalizeaz\u{a} predic\c{t}iile re\c{t}elei neuronale ( calculeaz\u{a} o valoare mai mare ) atunci c\^{a}nd aceasta atribuie valori mari claselor incorecte iar valoarea calculat\u{a} este mai mic\u{a} atunci c\^{a}nd clasa corect\u{a} are o vloare atribuit\u{a} foarte mare fa\c{t}\u{a} de celelalte clase. A\c{s}a c\u{a} scopul principal al procesului de inv\u{a}\c{t}are este acela de a minimiza scorul pe care func\c{t}ia de pieredere \^{i}l calculeaz\u{a}, deoarece cu c\^{a}t func\c{t}ia de pierdere calculeaz\u{a} un scor mai mic cu at\^{a}t putem s\u{a} fim mai siguri ca re\c{t}eaua neuronal\u{a} a \^{i}nv\u{a}\c{t}at s\u{a} \^{i}ndeplineasc\u{a} mai bine sarcina pentru care a fost conceput\u{a}.
 
-\subsection{Prevenirea efectului de overtfitting}
+\subsection{Prevenirea efectului de overfitting}
+
+Overtfitting apare c\^{a}nd o re\c{t}ea neuronal\u{a} are mai mul\c{t}i parametrii ( \^{i}ntariri \c{s}i bias - uri ) dec\^{a}t este necesar pentru a putea clasifica datele primite, astfel \^{i}nc\^{a}t re\c{t}eaua neuronal\u{a} \^{i}ncepe s\u{a} memoreze datele de antrenare \c{s}i nu mai \^{i}nva\c{t}\u{a} s\u{a} generalizeze, din aceast\u{a} cauz\u{a} atunci c\^{a}nd va trece la setul de date pentru care va trebuii s\u{a} fac\u{a} predic\c{t}ii / s\u{a} le clasifice va avea o acurate\c{t}e foarte mic\u{a} din cauz\u{a} c\u{a} nu a inv\u{a}\c{t}at nimic din setul de date de antrenare \c{s}i doar le-a memorat.
+
+\par 
+
+O bun\u{a} analogie cu efectul de overfitting este atunci c\^{a}nd un copil inva\c{t}\u{a} ce este o ma\c{s}in\u{a}, c\^{a}nd \^{i}i ar\u{a}t\u{a}m pentru prima dat\u{a} o ma\c{s}in\u{a} va \^{i}n\c{t}elege c\u{a} o ma\c{s}in\u{a} are patru ro\c{t}i, se poate deplasa, are u\c{s}i, geamuri, ins\u{a} dac\u{a} \^{i}i ar\u{a}t\u{a}m tot timpul acea\c{s}i ma\c{s}in\u{a} va crede faptul c\u{a} toate ma\c{s}inile au culoarea ro\c{s}ie, prin urmare orice obiect ro\c{s}u este o posibil\u{a} ma\c{s}in\u{a}, lucru care este total fals.
+
+\par
+
+O bun\u{a} metod\u{a} de a prevenii efectul de overfitting este de a aplica o fun\c{t}ie de regularizare la func\c{t}ia de pierdere astfel \^{i}nc\^{a}t s\u{a} penaliz\u{a}m \^{i}nt\u{a}ririle care au vlori mari deoarece \^{i}nt\u{a}ririle cu valori mari pot infleun\c{t}a  foarte mult predic\c{t}iile \c{s}i pot memora datele pe care ar trebuii s\u{a} le \^{i}nve\c{t}e de asemenea func\c{t}ia de regularizare trebuie s\u{a} favorizeze \^{i}nt\u{a}ririle cu date c\^{a}t mai dispersate posibil astfel \^{i}nc\^{a}t s\u{a} se generalizeze ceea ce \^{i}nva\c{t}\u{a} re\c{t}eaua neuronal\u{a} din setul de date de antrenare. O func\c{t}ie de regularizare care \^{i}ndepline\c{s}te aceste condi\c{t}ii este func\c{t}ia urm\u{a}toare:
+
+$$ R(W) = \sum_i \sum_j W_{i,j}^2 $$
+
+Pentru a dovedi faptul c\u{a} func\c{t}ia de mai sus \^{i}ndepline\c{s}te condi\c{t}iile dorite o s\u{a} d\u{a}m un mic exemplu, s\u{a} presupunem c\u{a} avem urm\u{a}torul set de date x = [1,1,1,1] \c{s}i \^{i}nt\u{a}ririle urm\u{a}toare $W_1 = [1,0,0,0], W_2 = [0.25, 0.25, 0.25, 0.25]$, ambele \^{i}nt\u{a}riri au acela\c{s}i produs matricial cu setul de date, $W^T_1 x = W^T_2 x = 1$, \^{i}ns\u{a} $R(W_1) = 1 $ \^{i}n timp ce $R(W_2) = 0.25$, dup\u{a} cum am zis deja scopul re\c{t}elei neuronale este acela de a minimiza func\c{t}ia de pierdere, din aceast\u{a} cauz\u{a} re\c{t}eaua neuronal\u{a} va prefera \^{i}nt\u{a}rirea $W_2$ \^{i}n locul \^{i}ntaririi $W_1$. Prin urmare func\c{t}ia de pierdere va avea forma urm\u{a}toare cu tot cu func\c{t}ia de regularizare :
+
+$$L = \frac{1}{N} \sum_i - log \bigg(\frac{e^{W_y_i x_y_i}}{\sum_j e^{W_j x_j}}\bigg) + \lambda \sum_i \sum_j W_{i,j}^2 $$
+
+$\lambda$ este un hiperparametru care poate fi reglat astfel \^{i}nc\^{a}t s\u{a} decidem c\^{a}t de mult s\u{a} influen\c{t}eze func\c{t}ia de regularizare procesul de \^{i}nv\u{a}\c{t}are.
+
+\subsection{Procesul de optimizare}
+
+Scopul procesului de optimizare este acela de a g\u{a}si  \^{i}nt\u{a}riri \c{s}i bias-uri care minimizeaz\u{a} func\c{t}ia de pierdere, acest proces este cel mai complicat dintre toate pentru c\u{a} trebuie calculat gradientul func\c{t}iei de pierdere care ne va spune in ce direc\c{t}ie trebuie actualizat \^{i}nt\u{a}ririle astfel \^{i}nc\^{a}t s\u{a} minimiz\u{a}m func\c{t}ia de pierdere.
+
+\par 
+
+Prin defini\c{t}ie gradientul este un c\^{a}mp vectorial ale c\u{a}rui componente sunt derivatele par\c{t}iale ale func\c{t}iei f \^{i}n raport cu o variabil\u{a} vecorial\u{a} $x = (x_1, x_2, ...., x_n)$, adic\u{a} :
+
+$$\nabla f = \bigg( \frac{\delta f}{\delta x_1}, \frac{\delta f}{\delta x_2}, ... , \frac{\delta f}{\delta x_n}  \bigg)$$
+
+Av\^{a}nd \^{i}n vedere faptul c\u{a} gradientul ne arat\u{a} direc\c{t}ia \^{i}n care func\c{t}ia are valorile cele mai mari vom dorii s\u{a} mergem \^{i}n direc\c{t}ia invers\u{a} ar\u{a}tat\u{a} de gardient deoarece scopul nostru este ca func\c{t}ia de pierdere s\u{a} aibe vloarea minim\u{a}. \^{I}ns\u{a} avem o problem\u{a} pentru c\u{a} gradientul ne zice direc\c{t}ia \^{i}n care s\u{a} mergem dar nu ne zice \c{s}i c\^{a}t s\u{a} mergem in aceea direc\c{t}ie din acest motiv ne putem trezii la un moment dat c\u{a} func\c{t}ia de pierdere \^{i}ncepe s\u{a} creasc\u{a} chiar dac\u{a} noi megem in direc\c{t}ia invers\u{a} spus\u{a} de gradient. O solu\c{t}ie la aceast\u{a} problem\u{a} este s\u{a} facem pa\c{s}i mici \^{i}n direc\c{t}ia invers\u{a} spus\u{a} de gradient, ace\c{s}ti pa\c{s}i se numesc rata de \^{i}nv\u{a}\c{t}are a re\c{t}elei neuronale, reprezent\^{a}nd cel mai important hiperparametru care trebuie setat manual dintr-o re\c{t}ea neuronal\u{a} deoarece dac\u{a} \^{i}l set\u{a}m prea mare nu vom ajunge niciodat\u{a} la punctul unde func\c{t}ia de pierdere are valoare minim\u{a}, iar dac\u{a} \^{i}l set\u{a}m prea mic o s\u{a} ajungem foarte greu la punctul de minim.
+
+\subsection{Calcularea gardientului func\c{t}iei de pierdere}
+
+Mai departe vom calcula gardintul func\c{t}iei de pieredere. 
+
+$$L = - \frac{1}{N} \sum_i log \bigg(\frac{e^{W_y_i x_y_i}}{\sum_j e^{W_j x_j}}\bigg) + \lambda \sum_i \sum_j W_{i,j}^2 $$
+
+S\u{a} not\u{a}m cu $p_i$  frac\c{t}ia din interiorul logaritmului
+
+$$p_i = \frac{e^{W_y_i x_y_i}}{\sum_j e^{W_j x_j}} $$
+
