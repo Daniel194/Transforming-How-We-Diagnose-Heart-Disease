@@ -164,9 +164,20 @@ Av\^{a}nd \^{i}n vedere faptul c\u{a} gradientul ne arat\u{a} direc\c{t}ia \^{i}
 
 Mai departe vom calcula gardintul func\c{t}iei de pieredere. 
 
-$$L = - \frac{1}{N} \sum_i log \bigg(\frac{e^{W_y_i x_y_i}}{\sum_j e^{W_j x_j}}\bigg) + \lambda \sum_i \sum_j W_{i,j}^2 $$
+$$L = - \frac{1}{N} \sum_i log \bigg(\frac{e^{W_i x_i}}{\sum_j e^{W_j x_j}}\bigg) + \lambda \sum_i \sum_j W_{i,j}^2 $$
 
 S\u{a} not\u{a}m cu $p_i$  frac\c{t}ia din interiorul logaritmului
 
-$$p_i = \frac{e^{W_y_i x_y_i}}{\sum_j e^{W_j x_j}} $$
+$$p_i = \frac{e^{W_i x_i}}{\sum_j e^{W_j x_j}} $$
 
+$$\frac{\delta p_i}{\delta W_i} = p_i ( 1 - p_i ) \quad \textrm{c\^{a}nd} \quad  i = j $$
+
+$$\frac{\delta p_i}{\delta W_i} =  - p_i p_j \quad \textrm{c\^{a}nd} \quad i \neq j $$
+
+Prin urmare 
+
+$$\frac{\delta L}{ \delta W_i} = - \frac{1}{N} \sum_i \frac{\delta  log \: p_i}{\delta W_i} + 2 \lambda \sum_i \sum_j W_{i,j}  = $$
+
+$$ = - \frac{1}{N} \sum_i \frac{1}{p_i} \frac{\delta p_i}{\delta W_i} + 2 \lambda \sum_i \sum_j W_{i,j} = - \frac{1 - p_i}{N} + \frac{1}{N} \sum_{i \neq j} p_i + 2 \lambda \sum_i \sum_j W_{i,j} = $$
+
+$$ = \frac{e^{W_i x_i}}{\sum_j e^{W_j x_j}} - 1 + 2 \lambda \sum_i \sum_j W_{i,j} $$
