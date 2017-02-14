@@ -160,24 +160,20 @@ $$\nabla f = \bigg( \frac{\delta f}{\delta x_1}, \frac{\delta f}{\delta x_2}, ..
 
 Av\^{a}nd \^{i}n vedere faptul c\u{a} gradientul ne arat\u{a} direc\c{t}ia \^{i}n care func\c{t}ia are valorile cele mai mari vom dorii s\u{a} mergem \^{i}n direc\c{t}ia invers\u{a} ar\u{a}tat\u{a} de gardient deoarece scopul nostru este ca func\c{t}ia de pierdere s\u{a} aibe vloarea minim\u{a}. \^{I}ns\u{a} avem o problem\u{a} pentru c\u{a} gradientul ne zice direc\c{t}ia \^{i}n care s\u{a} mergem dar nu ne zice \c{s}i c\^{a}t s\u{a} mergem in aceea direc\c{t}ie din acest motiv ne putem trezii la un moment dat c\u{a} func\c{t}ia de pierdere \^{i}ncepe s\u{a} creasc\u{a} chiar dac\u{a} noi megem in direc\c{t}ia invers\u{a} spus\u{a} de gradient. O solu\c{t}ie la aceast\u{a} problem\u{a} este s\u{a} facem pa\c{s}i mici \^{i}n direc\c{t}ia invers\u{a} spus\u{a} de gradient, ace\c{s}ti pa\c{s}i se numesc rata de \^{i}nv\u{a}\c{t}are a re\c{t}elei neuronale, reprezent\^{a}nd cel mai important hiperparametru care trebuie setat manual dintr-o re\c{t}ea neuronal\u{a} deoarece dac\u{a} \^{i}l set\u{a}m prea mare nu vom ajunge niciodat\u{a} la punctul unde func\c{t}ia de pierdere are valoare minim\u{a}, iar dac\u{a} \^{i}l set\u{a}m prea mic o s\u{a} ajungem foarte greu la punctul de minim.
 
-\subsection{Calcularea gardientului func\c{t}iei de pierdere}
+\par
 
-Mai departe vom calcula gardintul func\c{t}iei de pieredere. 
+\^{I}nainte s\u{a} calcul\u{a}m gradinetul func\c{t}iei noastre de pierdere vom introduce o variabil\u{a} intermediabil\u{a} p pentru a simplifica calculul
 
-$$L = - \frac{1}{N} \sum_i log \bigg(\frac{e^{W_i x_i}}{\sum_j e^{W_j x_j}}\bigg) + \lambda \sum_i \sum_j W_{i,j}^2 $$
+$$p_k = \frac{e^{f_k}}{\sum_j e^{f_j}}$$
 
-S\u{a} not\u{a}m cu $p_i$  frac\c{t}ia din interiorul logaritmului
+Astfel c\u{a} func\c{t}ia Softmax devine
 
-$$p_i = \frac{e^{W_i x_i}}{\sum_j e^{W_j x_j}} $$
+$$L_i = - log \big( p_{y_i} \big)$$
 
-$$\frac{\delta p_i}{\delta W_i} = p_i ( 1 - p_i ) \quad \textrm{c\^{a}nd} \quad  i = j $$
+Iar derivata pentru aceasta este
 
-$$\frac{\delta p_i}{\delta W_i} =  - p_i p_j \quad \textrm{c\^{a}nd} \quad i \neq j $$
+$$\frac{\delta L_i}{\delta f_k } = p_k \quad c\^{a}nd \quad y_i \neq k$$
 
-Prin urmare 
+$$\frac{\delta L_i}{\delta f_k } = p_k - 1 \quad c\^{a}nd \quad y_i = k$$
 
-$$\frac{\delta L}{ \delta W_i} = - \frac{1}{N} \sum_i \frac{\delta  log \: p_i}{\delta W_i} + 2 \lambda \sum_i \sum_j W_{i,j}  = $$
-
-$$ = - \frac{1}{N} \sum_i \frac{1}{p_i} \frac{\delta p_i}{\delta W_i} + 2 \lambda \sum_i \sum_j W_{i,j} = - \frac{1 - p_i}{N} + \frac{1}{N} \sum_{i \neq j} p_i + 2 \lambda \sum_i \sum_j W_{i,j} = $$
-
-$$ = \frac{e^{W_i x_i}}{\sum_j e^{W_j x_j}} - 1 + 2 \lambda \sum_i \sum_j W_{i,j} $$
+O s\u{a} dam un mic exemplu pentru a se \^{i}n\c{t}elege mai bine cum se calculeaz\u{a} gradientul pe baza formulelor de mai sus, s\u{a} presupunem c\u{a} p a calculat urm\u{a}toarele valori p = [0.2, 0.3, 0.5] iar clasa corect\u{a} este cea din mijloc cu probabilitatea atribuit\u{a} de 0.3, cu ajutorul formulelor de mai sus gradientul va avea urm\u{a}toarile valori [0.2, -0.7, 0.5]. Av\^{a}nd \^{i}n vedere ce ne spune un gradient este destul de u\c{s}or de interpretat rezultatul ob\c{t}inut, acela c\u{a} trebuie s\u{a} cre\c{s}tem clasele incorecte cu 0.2 \c{s}i 0.5 pentru a avea un rezultat mai mare la func\c{t}ia de pierdere \c{s}i s\u{a} scadem clasa corect\u{a} cu -0.7, \^{i}ns\u{a} pentru ca noi dorim ca func\c{t}ia de pierdere s\u{a} calculeze un rezultat mai mic vom scade cele do\u{a} clase incorecte cu -0.2 \c{s}i -0.5 \c{s}i vom cre\c{s}te clasa corect\u{a} cu 0.7.
