@@ -177,3 +177,24 @@ $$\frac{\delta L_i}{\delta f_k } = p_k \quad c\^{a}nd \quad y_i \neq k$$
 $$\frac{\delta L_i}{\delta f_k } = p_k - 1 \quad c\^{a}nd \quad y_i = k$$
 
 O s\u{a} dam un mic exemplu pentru a se \^{i}n\c{t}elege mai bine cum se calculeaz\u{a} gradientul pe baza formulelor de mai sus, s\u{a} presupunem c\u{a} p a calculat urm\u{a}toarele valori p = [0.2, 0.3, 0.5] iar clasa corect\u{a} este cea din mijloc cu probabilitatea atribuit\u{a} de 0.3, cu ajutorul formulelor de mai sus gradientul va avea urm\u{a}toarile valori [0.2, -0.7, 0.5]. Av\^{a}nd \^{i}n vedere ce ne spune un gradient este destul de u\c{s}or de interpretat rezultatul ob\c{t}inut, acela c\u{a} trebuie s\u{a} cre\c{s}tem clasele incorecte cu 0.2 \c{s}i 0.5 pentru a avea un rezultat mai mare la func\c{t}ia de pierdere \c{s}i s\u{a} scadem clasa corect\u{a} cu -0.7, \^{i}ns\u{a} pentru ca noi dorim ca func\c{t}ia de pierdere s\u{a} calculeze un rezultat mai mic vom scade cele do\u{a} clase incorecte cu -0.2 \c{s}i -0.5 \c{s}i vom cre\c{s}te clasa corect\u{a} cu 0.7.
+
+\par
+
+Dup\u{a} calcularea gradientului func\c{t}iei de pierdere trebuie s\u{a} calcul\u{a}m gradientul pentru \^{i}nt\u{a}riri \c{s}i bias pentru a \c{s}tii \^{i}n ce direc\c{t}ie trebuie s\u{a} \^{i}i actualiz\u{a}m ca s\u{a} minimiz\u{a}m rezultatul func\c{t}iei de pieredere. Deja \c{s}tim gradientul func\c{t}iei de pierdere a\c{s}a c\u{a} este destul de u\c{s}or s\u{a} calcul\u{a}m gradientul pentru \^{i}nt\u{a}riri \c{s}i bias av\^{a}nd \^{i}n vedere faptul c\u{a} $f_k = W_k x_k + b_k$, prin urmare
+
+$$\frac{\delta L_i}{\delta W_k} = \frac{\delta L_i}{\delta f_k} \frac{\delta f_k}{\delta W_k} = \frac{\delta L_i}{\delta f_k} x_k$$
+
+$$\frac{\delta L_i}{\delta b_k} = \frac{\delta L_i}{\delta f_k} \frac{\delta f_k}{\delta b_k} = \frac{\delta L_i}{\delta f_k}$$
+
+S\u{a} nu uitam faptul c\u{a} trebuie derivat\u{a} \c{s}i func\c{t}ia de regularizare care penalizeaz\u{a} \^{i}nt\u{a}ririle cu valori mari \c{s}i concentrare \^{i}ntr-un singur punct, astfel c\u{a} gradientul pentru \^{i}nt\u{a}riri devine 
+
+$$\frac{\delta L_i}{\delta W_k} = \frac{\delta L_i}{\delta f_k} x_k + \frac{\delta R(W_k)}{\delt W_k} = \frac{\delta L_i}{\delta f_k} x_k + 2 \lambda W_k$$
+
+Odat\u{a} calcula\c{t}i cei doi gradine\c{t}i putrem trece la pasul de actualizare a \^{i}ntaririlor \c{s}i bias - urilor 
+
+$$ W_k = W_k + \zeta \frac{\delta L_i}{\delta W_k} $$
+$$b_k = b_k + \zeta \frac{\delta L_i}{\delta b_k} $$
+
+\^{I}n formulele de mai sus am notat cu $\zeta$ pasul de \^{i}nv\u{a}\c{t}are a re\c{t}elei neuronale. Acest tip de actualizare a parametrilor dintr-o re\c{t}ea neuronal\u{a} se nume\c{s}te SGD (Stochastic Gradient Descendent) care este destul de bun pentru o re\c{t}ea neuronal\u{a} simpl\u{a} cum avem noi acum, \^{i}ns\u{a} exist\u{a} varia\c{t}iuni ale acestei metode mult mai eficiente, cum ar fi Momentum de exemplu pe care o vom folosii la o re\c{t}ea neuronal\u{a} mult mai comlex\u{a} peste c\^{a}teva capitole.
+
+\par
