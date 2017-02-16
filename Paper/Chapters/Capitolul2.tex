@@ -198,3 +198,23 @@ $$b_k = b_k + \zeta \frac{\delta L_i}{\delta b_k} $$
 \^{I}n formulele de mai sus am notat cu $\zeta$ pasul de \^{i}nv\u{a}\c{t}are a re\c{t}elei neuronale. Acest tip de actualizare a parametrilor dintr-o re\c{t}ea neuronal\u{a} se nume\c{s}te SGD (Stochastic Gradient Descendent) care este destul de bun pentru o re\c{t}ea neuronal\u{a} simpl\u{a} cum avem noi acum, \^{i}ns\u{a} exist\u{a} varia\c{t}iuni ale acestei metode mult mai eficiente, cum ar fi Momentum de exemplu pe care o vom folosii la o re\c{t}ea neuronal\u{a} mult mai comlex\u{a} peste c\^{a}teva capitole.
 
 \par
+
+\^{I}n momentul de fa\c{t}\u{a} am actualizat doar ultimul nivel dintr-o re\c{t}ea neuronal\u{a}, \^{i}ns\u{a} ce facem dac\u{a} vrem s\u{a} actualiz\u{a}m parametrii de la nivelul inferior ei ? Cum putem calcula gradientul pentru ace\c{s}tia ? \^{I}nainte s\u{a} calculam gradentul pentru \^{i}nt\u{a}ririle si bias-urile de pe nivelul inferior trebuie s\u{a} calcul\u{a}m derivata func\c{t}iei de activare, reamintim faptul c\u{a} func\c{t}ia de activare are urmatoarea formul\u{a} 
+
+\[ f(x) =
+  \begin{cases}
+    0       & \quad \text{dac\u{a} } x \leq 0\\
+    x  & \quad \text{dac\u{a} } x > 0\\
+  \end{cases}
+\]
+
+Calculul derivatei pentru func\c{t}ia de activare este necesar pentru c\u{a} aceasta ac\c{t}ioneaz\u{a} \^{i}ntre dou\u{a} nivele dintr-o re\c{t}ea neuronal\u{a} astfel c\u{a} dac\u{a} dorim s\u{a} actualiz\u{a}m parametrii unei re\c{t}ele neuronale de pe un nivel pe baza gradientului calculat de pe nivelul superior ei trebuie mai intai s\u{a} \^{i}l trecem prin derivate func\c{t}iei de activare, acest proces invers procesului normal pe care \^{i}l face o rec\c{t}ea neuronal\u{a} se mai nume\c{s}te \c{s}i backpropagation care are ca scop propagarea \^{i}napoi a gradinetului calculat la un pas superior.
+
+\[ \frac{\delta f(x)}{\delta x}  =
+  \begin{cases}
+    0       & \quad \text{dac\u{a} } x \leq 0\\
+    1  & \quad \text{dac\u{a} } x > 0\\
+  \end{cases}
+\]
+
+Combint\u{a} derivata de mai sus cu faptul c\u{a} 
