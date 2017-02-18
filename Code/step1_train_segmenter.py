@@ -1,7 +1,7 @@
-import Code.settings as settings
+import settings as settings
 import numpy as np
 import logging
-from Code.util_fileiter import FileIter
+from util_fileiter import FileIter
 
 IMAGE_SIZE = settings.TARGET_CROP
 SCALE_SIZE = settings.TARGET_CROP
