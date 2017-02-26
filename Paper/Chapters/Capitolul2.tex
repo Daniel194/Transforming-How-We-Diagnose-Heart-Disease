@@ -251,3 +251,17 @@ $$g_{i,j} = floor\bigg( 255 \sum_{n=0}^{f{i,j}} p_n \bigg)$$
 \includegraphics[width=150]{after.png}
 
 Cele dou\u{a} imagini de mai sus reprezint\u{a} un exempu de imagine din setul de date \^{i}nainte de a fi procesat\u{a} \c{s}i dup\u{a} ce a fost procesat\u{a}, cum se poate observa imaginea procesat\u{a} a fost decupat\u{a} din mijlocul imaginii neprocesate astfel \^{i}nc\^{a}t s\u{a} se elimine o cantitate c\^{a}t mai mare de date care nu sunt necesare pentru scopul nostru, de asemenea se mai poate observa c\u{a} imaginea procesat\u{a} are un contrast mai mare fa\c{t}\u{a} de imaginea neprocesat\u{a} iar detaliile imaginii se pot observa mai bine, aceste lucruri vor duce la o vitez\u{a} de calcul \c{s}i la o acurate\c{t}e mai mare a re\c{t}elei neuronale.
+
+\par
+
+Cum am precizat mai sus, vom salva intr-un fi\c{s}ier CSV id-ul pacientului, numarul radiografiei, numarul imaginii, numarul de linii \c{s}i de coloane, distan\c{t}a fizic\u{a} \^{i}ntre centrii a doi pixeli, ad\^{a}ncimea radiografiei, locatia radiografiei, planul in care a fost facut\u{a} radiografia ( pe line sau pe coloan\u{a} ) \c{s}i pozi\c{t}ia imaginii fa\c{t}\u{a} de col\c{t}ul din st\^{a}nga sus, pe l\^{a}ng\u{a} toate acestea vom mai salva \c{s}i varianta prin care s-a facut radiografia, c\^{a}nd s-a f\u{a}cut radiografia, firma care a f\u{a}cut aparatul de RMN \c{s}i numele modelului, v\^{a}rsta pacientului, ziua de na\c{s}tere a pacientului, sexul pacientului, numele fi\c{s}ierului \c{s}i orientarea pacientului in imagine. DICOM define\c{s}te un sistem de coordonate numit RCS (Reference Coordinates System) prin care se stabile\c{s}te pozi\c{t}ia corpului  \^{i}n imagine, astfel c\u{a} direc\c{t}ia X este de la m\^{a}na dreapta a pacientului spre m\^{a}na st\^{a}ng\u{a} a acestuia, direc\c{t}ia Y este din fa\c{t}a pacientului spre spatele acestuia, iar direc\c{t}ia Z este de la picioare spre cap, din cauza faptului c\u{a} pozi\c{t}ia corpului este tridimensional\u{a} iar radiografia este bidimensional\u{a} se va caulcula proiec\c{t}ia fiecarei axe definite mai sus la axele unui plan bidimensional, \^{i}n acest caz \^{i}n formatul DICOM se vor gasi \c{s}ase valori care definesc orientarea pacientului in imagine. Primele trei valori reprezint proiec\c{t}ia celor trei axe a planului tridimensional la axa X a planului bidimensional (Xx, Xy, Xz), iar celelalte trei valori reprezint\u{a} proiec\c{t}ia celor trei axe a planului tridimensional la axa Y a planului bidimensional (Yx, Yy, Yz), cu aceste valori se poate stabilii foarte u\c{s}or cum este orientat un pacient intr-o radiografie.
+
+\par
+
+Toate valorile salvate mai sus \^{i}n fi\c{s}ierul CSV au fost valori pe care nu am fost nevoi\c{t}i s\u{a} le calcul\u{a}m doarece sunt deja existente \^{i}n fiecare radiografie, \^{i}ns\u{a} pe baza lor putem s\u{a} calcul\u{a}m noi valori care ne vor fi de folos pe parcurs. Una dintre acestea este s\u{a} stabilim timpul dintre dou\u{a} imagini consecutive dintr-o radiografie \c{s}i distan\c{t}a dintre loca\c{t}iile lor, acestea pot fi u\c{s}or calculate prin diferen\c{t}a dintre timpii  celor dou\u{a} imagini \c{s}i a pozi\c{t}iilor pe care le au.
+
+\subsection{Identificarea inimii}
+
+Cum se poate observa \c{s}i \^{i}n imaginea de mai jos inima este destul de u\c{s}or de identificat cu ochiul libert pentru un om, \^{i}ns\u{a} pentru un calculator aceasta este \^{i}nc\u{a} greu de g\u{a}sit.
+
+\includegraphics[width=200]{after.png}
