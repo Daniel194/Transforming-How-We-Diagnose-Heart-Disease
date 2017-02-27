@@ -155,6 +155,7 @@ if __name__ == "__main__":
                               batch_size=BATCH_SIZE, augment=AUGMENT_TRAIN,
                               mean_image=settings.BASE_TRAIN_SEGMENT_DIR + "mean.png", random_crop=True,
                               crop_size=INPUT_SIZE, shuffle=True, scale_size=None)
+
         data_validate = FileIter(root_dir=settings.BASE_TRAIN_SEGMENT_DIR,
                                  flist_name="validate" + str(fold_no) + ".lst", batch_size=BATCH_SIZE, augment=False,
                                  mean_image=settings.BASE_TRAIN_SEGMENT_DIR + "mean.png", crop_size=INPUT_SIZE,

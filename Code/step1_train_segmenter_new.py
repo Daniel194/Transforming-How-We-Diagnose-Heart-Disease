@@ -456,6 +456,25 @@ class ImageRecognition(object):
 
         return images, labels
 
+    def __convolution_module(self, name, net, kernel_size, pad_size, filter_count, output_shape, stride=(1, 1),
+                             work_space=2048, batch_norm=True, down_pool=False, up_pool=False, act_type="relu",
+                             convolution=True):
+
+        with tf.variable_scope(name) as scope:
+            nr_units = functools.reduce(lambda x, y: x * y, kernel_size)
+            weights = self.__variable_with_weight_decay('weights', shape=kernel_size,
+                                                        stddev=1.0 / math.sqrt(float(nr_units)), wd=0.0)
+            scale = self.__variable_on_cpu('scale', kernel_size[3], tf.constant_initializer(1.0))
+            beta = self.__variable_on_cpu('beta', kernel_size[3], tf.constant_initializer(0.0))
+
+            if up_pool:
+                net = tf.nn.conv2d_transpose(net, weights, output_shape, padding='SAME', strides=[1, 2, 2, 1],
+                                             name='deconvolution')
+                batch_mean, batch_var = tf.nn.moments(net, [0])
+                bn = tf.nn.batch_normalization(net, batch_mean, batch_var, beta, scale, self.EPSILON)
+                net = tf.nn.relu(bn, name=scope.name)
+                self.__activation_summary(net)
+
     def __inference(self, images):
         """
         Build the CIFAR-10 model.
