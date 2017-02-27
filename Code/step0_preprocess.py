@@ -232,9 +232,9 @@ def convert_sax_images(rescale=True, base_size=256, crop_size=256):
     """
     Convert dicom format in png images and write them in a specific folder.
     :param rescale: boolean value for rescaling image.
-    :param base_size:
-    :param crop_size:
-    :return:
+    :param base_size: base size
+    :param crop_size: crop size
+    :return: nothing
     """
 
     target_dir = settings.BASE_PREPROCESSEDIMAGES_DIR
