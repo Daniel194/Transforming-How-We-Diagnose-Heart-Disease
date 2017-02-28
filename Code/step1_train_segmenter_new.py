@@ -506,146 +506,23 @@ class ImageRecognition(object):
 
     def __inference(self, images):
         """
-        Build the CIFAR-10 model.
+        Build the Segmentation module
         :param images: Images returned from distorted_inputs() or inputs().
         :return: Logits.
         """
 
-        # First Convolutional Layer
-        with tf.variable_scope('conv1') as scope:
-            nr_units = functools.reduce(lambda x, y: x * y, [5, 5, 3, 64])
-            weights = self.__variable_with_weight_decay('weights', shape=[5, 5, 3, 64],
-                                                        stddev=1.0 / math.sqrt(float(nr_units)), wd=0.0)
-            scale = self.__variable_on_cpu('scale', [64], tf.constant_initializer(1.0))
-            beta = self.__variable_on_cpu('beta', [64], tf.constant_initializer(0.0))
+        conv1 = self.__convolution_module("conv1", images, [3, 3, 3, 32], [], down_pool=True)
+        conv2 = self.__convolution_module("conv2", conv1, [3, 3, 32, 64], [], down_pool=True)
+        conv3 = self.__convolution_module("conv3", conv2, [3, 3, 64, 128], [], down_pool=True)
+        conv4 = self.__convolution_module("conv4", conv3, [3, 3, 128, 128], [], down_pool=True)
 
-            z = tf.nn.conv2d(images, weights, strides=[1, 1, 1, 1], padding='SAME')
-            batch_mean, batch_var = tf.nn.moments(z, [0])
-            bn = tf.nn.batch_normalization(z, batch_mean, batch_var, beta, scale, self.EPSILON)
-            conv1 = tf.nn.relu(bn, name=scope.name)
-            self.__activation_summary(conv1)
+        drop = tf.nn.dropout(conv4, 0.5)
 
-        # Second Convolutional Layer
-        with tf.variable_scope('conv2') as scope:
-            nr_units = functools.reduce(lambda x, y: x * y, [5, 5, 64, 128])
-            weights = self.__variable_with_weight_decay('weights', shape=[5, 5, 64, 128],
-                                                        stddev=1.0 / math.sqrt(float(nr_units)), wd=0.0)
-            scale = self.__variable_on_cpu('scale', [128], tf.constant_initializer(1.0))
-            beta = self.__variable_on_cpu('beta', [128], tf.constant_initializer(0.0))
+        conv5 = self.__convolution_module("conv5", drop, [3, 3, 128, 256], [], down_pool=True)
+        conv6 = self.__convolution_module("conv6", conv5, [3, 3, 256, 128], [], down_pool=True)
+        conv7 = self.__convolution_module("conv7", conv6, [3, 3, 128, 128], [], down_pool=True)
 
-            z = tf.nn.conv2d(conv1, weights, strides=[1, 1, 1, 1], padding='SAME')
-            batch_mean, batch_var = tf.nn.moments(z, [0])
-            bn = tf.nn.batch_normalization(z, batch_mean, batch_var, beta, scale, self.EPSILON)
-            conv2 = tf.nn.relu(bn, name=scope.name)
-            self.__activation_summary(conv2)
-
-        # First Pool Layer
-        with tf.name_scope('pool1'):
-            pool1 = tf.nn.max_pool(conv2, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME', name='pool1')
-
-        # Third Convolutional Layer
-        with tf.variable_scope('conv3') as scope:
-            nr_units = functools.reduce(lambda x, y: x * y, [5, 5, 128, 256])
-            weights = self.__variable_with_weight_decay('weights', shape=[5, 5, 128, 256],
-                                                        stddev=1.0 / math.sqrt(float(nr_units)), wd=0.0)
-            scale = self.__variable_on_cpu('scale', [256], tf.constant_initializer(1.0))
-            beta = self.__variable_on_cpu('beta', [256], tf.constant_initializer(0.0))
-
-            z = tf.nn.conv2d(pool1, weights, strides=[1, 1, 1, 1], padding='SAME')
-            batch_mean, batch_var = tf.nn.moments(z, [0])
-            bn = tf.nn.batch_normalization(z, batch_mean, batch_var, beta, scale, self.EPSILON)
-            conv3 = tf.nn.relu(bn, name=scope.name)
-            self.__activation_summary(conv3)
-
-        # Fourth Convolutional Layer
-        with tf.variable_scope('conv4') as scope:
-            nr_units = functools.reduce(lambda x, y: x * y, [3, 3, 256, 256])
-            weights = self.__variable_with_weight_decay('weights', shape=[3, 3, 256, 256],
-                                                        stddev=1.0 / math.sqrt(float(nr_units)), wd=0.0)
-            scale = self.__variable_on_cpu('scale', [256], tf.constant_initializer(1.0))
-            beta = self.__variable_on_cpu('beta', [256], tf.constant_initializer(0.0))
-
-            z = tf.nn.conv2d(conv3, weights, strides=[1, 1, 1, 1], padding='SAME')
-            batch_mean, batch_var = tf.nn.moments(z, [0])
-            bn = tf.nn.batch_normalization(z, batch_mean, batch_var, beta, scale, self.EPSILON)
-            conv4 = tf.nn.relu(bn, name=scope.name)
-            self.__activation_summary(conv4)
-
-        # Second Pool Layer
-        with tf.name_scope('pool2'):
-            pool2 = tf.nn.max_pool(conv4, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
-
-        # First Dropout
-        with tf.name_scope('dropout1'):
-            dropout1 = tf.nn.dropout(pool2, 0.8)
-
-        # Fifth Convolutional Layer
-        with tf.variable_scope('conv5') as scope:
-            nr_units = functools.reduce(lambda x, y: x * y, [3, 3, 256, 512])
-            weights = self.__variable_with_weight_decay('weights', shape=[3, 3, 256, 512],
-                                                        stddev=1.0 / math.sqrt(float(nr_units)), wd=0.0)
-            scale = self.__variable_on_cpu('scale', [512], tf.constant_initializer(1.0))
-            beta = self.__variable_on_cpu('beta', [512], tf.constant_initializer(0.0))
-
-            z = tf.nn.conv2d(dropout1, weights, strides=[1, 1, 1, 1], padding='SAME')
-            batch_mean, batch_var = tf.nn.moments(z, [0])
-            bn = tf.nn.batch_normalization(z, batch_mean, batch_var, beta, scale, self.EPSILON)
-            conv5 = tf.nn.relu(bn, name=scope.name)
-            self.__activation_summary(conv5)
-
-        # Second Dropout
-        with tf.name_scope('dropout2'):
-            dropout2 = tf.nn.dropout(conv5, 0.8)
-
-        # Sixth Convolutional Layer
-        with tf.variable_scope('conv6') as scope:
-            nr_units = functools.reduce(lambda x, y: x * y, [3, 3, 512, 512])
-            weights = self.__variable_with_weight_decay('weights', shape=[3, 3, 512, 512],
-                                                        stddev=1.0 / math.sqrt(float(nr_units)), wd=0.0)
-            scale = self.__variable_on_cpu('scale', [512], tf.constant_initializer(1.0))
-            beta = self.__variable_on_cpu('beta', [512], tf.constant_initializer(0.0))
-
-            z = tf.nn.conv2d(dropout2, weights, strides=[1, 1, 1, 1], padding='SAME')
-            batch_mean, batch_var = tf.nn.moments(z, [0])
-            bn = tf.nn.batch_normalization(z, batch_mean, batch_var, beta, scale, self.EPSILON)
-            conv6 = tf.nn.relu(bn, name=scope.name)
-            self.__activation_summary(conv6)
-
-        # Third Pool Layer
-        with tf.name_scope('pool3'):
-            pool3 = tf.nn.max_pool(conv6, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
-
-        # Third Dropout
-        with tf.name_scope('dropout3'):
-            dropout3 = tf.nn.dropout(pool3, 0.5)
-
-        # First Fully Connected Layer
-        with tf.variable_scope('fc1') as scope:
-            nr_units = functools.reduce(lambda x, y: x * y, [4608, 2048])
-            dropout3_flat = tf.reshape(dropout3, [-1, 4608])
-
-            weights = self.__variable_with_weight_decay('weights', shape=[4608, 2048],
-                                                        stddev=1.0 / math.sqrt(float(nr_units)), wd=0.0)
-            scale = self.__variable_on_cpu('scale', [2048], tf.constant_initializer(1.0))
-            beta = self.__variable_on_cpu('beta', [2048], tf.constant_initializer(0.0))
-
-            z = tf.matmul(dropout3_flat, weights)
-            batch_mean, batch_var = tf.nn.moments(z, [0])
-            bn = tf.nn.batch_normalization(z, batch_mean, batch_var, beta, scale, self.EPSILON)
-            fc1 = tf.nn.relu(bn, name=scope.name)
-            self.__activation_summary(fc1)
-
-        # SoftMax Linear
-        with tf.variable_scope('softmax_linear') as scope:
-            nr_units = functools.reduce(lambda x, y: x * y, [2048, self.NUM_CLASSES])
-
-            weights = self.__variable_with_weight_decay('weights', shape=[2048, self.NUM_CLASSES],
-                                                        stddev=1.0 / math.sqrt(float(nr_units)), wd=0.0)
-            biases = self.__variable_on_cpu('biases', [self.NUM_CLASSES], tf.constant_initializer(0.0))
-            softmax_linear = tf.add(tf.matmul(fc1, weights), biases, name=scope.name)
-            self.__activation_summary(softmax_linear)
-
-        return softmax_linear
+        # TODO
 
     def __loss(self, logits, labels):
         """
