@@ -456,24 +456,53 @@ class ImageRecognition(object):
 
         return images, labels
 
-    def __convolution_module(self, name, net, kernel_size, pad_size, filter_count, output_shape, stride=(1, 1),
-                             work_space=2048, batch_norm=True, down_pool=False, up_pool=False, act_type="relu",
-                             convolution=True):
+    def __convolution_module(self, name, net, kernel_size, output_shape, batch_norm=True, down_pool=False,
+                             up_pool=False, convolution=True):
+
+        """
+        Convolution module
+        :param name: the name of the layer
+        :param net: the data
+        :param kernel_size: the kernel size
+        :param output_shape: output shape for deconvolution layer
+        :param batch_norm: batch normalization (bool value)
+        :param down_pool: down pool (bool value)
+        :param up_pool: up pool (bool value)
+        :param convolution: convolutional layer (bool value)
+        :return: return the next hidden layer
+        """
 
         with tf.variable_scope(name) as scope:
             nr_units = functools.reduce(lambda x, y: x * y, kernel_size)
             weights = self.__variable_with_weight_decay('weights', shape=kernel_size,
                                                         stddev=1.0 / math.sqrt(float(nr_units)), wd=0.0)
+
             scale = self.__variable_on_cpu('scale', kernel_size[3], tf.constant_initializer(1.0))
             beta = self.__variable_on_cpu('beta', kernel_size[3], tf.constant_initializer(0.0))
 
             if up_pool:
-                net = tf.nn.conv2d_transpose(net, weights, output_shape, padding='SAME', strides=[1, 2, 2, 1],
-                                             name='deconvolution')
+                net = tf.nn.conv2d_transpose(net, weights, output_shape, padding='SAME', strides=[1, 2, 2, 1])
                 batch_mean, batch_var = tf.nn.moments(net, [0])
                 bn = tf.nn.batch_normalization(net, batch_mean, batch_var, beta, scale, self.EPSILON)
                 net = tf.nn.relu(bn, name=scope.name)
                 self.__activation_summary(net)
+
+            if convolution:
+                net = tf.nn.conv2d(net, weights, strides=[1, 1, 1, 1], padding='SAME')
+                self.__activation_summary(net)
+
+            if batch_norm:
+                batch_mean, batch_var = tf.nn.moments(net, [0])
+                bn = tf.nn.batch_normalization(net, batch_mean, batch_var, beta, scale, self.EPSILON)
+                net = bn
+
+            net = tf.nn.relu(net, name=scope.name)
+
+            if down_pool:
+                net = tf.nn.max_pool(net, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME', name=scope.name)
+                self.__activation_summary(net)
+
+        return net
 
     def __inference(self, images):
         """
