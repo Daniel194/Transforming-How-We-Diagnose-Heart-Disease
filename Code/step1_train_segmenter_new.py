@@ -516,13 +516,21 @@ class ImageRecognition(object):
         conv3 = self.__convolution_module("conv3", conv2, [3, 3, 64, 128], [], down_pool=True)
         conv4 = self.__convolution_module("conv4", conv3, [3, 3, 128, 128], [], down_pool=True)
 
-        drop = tf.nn.dropout(conv4, 0.5)
+        drop1 = tf.nn.dropout(conv4, 0.5)
 
-        conv5 = self.__convolution_module("conv5", drop, [3, 3, 128, 256], [], down_pool=True)
+        conv5 = self.__convolution_module("conv5", drop1, [3, 3, 128, 256], [], down_pool=True)
         conv6 = self.__convolution_module("conv6", conv5, [3, 3, 256, 128], [], down_pool=True)
         conv7 = self.__convolution_module("conv7", conv6, [3, 3, 128, 128], [], down_pool=True)
 
-        # TODO
+        conv8 = self.__convolution_module("conv8", conv7, [4, 4, 128, 128], [])
+
+        concat1 = tf.concat([conv3, conv8], 0)
+        drop2 = tf.nn.dropout(concat1, 0.5)
+
+        conv9 = self.__convolution_module("conv9", drop2, [3, 3, 128, 128], [])
+        conv10 = self.__convolution_module("conv10", conv9, [3, 3, 128, 128], [], down_pool=True)
+
+        #TODO
 
     def __loss(self, logits, labels):
         """
