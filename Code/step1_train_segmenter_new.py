@@ -457,7 +457,7 @@ class ImageRecognition(object):
         return images, labels
 
     def __convolution_module(self, name, net, kernel_size, output_shape, batch_norm=True, down_pool=False,
-                             up_pool=False, convolution=True):
+                             up_pool=False, convolution=True, activation=True):
 
         """
         Convolution module
@@ -469,6 +469,7 @@ class ImageRecognition(object):
         :param down_pool: down pool (bool value)
         :param up_pool: up pool (bool value)
         :param convolution: convolutional layer (bool value)
+        :param activation: add or not activation function in convolution module
         :return: return the next hidden layer
         """
 
@@ -496,7 +497,8 @@ class ImageRecognition(object):
                 bn = tf.nn.batch_normalization(net, batch_mean, batch_var, beta, scale, self.EPSILON)
                 net = bn
 
-            net = tf.nn.relu(net, name=scope.name)
+            if activation:
+                net = tf.nn.relu(net, name=scope.name)
 
             if down_pool:
                 net = tf.nn.max_pool(net, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME', name=scope.name)
@@ -530,7 +532,42 @@ class ImageRecognition(object):
         conv9 = self.__convolution_module("conv9", drop2, [3, 3, 128, 128], [])
         conv10 = self.__convolution_module("conv10", conv9, [3, 3, 128, 128], [], down_pool=True)
 
-        #TODO
+        concat2 = tf.concat([conv2, conv10], 0)
+        drop3 = tf.nn.dropout(concat2, 0.5)
+
+        conv11 = self.__convolution_module("conv11", drop3, [3, 3, 128, 128], [])
+        conv12 = self.__convolution_module("conv12", conv11, [3, 3, 128, 128], [], down_pool=True)
+
+        concat3 = tf.concat([conv1, conv12], 0)
+        drop4 = tf.nn.dropout(concat3, 0.5)
+
+        conv13 = self.__convolution_module("conv13", drop4, [3, 3, 128, 64], [])
+        conv14 = self.__convolution_module("conv14", conv13, [3, 3, 64, 64], [], down_pool=True)
+        conv15 = self.__convolution_module("conv15", conv14, [3, 3, 64, 1], [], batch_norm=False, activation=False)
+
+        conv15_flat = tf.reshape(conv15, [-1, 65536])
+
+        return self.__softmax_linear(conv15_flat, 65536, 0)
+
+    def __softmax_linear(self, data, shape, num_classes):
+        """
+        SoftMax Linear
+        :param data: the data
+        :param shape: the shape of the data
+        :param num_classes: the number of classes
+        :return: return softmax linear
+        """
+
+        with tf.variable_scope('softmax_linear') as scope:
+            nr_units = functools.reduce(lambda x, y: x * y, [shape, num_classes])
+
+            weights = self.__variable_with_weight_decay('weights', shape=[shape, num_classes],
+                                                        stddev=1.0 / math.sqrt(float(nr_units)), wd=0.0)
+            biases = self.__variable_on_cpu('biases', [num_classes], tf.constant_initializer(0.0))
+            softmax_linear = tf.add(tf.matmul(data, weights), biases, name=scope.name)
+            self.__activation_summary(softmax_linear)
+
+        return softmax_linear
 
     def __loss(self, logits, labels):
         """
