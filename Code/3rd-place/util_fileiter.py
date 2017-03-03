@@ -1,8 +1,9 @@
-import numpy as np
 import os
 import random
-import cv2
+
 import Code.utils as util
+import cv2
+import numpy as np
 
 np.random.seed(1301)
 random.seed(1301)

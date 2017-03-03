@@ -1,14 +1,15 @@
-import Code.utils as utils
-import Code.settings as settings
-import cv2
-import ntpath
 import csv
+import math
+import ntpath
+import os.path
+import shutil
+
+import Code.settings as settings
+import Code.utils as utils
+import cv2
 import numpy
 import pandas
-import shutil
 from Code.util_fileiter import FileIter
-import os.path
-import math
 
 MODEL_NAME = settings.MODEL_NAME
 CROP_SIZE = settings.CROP_SIZE
