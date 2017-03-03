@@ -1,5 +1,5 @@
 import dicom, cv2, re
-import os, fnmatch, shutil
+import os, fnmatch
 import numpy as np
 import matplotlib.pyplot as plt
 import warnings
@@ -25,12 +25,13 @@ SAX_SERIES = {
     "SC-N-3": "0915",
     "SC-N-40": "0944",
 }
-
 SUNNYBROOK_ROOT_PATH = "data/"
-
 TRAIN_CONTOUR_PATH = os.path.join(SUNNYBROOK_ROOT_PATH, "Sunnybrook Cardiac MR Database ContoursPart3",
                                   "TrainingDataContours")
 TRAIN_IMG_PATH = os.path.join(SUNNYBROOK_ROOT_PATH, "challenge_training")
+
+BATCHSIZE = 100
+NR_EPOCHS = 5
 
 
 def shrink_case(case):
@@ -79,60 +80,59 @@ def get_all_contours(contour_path):
     print("Shuffle data")
     np.random.shuffle(contours)
     print("Number of examples: {:d}".format(len(contours)))
-    extracted = map(Contour, contours)
+    extracted = list(map(Contour, contours))
 
     return extracted
 
 
-def export_all_contours(contours, img_path, lmdb_img_name, lmdb_label_name):
-    for lmdb_name in [lmdb_img_name, lmdb_label_name]:
-        db_path = os.path.abspath(lmdb_name)
-        if os.path.exists(db_path):
-            shutil.rmtree(db_path)
+def export_all_contours(batch, img_path):
+    imgs, labels = [], []
 
-    counter_img = 0
-    counter_label = 0
-    batchsz = 100
+    if len(batch) == 0:
+        return
 
-    print("Processing {:d} images and labels...".format(len(contours)))
+    for idx, ctr in enumerate(batch):
+        try:
+            img, label = load_contour(ctr, img_path)
+            imgs.append(img)
+            labels.append(label)
 
-    for i in range(int(np.ceil(len(contours) / float(batchsz)))):
-        batch = contours[(batchsz * i):(batchsz * (i + 1))]
+            if idx % 50 == 0:
+                print(ctr)
+                # plt.imshow(img)
+                # plt.show()
+                # plt.imshow(label)
+                # plt.show()
 
-        if len(batch) == 0:
-            break
+        except IOError:
+            continue
 
-        imgs, labels = [], []
-
-        for idx, ctr in enumerate(batch):
-            try:
-                img, label = load_contour(ctr, img_path)
-                imgs.append(img)
-                labels.append(label)
-                if idx % 20 == 0:
-                    print(ctr)
-                    plt.imshow(img)
-                    plt.show()
-                    plt.imshow(label)
-                    plt.show()
-            except IOError:
-                continue
-
-        counter_img += 1
-        print("Processed {:d} images".format(counter_img))
-
-        counter_label += 1
-        print("Processed {:d} labels".format(counter_label))
+    return imgs, labels
 
 
 if __name__ == "__main__":
     SPLIT_RATIO = 0.1
+
     print("Mapping ground truth contours to images...")
+
     ctrs = get_all_contours(TRAIN_CONTOUR_PATH)
     val_ctrs = ctrs[0:int(SPLIT_RATIO * len(ctrs))]
     train_ctrs = ctrs[int(SPLIT_RATIO * len(ctrs)):]
-    print("Done mapping ground truth contours to images")
-    print("\nBuilding LMDB for train...")
-    export_all_contours(train_ctrs, TRAIN_IMG_PATH, "train_images_lmdb", "train_labels_lmdb")
-    print("\nBuilding LMDB for val...")
-    export_all_contours(val_ctrs, TRAIN_IMG_PATH, "val_images_lmdb", "val_labels_lmdb")
+
+    print("Processing {:d} images and labels...".format(len(train_ctrs)))
+
+    for nr_epoch in range(NR_EPOCHS):
+        print("\n Epoch number {:d} \n".format(nr_epoch))
+
+        np.random.shuffle(train_ctrs)
+
+        for i in range(int(np.ceil(len(train_ctrs) / float(BATCHSIZE)))):
+            batch = train_ctrs[(BATCHSIZE * i):(BATCHSIZE * (i + 1))]
+
+            imgs_train, labels_train = export_all_contours(batch, TRAIN_IMG_PATH)
+            print(len(labels_train))
+
+    print("Processing {:d} images and labels...".format(len(val_ctrs)))
+
+    imgs_val, labels_val = export_all_contours(val_ctrs, TRAIN_IMG_PATH)
+    print(len(labels_val))
