@@ -456,50 +456,113 @@ class ImageRecognition(object):
 
         return images, labels
 
-    def __convolution_layer(self, name, data, kernel_size, strides, convolution=True, output_shape=None,
-                            activation=True):
+    def __conv_layer(self, name, x, W_shape, b_shape, padding='SAME'):
 
-        """
-        Convolution module
-        :param name: the name of the layer
-        :param net: the data
-        :param kernel_size: the kernel size
-        :param output_shape: output shape for deconvolution layer
-        :param batch_norm: batch normalization (bool value)
-        :param down_pool: down pool (bool value)
-        :param up_pool: up pool (bool value)
-        :param convolution: convolutional layer (bool value)
-        :param activation: add or not activation function in convolution module
-        :return: return the next hidden layer
-        """
-
-        with tf.variable_scope(name) as scope:
-            nr_units = functools.reduce(lambda x, y: x * y, kernel_size)
-            weights = self.__variable_with_weight_decay('weights', shape=kernel_size,
+        with tf.variable_scope(name):
+            nr_units = functools.reduce(lambda x, y: x * y, W_shape)
+            weights = self.__variable_with_weight_decay('weights', shape=W_shape,
                                                         stddev=1.0 / math.sqrt(float(nr_units)), wd=0.0)
-            biases = self.__variable_on_cpu('biases', kernel_size[3], tf.constant_initializer(0.0))
+            biases = self.__variable_on_cpu('biases', b_shape, tf.constant_initializer(0.0))
 
-            if convolution:
-                hidden = tf.nn.conv2d(data, weights, strides=strides, padding='SAME')
-            else:
-                hidden = tf.nn.conv2d_transpose(data, weights, output_shape, padding='SAME', strides=strides)
-
-            hidden = tf.add(hidden, biases, name=scope.name)
-
-            if activation:
-                hidden = tf.nn.relu(hidden, name=scope.name)
-
+            hidden = tf.nn.conv2d(x, weights, strides=[1, 1, 1, 1], padding=padding)
+            hidden = tf.add(hidden, biases)
+            hidden = tf.nn.relu(hidden)
             self.__activation_summary(hidden)
 
         return hidden
 
-    def __pool_layer(self, name, data):
+    def __deconv_layer(self, name, x, W_shape, b_shape, padding='SAME'):
+        with tf.variable_scope(name):
+            nr_units = functools.reduce(lambda x, y: x * y, W_shape)
+            weights = self.__variable_with_weight_decay('weights', shape=W_shape,
+                                                        stddev=1.0 / math.sqrt(float(nr_units)), wd=0.0)
+            biases = self.__variable_on_cpu('biases', b_shape, tf.constant_initializer(0.0))
 
-        with tf.variable_scope(name) as scope:
-            pool = tf.nn.max_pool(data, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME', name=scope.name)
-            self.__activation_summary(pool)
+            x_shape = tf.shape(x)
+            out_shape = tf.pack([x_shape[0], x_shape[1], x_shape[2], W_shape[2]])
+            hidden = tf.nn.conv2d_transpose(x, weights, out_shape, [1, 1, 1, 1], padding=padding)
+            hidden = tf.add(hidden, biases)
+            self.__activation_summary(hidden)
 
-        return pool
+        return hidden
+
+    def __pool_layer(self, x):
+
+        return tf.nn.max_pool_with_argmax(x, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
+
+    def __unravel_argmax(self, argmax, shape):
+
+        output_list = []
+        output_list.append(argmax // (shape[2] * shape[3]))
+        output_list.append(argmax % (shape[2] * shape[3]) // shape[3])
+
+        return tf.pack(output_list)
+
+    def __unpool_layer2x2(self, x, raveled_argmax, out_shape):
+
+        argmax = self.__unravel_argmax(raveled_argmax, tf.to_int64(out_shape))
+        output = tf.zeros([out_shape[1], out_shape[2], out_shape[3]])
+
+        height = tf.shape(output)[0]
+        width = tf.shape(output)[1]
+        channels = tf.shape(output)[2]
+
+        t1 = tf.to_int64(tf.range(channels))
+        t1 = tf.tile(t1, [((width + 1) // 2) * ((height + 1) // 2)])
+        t1 = tf.reshape(t1, [-1, channels])
+        t1 = tf.transpose(t1, perm=[1, 0])
+        t1 = tf.reshape(t1, [channels, (height + 1) // 2, (width + 1) // 2, 1])
+
+        t2 = tf.squeeze(argmax)
+        t2 = tf.pack((t2[0], t2[1]), axis=0)
+        t2 = tf.transpose(t2, perm=[3, 1, 2, 0])
+
+        t = tf.concat(3, [t2, t1])
+        indices = tf.reshape(t, [((height + 1) // 2) * ((width + 1) // 2) * channels, 3])
+
+        x1 = tf.squeeze(x)
+        x1 = tf.reshape(x1, [-1, channels])
+        x1 = tf.transpose(x1, perm=[1, 0])
+        values = tf.reshape(x1, [-1])
+
+        delta = tf.SparseTensor(indices, values, tf.to_int64(tf.shape(output)))
+
+        return tf.expand_dims(tf.sparse_tensor_to_dense(tf.sparse_reorder(delta)), 0)
+
+    def __unpool_layer2x2_batch(self, bottom, argmax):
+
+        bottom_shape = tf.shape(bottom)
+        top_shape = [bottom_shape[0], bottom_shape[1] * 2, bottom_shape[2] * 2, bottom_shape[3]]
+
+        batch_size = top_shape[0]
+        height = top_shape[1]
+        width = top_shape[2]
+        channels = top_shape[3]
+
+        argmax_shape = tf.to_int64([batch_size, height, width, channels])
+        argmax = self.__unravel_argmax(argmax, argmax_shape)
+
+        t1 = tf.to_int64(tf.range(channels))
+        t1 = tf.tile(t1, [batch_size * (width // 2) * (height // 2)])
+        t1 = tf.reshape(t1, [-1, channels])
+        t1 = tf.transpose(t1, perm=[1, 0])
+        t1 = tf.reshape(t1, [channels, batch_size, height // 2, width // 2, 1])
+        t1 = tf.transpose(t1, perm=[1, 0, 2, 3, 4])
+
+        t2 = tf.to_int64(tf.range(batch_size))
+        t2 = tf.tile(t2, [channels * (width // 2) * (height // 2)])
+        t2 = tf.reshape(t2, [-1, batch_size])
+        t2 = tf.transpose(t2, perm=[1, 0])
+        t2 = tf.reshape(t2, [batch_size, channels, height // 2, width // 2, 1])
+
+        t3 = tf.transpose(argmax, perm=[1, 4, 2, 3, 0])
+
+        t = tf.concat(4, [t2, t3, t1])
+        indices = tf.reshape(t, [(height // 2) * (width // 2) * channels * batch_size, 4])
+
+        x1 = tf.transpose(bottom, perm=[0, 3, 1, 2])
+        values = tf.reshape(x1, [-1])
+        return tf.scatter_nd(indices, values, tf.to_int64(top_shape))
 
     def __inference(self, images):
         """
@@ -508,40 +571,72 @@ class ImageRecognition(object):
         :return: Logits.
         """
 
-        conv1 = self.__convolution_layer("conv1", images, [5, 5, 1, 100], [1, 2, 2, 1])
-        pool1 = self.__pool_layer("pool1", conv1)
-        conv2 = self.__convolution_layer("conv2", pool1, [5, 5, 100, 100], [1, 2, 2, 1])
-        pool2 = self.__pool_layer("pool2", conv2)
-        conv3 = self.__convolution_layer("conv3", pool2, [3, 3, 100, 300], [1, 1, 1, 1])
-        conv4 = self.__convolution_layer("conv4", conv3, [3, 3, 300, 300], [1, 1, 1, 1])
-        drop1 = tf.nn.dropout(conv4, 0.9)
+        conv_1_1 = self.__conv_layer('conv_1_1', images, [3, 3, 1, 64], 64)
+        conv_1_2 = self.__conv_layer('conv_1_2', conv_1_1, [3, 3, 64, 64], 64)
 
-        score_classes = self.__convolution_layer("score_classes", drop1, [1, 1, 300, 2], [1, 1, 1, 1], activation=False)
-        denconv1 = self.__convolution_layer("denconv1", score_classes, [3, 3, 2, 2], [1, 2, 2, 1], activation=False,
-                                            convolution=False)
+        pool_1, pool_1_argmax = self.__pool_layer(conv_1_2)
 
+        conv_2_1 = self.__conv_layer('conv_2_1', pool_1, [3, 3, 64, 128], 128)
+        conv_2_2 = self.__conv_layer('conv_2_2', conv_2_1, [3, 3, 128, 128], 128)
 
-        return
+        pool_2, pool_2_argmax = self.__pool_layer(conv_2_2)
 
-    def __softmax_linear(self, data, shape, num_classes):
-        """
-        SoftMax Linear
-        :param data: the data
-        :param shape: the shape of the data
-        :param num_classes: the number of classes
-        :return: return softmax linear
-        """
+        conv_3_1 = self.__conv_layer('conv_3_1', pool_2, [3, 3, 128, 256], 256)
+        conv_3_2 = self.__conv_layer('conv_3_2', conv_3_1, [3, 3, 256, 256], 256)
+        conv_3_3 = self.__conv_layer('conv_3_3', conv_3_2, [3, 3, 256, 256], 256)
 
-        with tf.variable_scope('softmax_linear') as scope:
-            nr_units = functools.reduce(lambda x, y: x * y, [shape, num_classes])
+        pool_3, pool_3_argmax = self.__pool_layer(conv_3_3)
 
-            weights = self.__variable_with_weight_decay('weights', shape=[shape, num_classes],
-                                                        stddev=1.0 / math.sqrt(float(nr_units)), wd=0.0)
-            biases = self.__variable_on_cpu('biases', [num_classes], tf.constant_initializer(0.0))
-            softmax_linear = tf.add(tf.matmul(data, weights), biases, name=scope.name)
-            self.__activation_summary(softmax_linear)
+        conv_4_1 = self.__conv_layer('conv_4_1', pool_3, [3, 3, 256, 512], 512)
+        conv_4_2 = self.__conv_layer('conv_4_2', conv_4_1, [3, 3, 512, 512], 512)
+        conv_4_3 = self.__conv_layer('conv_4_3', conv_4_2, [3, 3, 512, 512], 512)
 
-        return softmax_linear
+        pool_4, pool_4_argmax = self.__pool_layer(conv_4_3)
+
+        conv_5_1 = self.__conv_layer('conv_5_1', pool_4, [3, 3, 512, 512], 512)
+        conv_5_2 = self.__conv_layer('conv_5_2', conv_5_1, [3, 3, 512, 512], 512)
+        conv_5_3 = self.__conv_layer('conv_5_3', conv_5_2, [3, 3, 512, 512], 512)
+
+        pool_5, pool_5_argmax = self.__pool_layer(conv_5_3)
+
+        fc_6 = self.__conv_layer('fc_6', pool_5, [7, 7, 512, 4096], 4096)
+        fc_7 = self.__conv_layer('fc_7', fc_6, [1, 1, 4096, 4096], 4096)
+
+        deconv_fc_6 = self.__deconv_layer('fc6_deconv', fc_7, [7, 7, 512, 4096], 512)
+
+        unpool_5 = self.__unpool_layer2x2_batch(deconv_fc_6, pool_5_argmax)
+
+        deconv_5_3 = self.__deconv_layer('deconv_5_3', unpool_5, [3, 3, 512, 512], 512)
+        deconv_5_2 = self.__deconv_layer('deconv_5_2', deconv_5_3, [3, 3, 512, 512], 512)
+        deconv_5_1 = self.__deconv_layer('deconv_5_1', deconv_5_2, [3, 3, 512, 512], 512)
+
+        unpool_4 = self.__unpool_layer2x2_batch(deconv_5_1, pool_4_argmax)
+
+        deconv_4_3 = self.__deconv_layer('deconv_4_3', unpool_4, [3, 3, 512, 512], 512)
+        deconv_4_2 = self.__deconv_layer('deconv_4_2', deconv_4_3, [3, 3, 512, 512], 512)
+        deconv_4_1 = self.__deconv_layer('deconv_4_1', deconv_4_2, [3, 3, 256, 512], 256)
+
+        unpool_3 = self.__unpool_layer2x2_batch(deconv_4_1, pool_3_argmax)
+
+        deconv_3_3 = self.__deconv_layer('deconv_3_3', unpool_3, [3, 3, 256, 256], 256)
+        deconv_3_2 = self.__deconv_layer('deconv_3_2', deconv_3_3, [3, 3, 256, 256], 256)
+        deconv_3_1 = self.__deconv_layer('deconv_3_1', deconv_3_2, [3, 3, 128, 256], 128)
+
+        unpool_2 = self.__unpool_layer2x2_batch(deconv_3_1, pool_2_argmax)
+
+        deconv_2_2 = self.__deconv_layer('deconv_2_2', unpool_2, [3, 3, 128, 128], 128)
+        deconv_2_1 = self.__deconv_layer('deconv_2_1', deconv_2_2, [3, 3, 64, 128], 64)
+
+        unpool_1 = self.__unpool_layer2x2_batch(deconv_2_1, pool_1_argmax)
+
+        deconv_1_2 = self.__deconv_layer('deconv_1_2', unpool_1, [3, 3, 64, 64], 64)
+        deconv_1_1 = self.__deconv_layer('deconv_1_1', deconv_1_2, [3, 3, 32, 64], 32)
+
+        score_1 = self.__deconv_layer('score_1', deconv_1_1, [1, 1, 2, 32], 2)
+
+        logits = tf.reshape(score_1, (-1, 2))
+
+        return logits
 
     def __loss(self, logits, labels):
         """
