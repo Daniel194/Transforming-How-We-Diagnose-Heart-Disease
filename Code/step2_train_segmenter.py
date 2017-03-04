@@ -648,10 +648,10 @@ class ImageRecognition(object):
         """
 
         # Calculate the average cross entropy loss across the batch.
-        labels = tf.cast(labels, tf.int64)
+        labels = tf.cast(tf.reshape(labels, [-1]), tf.int64)
         cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=labels, logits=logits,
-                                                                       name='cross_entropy_per_example')
-        cross_entropy_mean = tf.reduce_mean(cross_entropy, name='cross_entropy')
+                                                                       name='cross_entropy')
+        cross_entropy_mean = tf.reduce_mean(cross_entropy, name='cross_entropy_mean')
         tf.add_to_collection('losses', cross_entropy_mean)
 
         # The total loss is defined as the cross entropy loss plus all of the weight decay terms (L2 loss).
@@ -765,7 +765,7 @@ if __name__ == "__main__":
     FLAGS = tf.app.flags.FLAGS
 
     # Basic model parameters.
-    tf.app.flags.DEFINE_integer('batch_size', 128, """Number of images to process in a batch.""")
+    tf.app.flags.DEFINE_integer('batch_size', 2, """Number of images to process in a batch.""")
     tf.app.flags.DEFINE_string('data_dir', 'data', """Path to the CIFAR-10 data directory.""")
     tf.app.flags.DEFINE_boolean('use_fp16', False, """Train the model using fp16.""")
     tf.app.flags.DEFINE_string('train_dir', 'result/CNN5/train_result',
