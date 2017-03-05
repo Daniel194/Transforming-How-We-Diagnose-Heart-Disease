@@ -1,8 +1,14 @@
-import dicom, cv2, re
-import os, fnmatch
+import dicom
+import cv2
+import re
+import os
+import fnmatch
 import numpy as np
 import matplotlib.pyplot as plt
 import warnings
+import scipy
+import scipy.misc
+import sys
 
 warnings.filterwarnings('ignore')  # we ignore a RuntimeWarning produced from dividing by zero
 np.random.seed(1234)
@@ -43,13 +49,9 @@ def load_contour(contour, img_path):
     :return: return images and label
     """
 
-    filename = "IM-%s-%04d.dcm" % (SAX_SERIES[contour.case], contour.img_no)
+    filename = "IM-%s-%04d.png" % (SAX_SERIES[contour.case], contour.img_no)
     full_path = os.path.join(img_path, contour.case, filename)
-    f = dicom.read_file(full_path)
-
-    img = f.pixel_array.astype(np.int)
-    img = dicom_to_png(img)
-
+    img = cv2.imread(full_path, 0)
     ctrs = np.loadtxt(contour.ctr_path, delimiter=" ").astype(np.int)
     label = np.zeros_like(img, dtype="uint8")
     cv2.fillPoly(label, [ctrs], 1)
@@ -109,35 +111,26 @@ def export_all_contours(batch, img_path):
     return imgs, labels
 
 
-def dicom_to_png(input):
-    """
-    Function to convert from a DICOM image to png
-    :param input: DICOM format
-    :return: PNG format
+def convert_sax_images(ctrs, img_path):
     """
 
-    # Extracting data from the mri file
-    shape = input.pixel_array.shape
+    :param ctrs:
+    :param img_path:
+    :return:
+    """
 
-    image_2d = []
-    max_val = 0
-    for row in input.pixel_array:
-        pixels = []
-        for col in row:
-            pixels.append(col)
-            if col > max_val: max_val = col
-        image_2d.append(pixels)
+    for idx, ctr in enumerate(ctrs):
+        filename = "IM-%s-%04d.dcm" % (SAX_SERIES[ctr.case], ctr.img_no)
+        full_path = os.path.join(img_path, ctr.case, filename)
+        dicom_data = dicom.read_file(full_path)
 
-    # Rescaling grey scale between 0-255
-    image_2d_scaled = []
-    for row in image_2d:
-        row_scaled = []
-        for col in row:
-            col_scaled = int((float(col) / float(max_val)) * 255.0)
-            row_scaled.append(col_scaled)
-        image_2d_scaled.append(row_scaled)
+        img_path = full_path.replace(".dcm", ".png")
+        scipy.misc.imsave(img_path, dicom_data.pixel_array)
 
-    return image_2d_scaled
+        img = cv2.imread(img_path, 0)
+        clahe = cv2.createCLAHE(tileGridSize=(1, 1))
+        cl_img = clahe.apply(img)
+        cv2.imwrite(img_path, cl_img)
 
 
 if __name__ == "__main__":
@@ -171,6 +164,10 @@ if __name__ == "__main__":
     print("Mapping ground truth contours to images...")
 
     ctrs = get_all_contours(TRAIN_CONTOUR_PATH)
+
+    if len(sys.argv) > 1 and str(sys.argv[1]) == 'convert':
+        convert_sax_images(ctrs, TRAIN_IMG_PATH)
+
     val_ctrs = ctrs[0:int(SPLIT_RATIO * len(ctrs))]
     train_ctrs = ctrs[int(SPLIT_RATIO * len(ctrs)):]
 
