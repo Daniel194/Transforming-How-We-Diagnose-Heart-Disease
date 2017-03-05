@@ -111,12 +111,12 @@ def export_all_contours(batch, img_path):
     return imgs, labels
 
 
-def convert_sax_images(ctrs, img_path):
+def convert_dicom_to_png(ctrs, img_path):
     """
-
-    :param ctrs:
-    :param img_path:
-    :return:
+    Convert DICOM format to PNG format
+    :param ctrs: dicom paths
+    :param img_path: image folder path
+    :return: nothing
     """
 
     for idx, ctr in enumerate(ctrs):
@@ -124,13 +124,13 @@ def convert_sax_images(ctrs, img_path):
         full_path = os.path.join(img_path, ctr.case, filename)
         dicom_data = dicom.read_file(full_path)
 
-        img_path = full_path.replace(".dcm", ".png")
-        scipy.misc.imsave(img_path, dicom_data.pixel_array)
+        img_new_path = full_path.replace(".dcm", ".png")
+        scipy.misc.imsave(img_new_path, dicom_data.pixel_array)
 
-        img = cv2.imread(img_path, 0)
+        img = cv2.imread(img_new_path, 0)
         clahe = cv2.createCLAHE(tileGridSize=(1, 1))
         cl_img = clahe.apply(img)
-        cv2.imwrite(img_path, cl_img)
+        cv2.imwrite(img_new_path, cl_img)
 
 
 if __name__ == "__main__":
@@ -166,7 +166,7 @@ if __name__ == "__main__":
     ctrs = get_all_contours(TRAIN_CONTOUR_PATH)
 
     if len(sys.argv) > 1 and str(sys.argv[1]) == 'convert':
-        convert_sax_images(ctrs, TRAIN_IMG_PATH)
+        convert_dicom_to_png(ctrs, TRAIN_IMG_PATH)
 
     val_ctrs = ctrs[0:int(SPLIT_RATIO * len(ctrs))]
     train_ctrs = ctrs[int(SPLIT_RATIO * len(ctrs)):]
