@@ -46,7 +46,10 @@ def load_contour(contour, img_path):
     filename = "IM-%s-%04d.dcm" % (SAX_SERIES[contour.case], contour.img_no)
     full_path = os.path.join(img_path, contour.case, filename)
     f = dicom.read_file(full_path)
+
     img = f.pixel_array.astype(np.int)
+    img = dicom_to_png(img)
+
     ctrs = np.loadtxt(contour.ctr_path, delimiter=" ").astype(np.int)
     label = np.zeros_like(img, dtype="uint8")
     cv2.fillPoly(label, [ctrs], 1)
@@ -95,15 +98,46 @@ def export_all_contours(batch, img_path):
 
             if idx % 50 == 0:
                 print(ctr)
-                # plt.imshow(img)
-                # plt.show()
-                # plt.imshow(label)
-                # plt.show()
+                plt.imshow(img, cmap='gray')
+                plt.show()
+                plt.imshow(label)
+                plt.show()
 
         except IOError:
             continue
 
     return imgs, labels
+
+
+def dicom_to_png(input):
+    """
+    Function to convert from a DICOM image to png
+    :param input: DICOM format
+    :return: PNG format
+    """
+
+    # Extracting data from the mri file
+    shape = input.pixel_array.shape
+
+    image_2d = []
+    max_val = 0
+    for row in input.pixel_array:
+        pixels = []
+        for col in row:
+            pixels.append(col)
+            if col > max_val: max_val = col
+        image_2d.append(pixels)
+
+    # Rescaling grey scale between 0-255
+    image_2d_scaled = []
+    for row in image_2d:
+        row_scaled = []
+        for col in row:
+            col_scaled = int((float(col) / float(max_val)) * 255.0)
+            row_scaled.append(col_scaled)
+        image_2d_scaled.append(row_scaled)
+
+    return image_2d_scaled
 
 
 if __name__ == "__main__":
@@ -132,7 +166,7 @@ if __name__ == "__main__":
     TRAIN_IMG_PATH = os.path.join(SUNNYBROOK_ROOT_PATH, "challenge_training")
 
     BATCHSIZE = 100
-    NR_EPOCHS = 5
+    NR_EPOCHS = 1
 
     print("Mapping ground truth contours to images...")
 
