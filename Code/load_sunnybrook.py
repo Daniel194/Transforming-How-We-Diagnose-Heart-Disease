@@ -9,9 +9,12 @@ import warnings
 import scipy
 import scipy.misc
 import sys
+import utils
+import random
 
 warnings.filterwarnings('ignore')  # we ignore a RuntimeWarning produced from dividing by zero
-np.random.seed(1234)
+np.random.seed(1301)
+random.seed(1301)
 
 
 class Contour(object):
@@ -51,7 +54,7 @@ def load_contour(contour, img_path):
 
     filename = "IM-%s-%04d.png" % (SAX_SERIES[contour.case], contour.img_no)
     full_path = os.path.join(img_path, contour.case, filename)
-    img = cv2.imread(full_path, 0)
+    img = cv2.imread(full_path, cv2.IMREAD_GRAYSCALE).astype(float)
     ctrs = np.loadtxt(contour.ctr_path, delimiter=" ").astype(np.int)
     label = np.zeros_like(img, dtype="uint8")
     cv2.fillPoly(label, [ctrs], 1)
@@ -100,10 +103,10 @@ def export_all_contours(batch, img_path):
 
             if idx % 50 == 0:
                 print(ctr)
-                plt.imshow(img, cmap='gray')
-                plt.show()
-                plt.imshow(label)
-                plt.show()
+                # plt.imshow(img, cmap='gray')
+                # plt.show()
+                # plt.imshow(label)
+                # plt.show()
 
         except IOError:
             continue
@@ -127,10 +130,30 @@ def convert_dicom_to_png(ctrs, img_path):
         img_new_path = full_path.replace(".dcm", ".png")
         scipy.misc.imsave(img_new_path, dicom_data.pixel_array)
 
-        img = cv2.imread(img_new_path, 0)
+        img = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE).astype(float)
         clahe = cv2.createCLAHE(tileGridSize=(1, 1))
         cl_img = clahe.apply(img)
         cv2.imwrite(img_new_path, cl_img)
+
+
+def distorted_image(image, label):
+    """
+    Generate new image an label
+    :param image: the image
+    :param label: the label
+    :return: return new image and label
+    """
+
+    crop_x = random.randint(0, 16)
+    crop_y = random.randint(0, 16)
+
+    image = image[:, crop_y:crop_y + 224, crop_x: crop_x + 224]  # [224 x 224]
+    label = label[:, crop_y:crop_y + 224, crop_x: crop_x + 224]  # [224 x 224]
+
+    image1 = utils.elastic_transform(image, 150, 15)
+    label1 = label
+
+    return image, label, image1, label1
 
 
 if __name__ == "__main__":
@@ -182,9 +205,28 @@ if __name__ == "__main__":
             batch = train_ctrs[(BATCHSIZE * i):(BATCHSIZE * (i + 1))]
 
             imgs_train, labels_train = export_all_contours(batch, TRAIN_IMG_PATH)
-            print(len(labels_train))
 
     print("Processing {:d} images and labels...".format(len(val_ctrs)))
 
     imgs_val, labels_val = export_all_contours(val_ctrs, TRAIN_IMG_PATH)
-    print(len(labels_val))
+
+    # TEST
+    img = imgs_val[0]
+    lbl = labels_val[0]
+
+    plt.imshow(img, cmap='gray')
+    plt.show()
+    plt.imshow(lbl)
+    plt.show()
+
+    output = distorted_image(img, lbl)
+
+    plt.imshow(output[0], cmap='gray')
+    plt.show()
+    plt.imshow(output[1])
+    plt.show()
+
+    plt.imshow(output[2], cmap='gray')
+    plt.show()
+    plt.imshow(output[3])
+    plt.show()
