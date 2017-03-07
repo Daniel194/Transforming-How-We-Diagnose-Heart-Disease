@@ -1,10 +1,11 @@
 import csv
 
-import Code.settings as  settings
-import Code.utils as utils
 import numpy
 import pandas
 from scipy.stats import norm
+
+import utils
+import settings
 
 MODEL_NAME = settings.MODEL_NAME
 PREDICT_FILE_PATH = settings.BASE_DIR + "prediction_calibrated_" + MODEL_NAME + ".csv"

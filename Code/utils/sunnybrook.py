@@ -15,6 +15,30 @@ warnings.filterwarnings('ignore')  # we ignore a RuntimeWarning produced from di
 np.random.seed(1301)
 random.seed(1301)
 
+SUNNYBROOK_ROOT_PATH = "data/"
+TRAIN_CONTOUR_PATH = os.path.join(SUNNYBROOK_ROOT_PATH, "Sunnybrook Cardiac MR Database ContoursPart3",
+                                  "TrainingDataContours")
+TRAIN_IMG_PATH = os.path.join(SUNNYBROOK_ROOT_PATH, "challenge_training")
+SPLIT_RATIO = 0.1
+SAX_SERIES = {
+    # challenge training
+    "SC-HF-I-1": "0004",
+    "SC-HF-I-2": "0106",
+    "SC-HF-I-4": "0116",
+    "SC-HF-I-40": "0134",
+    "SC-HF-NI-3": "0379",
+    "SC-HF-NI-4": "0501",
+    "SC-HF-NI-34": "0446",
+    "SC-HF-NI-36": "0474",
+    "SC-HYP-1": "0550",
+    "SC-HYP-3": "0650",
+    "SC-HYP-38": "0734",
+    "SC-HYP-40": "0755",
+    "SC-N-2": "0898",
+    "SC-N-3": "0915",
+    "SC-N-40": "0944",
+}
+
 
 class Contour(object):
     def __init__(self, ctr_path):
@@ -61,7 +85,7 @@ def load_contour(contour, img_path):
     return img, label
 
 
-def get_all_contours(contour_path):
+def __get_all_contours(contour_path):
     """
     Function walks through a directory containing contour files,
     and extracts the necessary case study number and image number from a contour filename using the Contour class.
@@ -152,45 +176,28 @@ def distorted_image(image, label):
     return image, label
 
 
+def get_all_contours():
+    """
+    :return: return paths to all countours
+    """
+
+    ctrs = __get_all_contours(TRAIN_CONTOUR_PATH)
+    val_ctrs = ctrs[0:int(SPLIT_RATIO * len(ctrs))]
+    train_ctrs = ctrs[int(SPLIT_RATIO * len(ctrs)):]
+
+    return train_ctrs, val_ctrs
+
+
 if __name__ == "__main__":
-    SPLIT_RATIO = 0.1
-    SAX_SERIES = {
-        # challenge training
-        "SC-HF-I-1": "0004",
-        "SC-HF-I-2": "0106",
-        "SC-HF-I-4": "0116",
-        "SC-HF-I-40": "0134",
-        "SC-HF-NI-3": "0379",
-        "SC-HF-NI-4": "0501",
-        "SC-HF-NI-34": "0446",
-        "SC-HF-NI-36": "0474",
-        "SC-HYP-1": "0550",
-        "SC-HYP-3": "0650",
-        "SC-HYP-38": "0734",
-        "SC-HYP-40": "0755",
-        "SC-N-2": "0898",
-        "SC-N-3": "0915",
-        "SC-N-40": "0944",
-    }
-    SUNNYBROOK_ROOT_PATH = "data/"
-    TRAIN_CONTOUR_PATH = os.path.join(SUNNYBROOK_ROOT_PATH, "Sunnybrook Cardiac MR Database ContoursPart3",
-                                      "TrainingDataContours")
-    TRAIN_IMG_PATH = os.path.join(SUNNYBROOK_ROOT_PATH, "challenge_training")
 
     BATCHSIZE = 100
     NR_EPOCHS = 1
 
-    print("Mapping ground truth contours to images...")
-
-    ctrs = get_all_contours(TRAIN_CONTOUR_PATH)
-
     if len(sys.argv) > 1 and str(sys.argv[1]) == 'convert':
+        ctrs = __get_all_contours(TRAIN_CONTOUR_PATH)
         convert_dicom_to_png(ctrs, TRAIN_IMG_PATH)
 
-    val_ctrs = ctrs[0:int(SPLIT_RATIO * len(ctrs))]
-    train_ctrs = ctrs[int(SPLIT_RATIO * len(ctrs)):]
-
-    print("Processing {:d} images and labels...".format(len(train_ctrs)))
+    train_ctrs, val_ctrs = get_all_contours()
 
     for nr_epoch in range(NR_EPOCHS):
         print("\n Epoch number {:d} \n".format(nr_epoch))

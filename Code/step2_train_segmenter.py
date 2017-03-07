@@ -7,6 +7,7 @@ import math
 import os
 import sys
 import re
+import sunnybrook
 
 
 class ImageRecognition(object):
@@ -33,17 +34,18 @@ class ImageRecognition(object):
         # names of the summaries when visualizing a model.
         self.TOWER_NAME = 'tower'
 
-    def train(self):
+    def train(self, train_ctrs):
         """
-        Train CIFAR-10 for a number of steps.
-        :return: Nothing.
+        Train Segmenter for a number of steps.
+        :param train_ctrs: an array which contains all paths to train data
+        :return: Nothing
         """
 
         with tf.Graph().as_default():
             global_step = tf.contrib.framework.get_or_create_global_step()
 
-            # Get images and labels for CIFAR-10.
-            images, labels = self._distorted_inputs()
+            # Get images and labels for Segmenter
+            images, labels = self._distorted_inputs(train_ctrs)
 
             # Build a Graph that computes the logits predictions from the
             # inference model.
@@ -417,12 +419,14 @@ class ImageRecognition(object):
 
         return var
 
-    def _distorted_inputs(self):
+    def _distorted_inputs(self, train_ctrs):
         """
         Construct distorted input for CIFAR training using the Reader ops.
         :return: images: Images. 4D tensor of [batch_size, IMAGE_SIZE, IMAGE_SIZE, 3] size.
                  labels: Labels. 1D tensor of [batch_size] size.
         """
+
+        # TODO
 
         if not FLAGS.data_dir:
             raise ValueError('Please supply a data_dir')
@@ -732,8 +736,10 @@ class ImageRecognition(object):
 def main(argv=None):  # pylint: disable=unused-argument
     model = ImageRecognition()
 
+    train_ctrs, val_ctrs = sunnybrook.get_all_contours()
+
     if len(sys.argv) != 2:
-        print('The program must be run as : python3.5 CNN5.py [train|eval]')
+        print('The program must be run as : python3.5 step2_train_segmenter.py [train|eval]')
         sys.exit(2)
     else:
         if sys.argv[1] == 'train':
@@ -744,7 +750,7 @@ def main(argv=None):  # pylint: disable=unused-argument
 
             tf.gfile.MakeDirs(FLAGS.train_dir)
 
-            model.train()
+            model.train(train_ctrs)
 
         elif sys.argv[1] == 'eval':
             print('Run Eval .....')
@@ -765,19 +771,14 @@ if __name__ == "__main__":
     FLAGS = tf.app.flags.FLAGS
 
     # Basic model parameters.
-    tf.app.flags.DEFINE_integer('batch_size', 2, """Number of images to process in a batch.""")
-    tf.app.flags.DEFINE_string('data_dir', 'data', """Path to the CIFAR-10 data directory.""")
-    tf.app.flags.DEFINE_boolean('use_fp16', False, """Train the model using fp16.""")
-    tf.app.flags.DEFINE_string('train_dir', 'result/CNN5/train_result',
+    tf.app.flags.DEFINE_integer('batch_size', 50, """Number of images to process in a batch.""")
+    tf.app.flags.DEFINE_integer('nr_epochs', 200, """Number of epochs to run.""")
+
+    tf.app.flags.DEFINE_string('data_dir', 'data', """Path to the sunnybrook data directory.""")
+    tf.app.flags.DEFINE_string('train_dir', 'result/segmenter/train_result',
                                """Directory where to write event logs and checkpoint.""")
-    tf.app.flags.DEFINE_integer('max_steps', 100000, """Number of batches to run.""")
-    tf.app.flags.DEFINE_boolean('log_device_placement', False, """Whether to log device placement.""")
-    tf.app.flags.DEFINE_string('eval_dir', 'result/CNN5/eval_result', """Directory where to write event logs.""")
-    tf.app.flags.DEFINE_string('eval_data', 'test', """Either 'test' or 'train_eval'.""")
-    tf.app.flags.DEFINE_string('checkpoint_dir', 'result/CNN5/train_result',
+    tf.app.flags.DEFINE_string('eval_dir', 'result/segmenter/eval_result', """Directory where to write event logs.""")
+    tf.app.flags.DEFINE_string('checkpoint_dir', 'result/segmenter/train_result',
                                """Directory where to read model checkpoints.""")
-    tf.app.flags.DEFINE_integer('eval_interval_secs', 60 * 5, """How often to run the eval.""")
-    tf.app.flags.DEFINE_integer('num_examples', 10000, """Number of examples to run.""")
-    tf.app.flags.DEFINE_boolean('run_once', False, """Whether to run eval only once.""")
 
     tf.app.run()

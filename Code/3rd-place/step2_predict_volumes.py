@@ -4,12 +4,12 @@ import ntpath
 import os.path
 import shutil
 
-import Code.settings as settings
-import Code.utils as utils
 import cv2
 import numpy
 import pandas
-from Code.util_fileiter import FileIter
+from util_fileiter import FileIter
+import settings
+import utils
 
 MODEL_NAME = settings.MODEL_NAME
 CROP_SIZE = settings.CROP_SIZE

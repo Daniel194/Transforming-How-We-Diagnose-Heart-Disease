@@ -1,8 +1,9 @@
-import Code.settings as settings
 import pandas
 from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.metrics import mean_absolute_error
 from sklearn.metrics import mean_squared_error
+
+import settings
 
 MODEL_NAME = settings.MODEL_NAME
 SRC_PATH = settings.BASE_DIR + "prediction_raw_" + MODEL_NAME + ".csv"
