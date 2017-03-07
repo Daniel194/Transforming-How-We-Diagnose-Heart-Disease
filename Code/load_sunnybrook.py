@@ -9,7 +9,6 @@ import warnings
 import scipy
 import scipy.misc
 import sys
-import utils
 import random
 
 warnings.filterwarnings('ignore')  # we ignore a RuntimeWarning produced from dividing by zero
@@ -147,13 +146,10 @@ def distorted_image(image, label):
     crop_x = random.randint(0, 16)
     crop_y = random.randint(0, 16)
 
-    image = image[:, crop_y:crop_y + 224, crop_x: crop_x + 224]  # [224 x 224]
-    label = label[:, crop_y:crop_y + 224, crop_x: crop_x + 224]  # [224 x 224]
+    image = image[crop_y:crop_y + 224, crop_x: crop_x + 224]  # [224 x 224]
+    label = label[crop_y:crop_y + 224, crop_x: crop_x + 224]  # [224 x 224]
 
-    image1 = utils.elastic_transform(image, 150, 15)
-    label1 = label
-
-    return image, label, image1, label1
+    return image, label
 
 
 if __name__ == "__main__":
@@ -209,24 +205,3 @@ if __name__ == "__main__":
     print("Processing {:d} images and labels...".format(len(val_ctrs)))
 
     imgs_val, labels_val = export_all_contours(val_ctrs, TRAIN_IMG_PATH)
-
-    # TEST
-    img = imgs_val[0]
-    lbl = labels_val[0]
-
-    plt.imshow(img, cmap='gray')
-    plt.show()
-    plt.imshow(lbl)
-    plt.show()
-
-    output = distorted_image(img, lbl)
-
-    plt.imshow(output[0], cmap='gray')
-    plt.show()
-    plt.imshow(output[1])
-    plt.show()
-
-    plt.imshow(output[2], cmap='gray')
-    plt.show()
-    plt.imshow(output[3])
-    plt.show()
