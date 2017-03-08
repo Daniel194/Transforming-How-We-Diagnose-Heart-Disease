@@ -7,37 +7,35 @@ import math
 import os
 import sys
 import re
-import sunnybrook
+import utils.sunnybrook as sunnybrook
 
 
-class ImageRecognition(object):
-    def __init__(self):
-        # Process images of this size. Note that this differs from the original CIFAR
-        # image size of 32 x 32. If one alters this number, then the entire model
-        # architecture will change and any model would need to be retrained.
-        self.IMAGE_SIZE = 24
+class LVSegmentation(object):
+    def __init__(self, train, val):
+        """
+        Initialize the parameters for neural network
+        :param train: all trains contours path
+        :param val: all validates contours path
+        """
 
-        # Global constants describing the CIFAR-10 data set.
-        self.NUM_CLASSES = 10
-        self.NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = 50000
-        self.NUM_EXAMPLES_PER_EPOCH_FOR_EVAL = 10000
+        self.IMAGE_SIZE = 224
+        self.BATCH_SIZE = 50
+        self.NR_EPOCHS = 2000
+        self.TRAIN = train
+        self.VAL = val
 
         # Constants describing the training process.
         self.MOVING_AVERAGE_DECAY = 0.9999  # The decay to use for the moving average.
-        self.NUM_EPOCHS_PER_DECAY = 350.0  # Epochs after which learning rate decays.
+        self.NUM_EPOCHS_PER_DECAY = 200.0  # Epochs after which learning rate decays.
         self.LEARNING_RATE_DECAY_FACTOR = 0.1  # Learning rate decay factor.
         self.INITIAL_LEARNING_RATE = 0.1  # Initial learning rate.
         self.EPSILON = 1e-3  # Hyperparamter for Batch Normalization.
 
-        # If a model is trained with multiple GPUs, prefix all Op names with tower_name
-        # to differentiate the operations. Note that this prefix is removed from the
-        # names of the summaries when visualizing a model.
         self.TOWER_NAME = 'tower'
 
-    def train(self, train_ctrs):
+    def train(self):
         """
         Train Segmenter for a number of steps.
-        :param train_ctrs: an array which contains all paths to train data
         :return: Nothing
         """
 
@@ -45,7 +43,7 @@ class ImageRecognition(object):
             global_step = tf.contrib.framework.get_or_create_global_step()
 
             # Get images and labels for Segmenter
-            images, labels = self._distorted_inputs(train_ctrs)
+            images, labels = self._distorted_inputs(self.TRAIN)
 
             # Build a Graph that computes the logits predictions from the
             # inference model.
@@ -734,9 +732,8 @@ class ImageRecognition(object):
 
 
 def main(argv=None):  # pylint: disable=unused-argument
-    model = ImageRecognition()
-
     train_ctrs, val_ctrs = sunnybrook.get_all_contours()
+    model = LVSegmentation(train_ctrs, val_ctrs)
 
     if len(sys.argv) != 2:
         print('The program must be run as : python3.5 step2_train_segmenter.py [train|eval]')
@@ -750,7 +747,7 @@ def main(argv=None):  # pylint: disable=unused-argument
 
             tf.gfile.MakeDirs(FLAGS.train_dir)
 
-            model.train(train_ctrs)
+            model.train()
 
         elif sys.argv[1] == 'eval':
             print('Run Eval .....')
