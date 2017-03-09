@@ -5,7 +5,6 @@ import functools
 import random
 import time
 import math
-import os
 import sys
 import re
 import utils.sunnybrook as sunnybrook
@@ -33,7 +32,7 @@ class LVSegmentation(object):
         # Constants describing the training process.
         self.BATCH_SIZE = 50  # Batch size per iteration
         self.NR_EPOCHS = 2000  # Number of epoch
-        self.STEPS = 6000  # Number of steps
+        self.STEPS = 10000  # Number of steps
 
         self.MOVING_AVERAGE_DECAY = 0.9999  # The decay to use for the moving average.
         self.NUM_EPOCHS_PER_DECAY = 200.0  # Epochs after which learning rate decays.
@@ -98,17 +97,15 @@ class LVSegmentation(object):
 
     def evaluate(self):
         """
-        Eval CIFAR-10 for a number of steps.
+        Eval Segmentation
         :return: Nothing.
         """
 
         with tf.Graph().as_default() as g:
-            # Get images and labels for CIFAR-10.
-            eval_data = FLAGS.eval_data == 'test'
-            images, labels = self._inputs(eval_data=eval_data)
+            # Get images and labels for Segmentation
+            images, labels = self.__inputs(self.VAL)
 
-            # Build a Graph that computes the logits predictions from the
-            # inference model.
+            # Build a Graph that computes the logits predictions from the inference model.
             logits = self.__inference(images)
 
             # Calculate predictions.
@@ -124,17 +121,11 @@ class LVSegmentation(object):
 
             summary_writer = tf.summary.FileWriter(FLAGS.eval_dir, g)
 
-            while True:
-                self.__eval_once(saver, summary_writer, top_k_op, summary_op)
+            self.__eval(saver, summary_writer, top_k_op, summary_op)
 
-                if FLAGS.run_once:
-                    break
-
-                time.sleep(FLAGS.eval_interval_secs)
-
-    def __eval_once(self, saver, summary_writer, top_k_op, summary_op):
+    def __eval(self, saver, summary_writer, top_k_op, summary_op):
         """
-        Run Eval once.
+        Run Eval.
         :param saver:  Saver.
         :param summary_writer: Summary writer.
         :param top_k_op: Top K op.
@@ -148,9 +139,6 @@ class LVSegmentation(object):
             if ckpt and ckpt.model_checkpoint_path:
                 # Restores from checkpoint
                 saver.restore(sess, ckpt.model_checkpoint_path)
-                # Assuming model_checkpoint_path looks something like:
-                #   /my-favorite-path/cifar10_train/model.ckpt-0,
-                # extract global_step from it.
                 global_step = ckpt.model_checkpoint_path.split('/')[-1].split('-')[-1]
             else:
                 print('No checkpoint file found')
@@ -158,9 +146,9 @@ class LVSegmentation(object):
 
             # Start the queue runners.
             coord = tf.train.Coordinator()
+            threads = []
 
             try:
-                threads = []
                 for qr in tf.get_collection(tf.GraphKeys.QUEUE_RUNNERS):
                     threads.extend(qr.create_threads(sess, coord=coord, daemon=True, start=True))
 
@@ -188,55 +176,31 @@ class LVSegmentation(object):
             coord.request_stop()
             coord.join(threads, stop_grace_period_secs=10)
 
-    def __inputs(self, eval_data, data_dir, batch_size):
+    def __inputs(self, val_ctrs):
         """
-        Construct input for CIFAR evaluation using the Reader ops.
-        :param eval_data: bool, indicating if one should use the train or eval data set.
-        :param data_dir: Path to the CIFAR-10 data directory.
-        :param batch_size: Number of images per batch.
-        :return: images: Images. 4D tensor of [batch_size, IMAGE_SIZE, IMAGE_SIZE, 3] size.
-                 labels: Labels. 1D tensor of [batch_size] size.
+        Construct input for Sunnybrook evaluation using the Reader ops.
+        :param val_ctrs: an array of [batch_size] which contains paths to images and labels.
+        :return: images: Images. 3D tensor of [batch_size, IMAGE_SIZE, IMAGE_SIZE] size.
+                 labels: Labels. 3D tensor of [batch_size, IMAGE_SIZE, IMAGE_SIZE] size.
         """
 
-        if not eval_data:
-            filenames = [os.path.join(data_dir, 'data_batch_%d.bin' % i) for i in range(1, 6)]
-            num_examples_per_epoch = self.NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN
-        else:
-            filenames = [os.path.join(data_dir, 'test_batch.bin')]
-            num_examples_per_epoch = self.NUM_EXAMPLES_PER_EPOCH_FOR_EVAL
+        images, labels = sunnybrook.export_all_contours(val_ctrs)
 
-        for f in filenames:
-            if not tf.gfile.Exists(f):
-                raise ValueError('Failed to find file: ' + f)
-
-        # Create a queue that produces the filenames to read.
-        filename_queue = tf.train.string_input_producer(filenames)
-
-        # Read examples from files in the filename queue.
-        read_input = self.__read_cifar10(filename_queue)
-        reshaped_image = tf.cast(read_input.uint8image, tf.float32)
-
-        height = self.IMAGE_SIZE
-        width = self.IMAGE_SIZE
+        images = tf.cast(images, tf.float32)
+        labels = tf.cast(images, tf.int16)
 
         # Image processing for evaluation.
         # Crop the central [height, width] of the image.
-        resized_image = tf.image.resize_image_with_crop_or_pad(reshaped_image, width, height)
+        crop = (self.IMAGE_INIT_SIZE - self.IMAGE_SIZE) / 4
+        crop = int(crop)
+
+        images = images[:, crop:crop + self.IMAGE_SIZE, crop: crop + self.IMAGE_SIZE]
+        labels = labels[:, crop:crop + self.IMAGE_SIZE, crop: crop + self.IMAGE_SIZE]
 
         # Subtract off the mean and divide by the variance of the pixels.
-        float_image = tf.image.per_image_standardization(resized_image)
+        images = tf.image.per_image_standardization(images)
 
-        # Set the shapes of tensors.
-        float_image.set_shape([height, width, 3])
-        read_input.label.set_shape([1])
-
-        # Ensure that the random shuffling has good mixing properties.
-        min_fraction_of_examples_in_queue = 0.4
-        min_queue_examples = int(num_examples_per_epoch * min_fraction_of_examples_in_queue)
-
-        # Generate a batch of images and labels by building up a queue of examples.
-        return self.__generate_image_and_label_batch(float_image, read_input.label, min_queue_examples, batch_size,
-                                                     shuffle=False)
+        return images, labels
 
     def __activation_summary(self, x):
         """
@@ -318,26 +282,6 @@ class LVSegmentation(object):
             images = tf.image.per_image_standardization(images)
 
             yield images, labels
-
-    def _inputs(self, eval_data):
-        """
-        Construct input for CIFAR evaluation using the Reader ops.
-        :param eval_data: bool, indicating if one should use the train or eval data set.
-        :return: images: Images. 4D tensor of [batch_size, IMAGE_SIZE, IMAGE_SIZE, 3] size.
-                 labels: Labels. 1D tensor of [batch_size] size.
-        """
-
-        if not FLAGS.data_dir:
-            raise ValueError('Please supply a data_dir')
-
-        data_dir = os.path.join(FLAGS.data_dir)
-        images, labels = self.__inputs(eval_data=eval_data, data_dir=data_dir, batch_size=FLAGS.batch_size)
-
-        if FLAGS.use_fp16:
-            images = tf.cast(images, tf.float16)
-            labels = tf.cast(labels, tf.float16)
-
-        return images, labels
 
     def __conv_layer(self, name, x, W_shape, b_shape, padding='SAME'):
         """
@@ -655,9 +599,6 @@ if __name__ == "__main__":
     FLAGS = tf.app.flags.FLAGS
 
     # Basic model parameters.
-    tf.app.flags.DEFINE_integer('batch_size', 50, """Number of images to process in a batch.""")
-    tf.app.flags.DEFINE_integer('nr_epochs', 200, """Number of epochs to run.""")
-
     tf.app.flags.DEFINE_string('data_dir', 'data', """Path to the sunnybrook data directory.""")
     tf.app.flags.DEFINE_string('train_dir', 'result/segmenter/train_result',
                                """Directory where to write event logs and checkpoint.""")
