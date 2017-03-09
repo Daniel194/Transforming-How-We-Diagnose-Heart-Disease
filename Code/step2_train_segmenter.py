@@ -26,12 +26,15 @@ class LVSegmentation(object):
         # Image constant variables
         self.IMAGE_INIT_SIZE = 252
         self.IMAGE_SIZE = 224
+        self.NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = len(train)
         self.TRAIN = train
         self.VAL = val
 
         # Constants describing the training process.
         self.BATCH_SIZE = 50  # Batch size per iteration
         self.NR_EPOCHS = 2000  # Number of epoch
+        self.STEPS = 6000  # Number of steps
+
         self.MOVING_AVERAGE_DECAY = 0.9999  # The decay to use for the moving average.
         self.NUM_EPOCHS_PER_DECAY = 200.0  # Epochs after which learning rate decays.
         self.LEARNING_RATE_DECAY_FACTOR = 0.1  # Learning rate decay factor.
@@ -80,18 +83,16 @@ class LVSegmentation(object):
                     loss_value = run_values.results
 
                     if self._step % 10 == 0:
-                        num_examples_per_step = FLAGS.batch_size
-                        examples_per_sec = num_examples_per_step / duration
                         sec_per_batch = float(duration)
 
-                        format_str = '%s: step %d, loss = %.2f (%.1f examples/sec; %.3f  sec/batch)'
-                        print(format_str % (datetime.now(), self._step, loss_value, examples_per_sec, sec_per_batch))
+                        format_str = '%s: step %d, loss = %.2f (%.3f  sec/batch)'
+                        print(format_str % (datetime.now(), self._step, loss_value, sec_per_batch))
 
             with tf.train.MonitoredTrainingSession(
                     checkpoint_dir=FLAGS.train_dir,
-                    hooks=[tf.train.StopAtStepHook(last_step=FLAGS.max_steps), tf.train.NanTensorHook(loss),
+                    hooks=[tf.train.StopAtStepHook(last_step=self.STEPS), tf.train.NanTensorHook(loss),
                            _LoggerHook()],
-                    config=tf.ConfigProto(log_device_placement=FLAGS.log_device_placement)) as mon_sess:
+                    config=tf.ConfigProto(log_device_placement=False)) as mon_sess:
                 while not mon_sess.should_stop():
                     mon_sess.run(train_op)
 
@@ -262,26 +263,22 @@ class LVSegmentation(object):
         """
 
         with tf.device('/cpu:0'):
-            dtype = tf.float16 if FLAGS.use_fp16 else tf.float32
-            var = tf.get_variable(name, shape, initializer=initializer, dtype=dtype)
+            var = tf.get_variable(name, shape, initializer=initializer, dtype=tf.float32)
 
         return var
 
     def __variable_with_weight_decay(self, name, shape, stddev, wd):
         """
         Helper to create an initialized Variable with weight decay.
-        Note that the Variable is initialized with a truncated normal distribution.
         A weight decay is added only if one is specified.
         :param name: name of the variable
         :param shape: list of ints
         :param stddev: standard deviation of a truncated Gaussian
-        :param wd: add L2Loss weight decay multiplied by this float. If None, weight
-                   decay is not added for this Variable.
+        :param wd: add L2Loss weight decay multiplied by this float. If None, weight decay is not added for this Variable.
         :return: Variable Tensor
         """
 
-        dtype = tf.float16 if FLAGS.use_fp16 else tf.float32
-        var = self.__variable_on_cpu(name, shape, tf.truncated_normal_initializer(stddev=stddev, dtype=dtype))
+        var = self.__variable_on_cpu(name, shape, tf.truncated_normal_initializer(stddev=stddev, dtype=tf.float32))
 
         if wd is not None:
             weight_decay = tf.multiply(tf.nn.l2_loss(var), wd, name='weight_loss')
@@ -343,6 +340,15 @@ class LVSegmentation(object):
         return images, labels
 
     def __conv_layer(self, name, x, W_shape, b_shape, padding='SAME'):
+        """
+        Convolutional Layer
+        :param name: the name of the layer
+        :param x: the data
+        :param W_shape: the shape of the weights
+        :param b_shape: the shape of the biases
+        :param padding: padding time
+        :return: return the next hidden layer
+        """
 
         with tf.variable_scope(name):
             nr_units = functools.reduce(lambda x, y: x * y, W_shape)
@@ -358,6 +364,16 @@ class LVSegmentation(object):
         return hidden
 
     def __deconv_layer(self, name, x, W_shape, b_shape, padding='SAME'):
+        """
+        Deconvolutional Layer
+        :param name: the name of the layer
+        :param x: the date
+        :param W_shape: the shape of the weights
+        :param b_shape:the shape of the biases
+        :param padding: the padding time
+        :return: the next hidden layer
+        """
+
         with tf.variable_scope(name):
             nr_units = functools.reduce(lambda x, y: x * y, W_shape)
             weights = self.__variable_with_weight_decay('weights', shape=W_shape,
@@ -373,10 +389,21 @@ class LVSegmentation(object):
         return hidden
 
     def __pool_layer(self, x):
+        """
+        Pool Layer
+        :param x: the data
+        :return: the data after max pool layer
+        """
 
         return tf.nn.max_pool_with_argmax(x, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
 
     def __unravel_argmax(self, argmax, shape):
+        """
+        Unravel the argmax
+        :param argmax: the argmax
+        :param shape: the shape
+        :return: argmax
+        """
 
         output_list = []
         output_list.append(argmax // (shape[2] * shape[3]))
@@ -384,38 +411,13 @@ class LVSegmentation(object):
 
         return tf.pack(output_list)
 
-    def __unpool_layer2x2(self, x, raveled_argmax, out_shape):
-
-        argmax = self.__unravel_argmax(raveled_argmax, tf.to_int64(out_shape))
-        output = tf.zeros([out_shape[1], out_shape[2], out_shape[3]])
-
-        height = tf.shape(output)[0]
-        width = tf.shape(output)[1]
-        channels = tf.shape(output)[2]
-
-        t1 = tf.to_int64(tf.range(channels))
-        t1 = tf.tile(t1, [((width + 1) // 2) * ((height + 1) // 2)])
-        t1 = tf.reshape(t1, [-1, channels])
-        t1 = tf.transpose(t1, perm=[1, 0])
-        t1 = tf.reshape(t1, [channels, (height + 1) // 2, (width + 1) // 2, 1])
-
-        t2 = tf.squeeze(argmax)
-        t2 = tf.pack((t2[0], t2[1]), axis=0)
-        t2 = tf.transpose(t2, perm=[3, 1, 2, 0])
-
-        t = tf.concat(3, [t2, t1])
-        indices = tf.reshape(t, [((height + 1) // 2) * ((width + 1) // 2) * channels, 3])
-
-        x1 = tf.squeeze(x)
-        x1 = tf.reshape(x1, [-1, channels])
-        x1 = tf.transpose(x1, perm=[1, 0])
-        values = tf.reshape(x1, [-1])
-
-        delta = tf.SparseTensor(indices, values, tf.to_int64(tf.shape(output)))
-
-        return tf.expand_dims(tf.sparse_tensor_to_dense(tf.sparse_reorder(delta)), 0)
-
-    def __unpool_layer2x2_batch(self, bottom, argmax):
+    def __unpool_layer2x2(self, bottom, argmax):
+        """
+        Unpool Layer
+        :param bottom: the data
+        :param argmax: the position of the argument max of the previous max pool layer
+        :return: the hidden layer
+        """
 
         bottom_shape = tf.shape(bottom)
         top_shape = [bottom_shape[0], bottom_shape[1] * 2, bottom_shape[2] * 2, bottom_shape[3]]
@@ -448,6 +450,7 @@ class LVSegmentation(object):
 
         x1 = tf.transpose(bottom, perm=[0, 3, 1, 2])
         values = tf.reshape(x1, [-1])
+
         return tf.scatter_nd(indices, values, tf.to_int64(top_shape))
 
     def __inference(self, images):
@@ -490,30 +493,30 @@ class LVSegmentation(object):
 
         deconv_fc_6 = self.__deconv_layer('fc6_deconv', fc_7, [7, 7, 512, 4096], 512)
 
-        unpool_5 = self.__unpool_layer2x2_batch(deconv_fc_6, pool_5_argmax)
+        unpool_5 = self.__unpool_layer2x2(deconv_fc_6, pool_5_argmax)
 
         deconv_5_3 = self.__deconv_layer('deconv_5_3', unpool_5, [3, 3, 512, 512], 512)
         deconv_5_2 = self.__deconv_layer('deconv_5_2', deconv_5_3, [3, 3, 512, 512], 512)
         deconv_5_1 = self.__deconv_layer('deconv_5_1', deconv_5_2, [3, 3, 512, 512], 512)
 
-        unpool_4 = self.__unpool_layer2x2_batch(deconv_5_1, pool_4_argmax)
+        unpool_4 = self.__unpool_layer2x2(deconv_5_1, pool_4_argmax)
 
         deconv_4_3 = self.__deconv_layer('deconv_4_3', unpool_4, [3, 3, 512, 512], 512)
         deconv_4_2 = self.__deconv_layer('deconv_4_2', deconv_4_3, [3, 3, 512, 512], 512)
         deconv_4_1 = self.__deconv_layer('deconv_4_1', deconv_4_2, [3, 3, 256, 512], 256)
 
-        unpool_3 = self.__unpool_layer2x2_batch(deconv_4_1, pool_3_argmax)
+        unpool_3 = self.__unpool_layer2x2(deconv_4_1, pool_3_argmax)
 
         deconv_3_3 = self.__deconv_layer('deconv_3_3', unpool_3, [3, 3, 256, 256], 256)
         deconv_3_2 = self.__deconv_layer('deconv_3_2', deconv_3_3, [3, 3, 256, 256], 256)
         deconv_3_1 = self.__deconv_layer('deconv_3_1', deconv_3_2, [3, 3, 128, 256], 128)
 
-        unpool_2 = self.__unpool_layer2x2_batch(deconv_3_1, pool_2_argmax)
+        unpool_2 = self.__unpool_layer2x2(deconv_3_1, pool_2_argmax)
 
         deconv_2_2 = self.__deconv_layer('deconv_2_2', unpool_2, [3, 3, 128, 128], 128)
         deconv_2_1 = self.__deconv_layer('deconv_2_1', deconv_2_2, [3, 3, 64, 128], 64)
 
-        unpool_1 = self.__unpool_layer2x2_batch(deconv_2_1, pool_1_argmax)
+        unpool_1 = self.__unpool_layer2x2(deconv_2_1, pool_1_argmax)
 
         deconv_1_2 = self.__deconv_layer('deconv_1_2', unpool_1, [3, 3, 64, 64], 64)
         deconv_1_1 = self.__deconv_layer('deconv_1_1', deconv_1_2, [3, 3, 32, 64], 32)
@@ -568,7 +571,7 @@ class LVSegmentation(object):
 
     def __train(self, total_loss, global_step):
         """
-        Train CIFAR-10 model.
+        Train Segmentation model.
         Create an optimizer and apply to all trainable variables. Add moving
         average for all trainable variables.
         :param total_loss: Total loss from loss().
