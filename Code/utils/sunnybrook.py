@@ -105,7 +105,7 @@ def __get_all_contours(contour_path):
     return extracted
 
 
-def export_all_contours(batch, img_path):
+def __export_all_contours(batch, img_path):
     """
     Function return an array with all images and labels for a specific batch.
     :param batch: an array with all path to contour file.
@@ -130,6 +130,30 @@ def export_all_contours(batch, img_path):
                 # plt.show()
                 # plt.imshow(label)
                 # plt.show()
+
+        except IOError:
+            continue
+
+    return imgs, labels
+
+
+def export_all_contours(batch):
+    """
+    Function return an array with all images and labels for a specific batch.
+    :param batch: an array with all path to contour file.
+    :return: return two arrays, one for images and one for labels
+    """
+
+    imgs, labels = [], []
+
+    if len(batch) == 0:
+        return
+
+    for idx, ctr in enumerate(batch):
+        try:
+            img, label = load_contour(ctr, TRAIN_IMG_PATH)
+            imgs.append(img)
+            labels.append(label)
 
         except IOError:
             continue
@@ -207,8 +231,8 @@ if __name__ == "__main__":
         for i in range(int(np.ceil(len(train_ctrs) / float(BATCHSIZE)))):
             batch = train_ctrs[(BATCHSIZE * i):(BATCHSIZE * (i + 1))]
 
-            imgs_train, labels_train = export_all_contours(batch, TRAIN_IMG_PATH)
+            imgs_train, labels_train = __export_all_contours(batch, TRAIN_IMG_PATH)
 
     print("Processing {:d} images and labels...".format(len(val_ctrs)))
 
-    imgs_val, labels_val = export_all_contours(val_ctrs, TRAIN_IMG_PATH)
+    imgs_val, labels_val = __export_all_contours(val_ctrs, TRAIN_IMG_PATH)
