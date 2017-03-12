@@ -19,7 +19,7 @@ class LVSegmentation(object):
         """
 
         # Initialize random
-        np.random.seed(time.time())
+        np.random.seed(int(time.time()))
         random.seed(time.time())
 
         # Image constant variables
@@ -264,9 +264,6 @@ class LVSegmentation(object):
             batch = train_ctrs[(self.BATCH_SIZE * i):(self.BATCH_SIZE * (i + 1))]
 
             images, labels = sunnybrook.export_all_contours(batch)
-
-            images = tf.cast(images, tf.float32)
-            labels = tf.cast(images, tf.int16)
 
             # Randomly crop a [height, width] section of the image.
             crop_max = (self.IMAGE_INIT_SIZE - self.IMAGE_SIZE) / 2
@@ -600,10 +597,10 @@ if __name__ == "__main__":
 
     # Basic model parameters.
     tf.app.flags.DEFINE_string('data_dir', 'data', """Path to the sunnybrook data directory.""")
-    tf.app.flags.DEFINE_string('train_dir', 'result/segmenter/train_result',
+    tf.app.flags.DEFINE_string('train_dir', '../../result/segmenter/train_result',
                                """Directory where to write event logs and checkpoint.""")
-    tf.app.flags.DEFINE_string('eval_dir', 'result/segmenter/eval_result', """Directory where to write event logs.""")
-    tf.app.flags.DEFINE_string('checkpoint_dir', 'result/segmenter/train_result',
+    tf.app.flags.DEFINE_string('eval_dir', '../../result/segmenter/eval_result', """Directory where to write event logs.""")
+    tf.app.flags.DEFINE_string('checkpoint_dir', '../../result/segmenter/train_result',
                                """Directory where to read model checkpoints.""")
 
     tf.app.run()

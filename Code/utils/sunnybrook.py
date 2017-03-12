@@ -15,7 +15,7 @@ warnings.filterwarnings('ignore')  # we ignore a RuntimeWarning produced from di
 np.random.seed(1301)
 random.seed(1301)
 
-SUNNYBROOK_ROOT_PATH = "data/"
+SUNNYBROOK_ROOT_PATH = "../../data/"
 TRAIN_CONTOUR_PATH = os.path.join(SUNNYBROOK_ROOT_PATH, "Sunnybrook Cardiac MR Database ContoursPart3",
                                   "TrainingDataContours")
 TRAIN_IMG_PATH = os.path.join(SUNNYBROOK_ROOT_PATH, "challenge_training")
@@ -158,7 +158,7 @@ def export_all_contours(batch):
         except IOError:
             continue
 
-    return imgs, labels
+    return np.array(imgs), np.array(labels)
 
 
 def convert_dicom_to_png(ctrs, img_path):
