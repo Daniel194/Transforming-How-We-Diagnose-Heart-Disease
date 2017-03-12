@@ -1,5 +1,11 @@
 \chapter{Re\c{t}ele neuronale convolu\c{t}ionale}
 
+Re\c{t}elele neuronale convolu\c{t}ionale  sunt foarte similare cu re\c{t}elele neuronale obi\c{s}nuite din capitolul anterior, ele sunt formate din neuroni care \^{i}nva\c{t}\u{a} \^{i}nt\u{a}riri \c{s}i bias-uri care s\u{a} \^{i}ndeplineasc\u{a} o anumit\u{a} sarcin\u{a}. Fiecare neuron prime\c{s}te date de intrare de la neuronii de pe nivelul inferiro lor, efectuaz\u{a} o opera\c{t}ie de multiplicare \^{i}ntre \^{i}nt\u{a}rir \c{s}i datele de intrare, adun\u{a} bias-ul la rezultatul ob\c{t}inut \^{i}n urma multiplic\u{a}rii iar dup\u{a} de cele mai multe ori aplic\u{a} o func\c{t}ie de activare, iar la final dup\u{a} ultimul nivel aplic\u{a}o func\c{t}ie de cost care s\u{a} determine c\^{a}t de aproape este re\c{t}eaua neuronal\u{a} de adevar \c{s}i dup\u{a} se aplic\u{a} propagarea \^{i}napoi pentru a actualiza \^{i}nt\u{a}ririle \c{s}i bias-ruile de pe fiecare nivel astfle \^{i}nc\^{a}t ca la urmatorul pas de \^{i}nv\u{a}\c{t}are a re\c{t}elei neuroanle aceasta s\u{a} ob\c{t}in\u{a} un rezultat mai mic de la func\c{t}ia de cost.
+
+La prima vedere re\c{t}elele neuronale convolu\c{t}ionale seamana foarte mult cu re\c{t}elele neuronale obi\c{s}nuite, un lucru adevarat, \^{i}ns\u{a} exista unele diferen\c{t}e \^{i}ntre ele. Rec\c{t}elele neuronale convolutionale pleac\u{a} de la prezum\c{t}ia c\u{a} datele de intrare de pe primul nivel sunt imagini, fa\c{t}\u{a} de re\c{t}elele neuronale obi\c{s}nuite unde datele de intrare de pe primul nivel sunt ni\c{s}te vectori, din aceast\u{a} cauz\u{a} re\c{t}elele neuronale convolu\c{t}ionale se pot folosii de unele propiet\u{a}\c{t}i ale imaginilor asfel \^{i}nc\^{a}t acestea s\u{a} fiu mai eficiente in sarcini ce implica imaginile \c{s}i mai u\c{s}or de antrenat deoarece au nevoie de mai pu\c{t}ini parametrii dec\^{a}t ar avea nevoie o re\c{t}ea nuronale obi\c{s}nuit\u{a} \^{i}n \^{i}ndeplinirea aceleia\c{s}i sarcini.
+
+\section{Arhitectura unei re\c{t}ele neuronale convolutionale}
+
 Re\c{t}elele neuronale convolutionale folosesc trei idei de baz\i{a} : local receptive fields, shared weights \c{s}i pooling.
 
 \par
