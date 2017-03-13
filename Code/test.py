@@ -3,12 +3,18 @@ import random
 import tensorflow as tf
 import time
 import numpy as np
-import cv2
+import utils.sunnybrook as sunnybrook
+
+from tensorflow.python.framework import ops
+from tensorflow.python.ops import gen_nn_ops
 
 
 class LVSegmentation(object):
-    def __init__(self, use_cpu=False, checkpoint_dir='../../result/segmenter/train_result'):
+    def __init__(self, data_paths, use_cpu=False, checkpoint_dir='../../result/segmenter/train_result/'):
+        random.seed(time.time())
+
         self.build(use_cpu=use_cpu)
+        self.data_paths = data_paths
 
         self.saver = tf.train.Saver(max_to_keep=5, keep_checkpoint_every_n_hours=1)
         config = tf.ConfigProto(allow_soft_placement=True)
@@ -34,37 +40,51 @@ class LVSegmentation(object):
         self.restore_session()
         return self.prediction.eval(session=self.session, feed_dict={image: [image]})[0]
 
-    def train(self, train_stage=1, training_steps=1000, restore_session=False, learning_rate=1e-6):
+    def train(self, training_steps=1000, restore_session=False, learning_rate=1e-6):
         if restore_session:
             step_start = self.restore_session()
         else:
             step_start = 0
 
-        if train_stage == 1:
-            trainset = open('data/stage_1_train_imgset/train.txt').readlines()
-        else:
-            trainset = open('data/stage_2_train_imgset/train.txt').readlines()
-
         for i in range(step_start, step_start + training_steps):
-            # pick random line from file
-            random_line = random.choice(trainset)
-            image_file = random_line.split(' ')[0]
-            ground_truth_file = random_line.split(' ')[1]
-            image = np.float32(cv2.imread('data' + image_file))
-            ground_truth = cv2.imread('data' + ground_truth_file[:-1], cv2.IMREAD_GRAYSCALE)
-            # norm to 21 classes [0-20] (see paper)
-            ground_truth = (ground_truth / 255) * 20
-            print('run train step: ' + str(i))
-            start = time.time()
-            self.train_step.run(session=self.session,
-                                feed_dict={self.x: [image], self.y: [ground_truth], self.rate: learning_rate})
+            # pick random data
+            data_path = random.sample(self.data_paths, 5)
+            images, labels = sunnybrook.export_all_contours(data_path)
 
-            if i % 10000 == 0:
-                print('step {} finished in {:.2f} s with loss of {:.6f}'.format(
-                    i, time.time() - start,
-                    self.loss.eval(session=self.session, feed_dict={self.x: [image], self.y: [ground_truth]})))
+            crop_x = random.randint(0, 16)
+            crop_y = random.randint(0, 16)
+
+            images = images[:, crop_y:crop_y + 224, crop_x: crop_x + 224]
+            labels = labels[:, crop_y:crop_y + 224, crop_x: crop_x + 224]
+            images = np.float32(images)
+
+            images = images.reshape(5, 224, 224, 1)
+
+            if i % 10 == 0:
+                print('run train step: ' + str(i))
+
+            start = time.time()
+
+            self.train_step.run(session=self.session,
+                                feed_dict={self.x: images, self.y: labels, self.rate: learning_rate})
+
+            if i % 100 == 0 or i == training_steps - 1:
+                print('step {} finished in {:.2f} s with loss of {:.6f}'
+                      .format(i, time.time() - start,
+                              self.loss.eval(session=self.session, feed_dict={self.x: images, self.y: labels})))
+
                 self.saver.save(self.session, self.checkpoint_dir + 'model', global_step=i)
+
                 print('Model {} saved'.format(i))
+
+    @ops.RegisterGradient("MaxPoolWithArgmax")
+    def _MaxPoolGradWithArgmax(op, grad, unused_argmax_grad):
+        return gen_nn_ops._max_pool_grad_with_argmax(op.inputs[0],
+                                                     grad,
+                                                     op.outputs[1],
+                                                     op.get_attr("ksize"),
+                                                     op.get_attr("strides"),
+                                                     padding=op.get_attr("padding"))
 
     def build(self, use_cpu=False):
         '''
@@ -80,12 +100,13 @@ class LVSegmentation(object):
             device = '/gpu:0'
 
         with tf.device(device):
-            self.x = tf.placeholder(tf.float32, shape=(1, None, None, 3))
-            self.y = tf.placeholder(tf.int64, shape=(1, None, None))
+            self.x = tf.placeholder(tf.float32, shape=(None, 224, 224, 1))
+            self.y = tf.placeholder(tf.int64, shape=(None, 224, 224))
+
             expected = tf.expand_dims(self.y, -1)
             self.rate = tf.placeholder(tf.float32, shape=[])
 
-            conv_1_1 = self.conv_layer(self.x, [3, 3, 3, 64], 64, 'conv_1_1')
+            conv_1_1 = self.conv_layer(self.x, [3, 3, 1, 64], 64, 'conv_1_1')
             conv_1_2 = self.conv_layer(conv_1_1, [3, 3, 64, 64], 64, 'conv_1_2')
 
             pool_1, pool_1_argmax = self.pool_layer(conv_1_2)
@@ -118,30 +139,30 @@ class LVSegmentation(object):
 
             deconv_fc_6 = self.deconv_layer(fc_7, [7, 7, 512, 4096], 512, 'fc6_deconv')
 
-            unpool_5 = self.unpool_layer2x2(deconv_fc_6, pool_5_argmax, tf.shape(conv_5_3))
+            unpool_5 = self.unpool_layer2x2(deconv_fc_6, pool_5_argmax)
 
             deconv_5_3 = self.deconv_layer(unpool_5, [3, 3, 512, 512], 512, 'deconv_5_3')
             deconv_5_2 = self.deconv_layer(deconv_5_3, [3, 3, 512, 512], 512, 'deconv_5_2')
             deconv_5_1 = self.deconv_layer(deconv_5_2, [3, 3, 512, 512], 512, 'deconv_5_1')
 
-            unpool_4 = self.unpool_layer2x2(deconv_5_1, pool_4_argmax, tf.shape(conv_4_3))
+            unpool_4 = self.unpool_layer2x2(deconv_5_1, pool_4_argmax)
 
             deconv_4_3 = self.deconv_layer(unpool_4, [3, 3, 512, 512], 512, 'deconv_4_3')
             deconv_4_2 = self.deconv_layer(deconv_4_3, [3, 3, 512, 512], 512, 'deconv_4_2')
             deconv_4_1 = self.deconv_layer(deconv_4_2, [3, 3, 256, 512], 256, 'deconv_4_1')
 
-            unpool_3 = self.unpool_layer2x2(deconv_4_1, pool_3_argmax, tf.shape(conv_3_3))
+            unpool_3 = self.unpool_layer2x2(deconv_4_1, pool_3_argmax)
 
             deconv_3_3 = self.deconv_layer(unpool_3, [3, 3, 256, 256], 256, 'deconv_3_3')
             deconv_3_2 = self.deconv_layer(deconv_3_3, [3, 3, 256, 256], 256, 'deconv_3_2')
             deconv_3_1 = self.deconv_layer(deconv_3_2, [3, 3, 128, 256], 128, 'deconv_3_1')
 
-            unpool_2 = self.unpool_layer2x2(deconv_3_1, pool_2_argmax, tf.shape(conv_2_2))
+            unpool_2 = self.unpool_layer2x2(deconv_3_1, pool_2_argmax)
 
             deconv_2_2 = self.deconv_layer(unpool_2, [3, 3, 128, 128], 128, 'deconv_2_2')
             deconv_2_1 = self.deconv_layer(deconv_2_2, [3, 3, 64, 128], 64, 'deconv_2_1')
 
-            unpool_1 = self.unpool_layer2x2(deconv_2_1, pool_1_argmax, tf.shape(conv_1_2))
+            unpool_1 = self.unpool_layer2x2(deconv_2_1, pool_1_argmax)
 
             deconv_1_2 = self.deconv_layer(unpool_1, [3, 3, 64, 64], 64, 'deconv_1_2')
             deconv_1_1 = self.deconv_layer(deconv_1_2, [3, 3, 32, 64], 32, 'deconv_1_1')
@@ -191,34 +212,40 @@ class LVSegmentation(object):
         output_list.append(argmax % (shape[2] * shape[3]) // shape[3])
         return tf.stack(output_list)
 
-    def unpool_layer2x2(self, x, raveled_argmax, out_shape):
-        argmax = self.unravel_argmax(raveled_argmax, tf.to_int64(out_shape))
-        output = tf.zeros([out_shape[1], out_shape[2], out_shape[3]])
+    def unpool_layer2x2(self, bottom, argmax):
+        bottom_shape = tf.shape(bottom)
+        top_shape = [bottom_shape[0], bottom_shape[1] * 2, bottom_shape[2] * 2, bottom_shape[3]]
 
-        height = tf.shape(output)[0]
-        width = tf.shape(output)[1]
-        channels = tf.shape(output)[2]
+        batch_size = top_shape[0]
+        height = top_shape[1]
+        width = top_shape[2]
+        channels = top_shape[3]
+
+        argmax_shape = tf.to_int64([batch_size, height, width, channels])
+        argmax = self.unravel_argmax(argmax, argmax_shape)
 
         t1 = tf.to_int64(tf.range(channels))
-        t1 = tf.tile(t1, [((width + 1) // 2) * ((height + 1) // 2)])
+        t1 = tf.tile(t1, [batch_size * (width // 2) * (height // 2)])
         t1 = tf.reshape(t1, [-1, channels])
         t1 = tf.transpose(t1, perm=[1, 0])
-        t1 = tf.reshape(t1, [channels, (height + 1) // 2, (width + 1) // 2, 1])
+        t1 = tf.reshape(t1, [channels, batch_size, height // 2, width // 2, 1])
+        t1 = tf.transpose(t1, perm=[1, 0, 2, 3, 4])
 
-        t2 = tf.squeeze(argmax)
-        t2 = tf.stack((t2[0], t2[1]), axis=0)
-        t2 = tf.transpose(t2, perm=[3, 1, 2, 0])
+        t2 = tf.to_int64(tf.range(batch_size))
+        t2 = tf.tile(t2, [channels * (width // 2) * (height // 2)])
+        t2 = tf.reshape(t2, [-1, batch_size])
+        t2 = tf.transpose(t2, perm=[1, 0])
+        t2 = tf.reshape(t2, [batch_size, channels, height // 2, width // 2, 1])
 
-        t = tf.concat([t2, t1], 3)
-        indices = tf.reshape(t, [((height + 1) // 2) * ((width + 1) // 2) * channels, 3])
+        t3 = tf.transpose(argmax, perm=[1, 4, 2, 3, 0])
 
-        x1 = tf.squeeze(x)
-        x1 = tf.reshape(x1, [-1, channels])
-        x1 = tf.transpose(x1, perm=[1, 0])
+        t = tf.concat([t2, t3, t1], 4)
+        indices = tf.reshape(t, [(height // 2) * (width // 2) * channels * batch_size, 4])
+
+        x1 = tf.transpose(bottom, perm=[0, 3, 1, 2])
         values = tf.reshape(x1, [-1])
 
-        delta = tf.SparseTensor(indices, values, tf.to_int64(tf.shape(output)))
-        return tf.expand_dims(tf.sparse_tensor_to_dense(tf.sparse_reorder(delta)), 0)
+        return tf.scatter_nd(indices, values, tf.to_int64(top_shape))
 
     def unpool_layer2x2_batch(self, x, argmax):
         '''
@@ -266,5 +293,7 @@ class LVSegmentation(object):
 
 
 if __name__ == '__main__':
-    deconvNet = LVSegmentation()
+    train, val = sunnybrook.get_all_contours()
+
+    deconvNet = LVSegmentation(train)
     deconvNet.train()

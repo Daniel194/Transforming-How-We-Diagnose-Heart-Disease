@@ -213,26 +213,6 @@ def get_all_contours():
 
 
 if __name__ == "__main__":
-
-    BATCHSIZE = 100
-    NR_EPOCHS = 1
-
-    if len(sys.argv) > 1 and str(sys.argv[1]) == 'convert':
-        ctrs = __get_all_contours(TRAIN_CONTOUR_PATH)
-        convert_dicom_to_png(ctrs, TRAIN_IMG_PATH)
-
-    train_ctrs, val_ctrs = get_all_contours()
-
-    for nr_epoch in range(NR_EPOCHS):
-        print("\n Epoch number {:d} \n".format(nr_epoch))
-
-        np.random.shuffle(train_ctrs)
-
-        for i in range(int(np.ceil(len(train_ctrs) / float(BATCHSIZE)))):
-            batch = train_ctrs[(BATCHSIZE * i):(BATCHSIZE * (i + 1))]
-
-            imgs_train, labels_train = __export_all_contours(batch, TRAIN_IMG_PATH)
-
-    print("Processing {:d} images and labels...".format(len(val_ctrs)))
-
-    imgs_val, labels_val = __export_all_contours(val_ctrs, TRAIN_IMG_PATH)
+    # Convert Sunnybrook dataset from DICOM form to PNG format
+    ctrs = __get_all_contours(TRAIN_CONTOUR_PATH)
+    convert_dicom_to_png(ctrs, TRAIN_IMG_PATH)
