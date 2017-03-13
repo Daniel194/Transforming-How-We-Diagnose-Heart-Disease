@@ -6,16 +6,14 @@ import numpy as np
 import cv2
 
 
-class DeconvNet:
-    def __init__(self, use_cpu=False, checkpoint_dir='./checkpoints/'):
-        self.maybe_download_and_extract()
-
+class LVSegmentation(object):
+    def __init__(self, use_cpu=False, checkpoint_dir='../../result/segmenter/train_result'):
         self.build(use_cpu=use_cpu)
 
-        self.saver = tf.train.Saver(max_to_keep = 5, keep_checkpoint_every_n_hours =1)
-        config = tf.ConfigProto(allow_soft_placement = True)
-        self.session = tf.Session(config = config)
-        self.session.run(tf.initialize_all_variables())
+        self.saver = tf.train.Saver(max_to_keep=5, keep_checkpoint_every_n_hours=1)
+        config = tf.ConfigProto(allow_soft_placement=True)
+        self.session = tf.Session(config=config)
+        self.session.run(tf.global_variables_initializer())
         self.checkpoint_dir = checkpoint_dir
 
     def restore_session(self):
@@ -32,15 +30,13 @@ class DeconvNet:
 
         return global_step
 
-
     def predict(self, image):
         self.restore_session()
         return self.prediction.eval(session=self.session, feed_dict={image: [image]})[0]
 
-
     def train(self, train_stage=1, training_steps=1000, restore_session=False, learning_rate=1e-6):
         if restore_session:
-            step_start = restore_session()
+            step_start = self.restore_session()
         else:
             step_start = 0
 
@@ -49,7 +45,7 @@ class DeconvNet:
         else:
             trainset = open('data/stage_2_train_imgset/train.txt').readlines()
 
-        for i in range(step_start, step_start+training_steps):
+        for i in range(step_start, step_start + training_steps):
             # pick random line from file
             random_line = random.choice(trainset)
             image_file = random_line.split(' ')[0]
@@ -58,14 +54,16 @@ class DeconvNet:
             ground_truth = cv2.imread('data' + ground_truth_file[:-1], cv2.IMREAD_GRAYSCALE)
             # norm to 21 classes [0-20] (see paper)
             ground_truth = (ground_truth / 255) * 20
-            print('run train step: '+str(i))
+            print('run train step: ' + str(i))
             start = time.time()
-            self.train_step.run(session=self.session, feed_dict={self.x: [image], self.y: [ground_truth], self.rate: learning_rate})
+            self.train_step.run(session=self.session,
+                                feed_dict={self.x: [image], self.y: [ground_truth], self.rate: learning_rate})
 
             if i % 10000 == 0:
                 print('step {} finished in {:.2f} s with loss of {:.6f}'.format(
-                    i, time.time() - start, self.loss.eval(session=self.session, feed_dict={self.x: [image], self.y: [ground_truth]})))
-                self.saver.save(self.session, self.checkpoint_dir+'model', global_step=i)
+                    i, time.time() - start,
+                    self.loss.eval(session=self.session, feed_dict={self.x: [image], self.y: [ground_truth]})))
+                self.saver.save(self.session, self.checkpoint_dir + 'model', global_step=i)
                 print('Model {} saved'.format(i))
 
     def build(self, use_cpu=False):
@@ -151,7 +149,9 @@ class DeconvNet:
             score_1 = self.deconv_layer(deconv_1_1, [1, 1, 2, 32], 2, 'score_1')
 
             logits = tf.reshape(score_1, (-1, 2))
-            cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(logits, tf.reshape(expected, [-1]), name='x_entropy')
+            cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits,
+                                                                           labels=tf.reshape(expected, [-1]),
+                                                                           name='x_entropy')
             self.loss = tf.reduce_mean(cross_entropy, name='x_entropy_mean')
 
             self.train_step = tf.train.AdamOptimizer(self.rate).minimize(self.loss)
@@ -176,13 +176,12 @@ class DeconvNet:
         with tf.device('/gpu:0'):
             return tf.nn.max_pool_with_argmax(x, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
 
-
     def deconv_layer(self, x, W_shape, b_shape, name, padding='SAME'):
         W = self.weight_variable(W_shape)
         b = self.bias_variable([b_shape])
 
         x_shape = tf.shape(x)
-        out_shape = tf.pack([x_shape[0], x_shape[1], x_shape[2], W_shape[2]])
+        out_shape = tf.stack([x_shape[0], x_shape[1], x_shape[2], W_shape[2]])
 
         return tf.nn.conv2d_transpose(x, W, out_shape, [1, 1, 1, 1], padding=padding) + b
 
@@ -190,7 +189,7 @@ class DeconvNet:
         output_list = []
         output_list.append(argmax // (shape[2] * shape[3]))
         output_list.append(argmax % (shape[2] * shape[3]) // shape[3])
-        return tf.pack(output_list)
+        return tf.stack(output_list)
 
     def unpool_layer2x2(self, x, raveled_argmax, out_shape):
         argmax = self.unravel_argmax(raveled_argmax, tf.to_int64(out_shape))
@@ -207,10 +206,10 @@ class DeconvNet:
         t1 = tf.reshape(t1, [channels, (height + 1) // 2, (width + 1) // 2, 1])
 
         t2 = tf.squeeze(argmax)
-        t2 = tf.pack((t2[0], t2[1]), axis=0)
+        t2 = tf.stack((t2[0], t2[1]), axis=0)
         t2 = tf.transpose(t2, perm=[3, 1, 2, 0])
 
-        t = tf.concat(3, [t2, t1])
+        t = tf.concat([t2, t1], 3)
         indices = tf.reshape(t, [((height + 1) // 2) * ((width + 1) // 2) * channels, 3])
 
         x1 = tf.squeeze(x)
@@ -231,7 +230,7 @@ class DeconvNet:
             4D output tensor of shape [batch_size x 2*height x 2*width x channels]
         '''
         x_shape = tf.shape(x)
-        out_shape = [x_shape[0], x_shape[1]*2, x_shape[2]*2, x_shape[3]]
+        out_shape = [x_shape[0], x_shape[1] * 2, x_shape[2] * 2, x_shape[3]]
 
         batch_size = out_shape[0]
         height = out_shape[1]
@@ -242,22 +241,22 @@ class DeconvNet:
         argmax = self.unravel_argmax(argmax, argmax_shape)
 
         t1 = tf.to_int64(tf.range(channels))
-        t1 = tf.tile(t1, [batch_size*(width//2)*(height//2)])
+        t1 = tf.tile(t1, [batch_size * (width // 2) * (height // 2)])
         t1 = tf.reshape(t1, [-1, channels])
         t1 = tf.transpose(t1, perm=[1, 0])
-        t1 = tf.reshape(t1, [channels, batch_size, height//2, width//2, 1])
+        t1 = tf.reshape(t1, [channels, batch_size, height // 2, width // 2, 1])
         t1 = tf.transpose(t1, perm=[1, 0, 2, 3, 4])
 
         t2 = tf.to_int64(tf.range(batch_size))
-        t2 = tf.tile(t2, [channels*(width//2)*(height//2)])
+        t2 = tf.tile(t2, [channels * (width // 2) * (height // 2)])
         t2 = tf.reshape(t2, [-1, batch_size])
         t2 = tf.transpose(t2, perm=[1, 0])
-        t2 = tf.reshape(t2, [batch_size, channels, height//2, width//2, 1])
+        t2 = tf.reshape(t2, [batch_size, channels, height // 2, width // 2, 1])
 
         t3 = tf.transpose(argmax, perm=[1, 4, 2, 3, 0])
 
         t = tf.concat(4, [t2, t3, t1])
-        indices = tf.reshape(t, [(height//2)*(width//2)*channels*batch_size, 4])
+        indices = tf.reshape(t, [(height // 2) * (width // 2) * channels * batch_size, 4])
 
         x1 = tf.transpose(x, perm=[0, 3, 1, 2])
         values = tf.reshape(x1, [-1])
@@ -267,5 +266,5 @@ class DeconvNet:
 
 
 if __name__ == '__main__':
-    deconvNet = DeconvNet()
+    deconvNet = LVSegmentation()
     deconvNet.train()
