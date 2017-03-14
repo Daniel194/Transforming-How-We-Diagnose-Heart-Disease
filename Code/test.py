@@ -10,12 +10,10 @@ from tensorflow.python.ops import gen_nn_ops
 
 
 class LVSegmentation(object):
-    def __init__(self, data_paths, use_cpu=False, checkpoint_dir='../../result/segmenter/train_result/'):
+    def __init__(self, use_cpu=False, checkpoint_dir='../../result/segmenter/train_result/'):
         random.seed(time.time())
 
         self.build(use_cpu=use_cpu)
-        self.data_paths = data_paths
-
         self.saver = tf.train.Saver(max_to_keep=5, keep_checkpoint_every_n_hours=1)
         config = tf.ConfigProto(allow_soft_placement=True)
         self.session = tf.Session(config=config)
@@ -36,11 +34,14 @@ class LVSegmentation(object):
 
         return global_step
 
-    def predict(self, image):
+    def predict(self, data_path):
         self.restore_session()
-        return self.prediction.eval(session=self.session, feed_dict={image: [image]})[0]
 
-    def train(self, training_steps=1000, restore_session=False, learning_rate=1e-6):
+        image, _ = self.read_data(data_path)
+
+        return self.prediction.eval(session=self.session, feed_dict={image: image})[0]
+
+    def train(self, data_paths, training_steps=1000, restore_session=False, learning_rate=1e-6):
         if restore_session:
             step_start = self.restore_session()
         else:
@@ -48,17 +49,8 @@ class LVSegmentation(object):
 
         for i in range(step_start, step_start + training_steps):
             # pick random data
-            data_path = random.sample(self.data_paths, 5)
-            images, labels = sunnybrook.export_all_contours(data_path)
-
-            crop_x = random.randint(0, 16)
-            crop_y = random.randint(0, 16)
-
-            images = images[:, crop_y:crop_y + 224, crop_x: crop_x + 224]
-            labels = labels[:, crop_y:crop_y + 224, crop_x: crop_x + 224]
-            images = np.float32(images)
-
-            images = images.reshape(5, 224, 224, 1)
+            data_path = random.sample(data_paths, 5)
+            images, labels = self.read_data(data_path)
 
             if i % 10 == 0:
                 print('run train step: ' + str(i))
@@ -76,6 +68,20 @@ class LVSegmentation(object):
                 self.saver.save(self.session, self.checkpoint_dir + 'model', global_step=i)
 
                 print('Model {} saved'.format(i))
+
+    def read_data(self, paths):
+        images, labels = sunnybrook.export_all_contours(paths)
+
+        crop_x = random.randint(0, 16)
+        crop_y = random.randint(0, 16)
+
+        images = images[:, crop_y:crop_y + 224, crop_x: crop_x + 224]
+        labels = labels[:, crop_y:crop_y + 224, crop_x: crop_x + 224]
+        images = np.float32(images)
+
+        images = images.reshape(5, 224, 224, 1)
+
+        return images, labels
 
     @ops.RegisterGradient("MaxPoolWithArgmax")
     def _MaxPoolGradWithArgmax(op, grad, unused_argmax_grad):
@@ -295,5 +301,9 @@ class LVSegmentation(object):
 if __name__ == '__main__':
     train, val = sunnybrook.get_all_contours()
 
-    deconvNet = LVSegmentation(train)
-    deconvNet.train()
+    deconvNet = LVSegmentation()
+    deconvNet.train(train, restore_session=True)
+
+    # pred = deconvNet.predict(val[0:2])
+    #
+    # print(len(pred))
