@@ -43,7 +43,16 @@ class LVSegmentation(object):
 
         return self.prediction.eval(session=self.session, feed_dict={self.x: images})
 
-    def train(self, train_paths, eval_paths, training_steps=1000, restore_session=False, learning_rate=1e-6):
+    def evaluate(self, eval_paths):
+        self.restore_session()
+
+        images, labels = self.read_data(eval_paths)
+
+        accuracy = self.accuracy.eval(session=self.session, feed_dict={self.x: images, self.y: labels})
+
+        print('Model has accuracy : {:.6f} '.format(accuracy))
+
+    def train(self, train_paths, training_steps=1000, restore_session=False, learning_rate=1e-6):
         if restore_session:
             step_start = self.restore_session()
         else:
@@ -71,14 +80,6 @@ class LVSegmentation(object):
 
                 print('Model {} saved'.format(i))
 
-                if i % 1000 == 0:
-                    eval_images, eval_labels = self.read_data(eval_paths)
-
-                    accuracy = self.accuracy.eval(session=self.session,
-                                                  feed_dict={self.x: eval_images, self.y: eval_labels})
-
-                    print('Model {} has accuracy : {:.6f} '.format(i, accuracy))
-
     def read_data(self, paths):
         images, labels = sunnybrook.export_all_contours(paths)
 
@@ -89,7 +90,10 @@ class LVSegmentation(object):
         labels = labels[:, crop_y:crop_y + 224, crop_x: crop_x + 224]
         images = np.float32(images)
 
-        images = images.reshape(-1, 224, 224, 1)
+        images -= np.mean(images, dtype=np.float32)  # zero-centered
+        images /= np.std(images, dtype=np.float32)  # normalization
+
+        images = np.reshape(images, (-1, 224, 224, 1))
 
         return images, labels
 
@@ -103,12 +107,6 @@ class LVSegmentation(object):
                                                      padding=op.get_attr("padding"))
 
     def build(self, use_cpu=False):
-        '''
-        use_cpu allows you to test or train the network even with low GPU memory
-        anyway: currently there is no tensorflow CPU support for unpooling respectively
-        for the tf.nn.max_pool_with_argmax metod so that GPU support is needed for training
-        and prediction
-        '''
 
         if use_cpu:
             device = '/cpu:0'
@@ -122,9 +120,7 @@ class LVSegmentation(object):
             expected = tf.expand_dims(self.y, -1)
             self.rate = tf.placeholder(tf.float32, shape=[])
 
-            x_norm = tf.image.per_image_standardization(self.x)
-
-            conv_1_1 = self.conv_layer(x_norm, [3, 3, 1, 64], 64, 'conv_1_1')
+            conv_1_1 = self.conv_layer(self.x, [3, 3, 1, 64], 64, 'conv_1_1')
             conv_1_2 = self.conv_layer(conv_1_1, [3, 3, 64, 64], 64, 'conv_1_2')
 
             pool_1, pool_1_argmax = self.pool_layer(conv_1_2)
@@ -198,7 +194,7 @@ class LVSegmentation(object):
 
             self.prediction = tf.argmax(tf.reshape(tf.nn.softmax(logits), tf.shape(score_1)), dimension=3)
 
-            self.accuracy = tf.reduce_sum(tf.pow(self.prediction - expected, 2))
+            self.accuracy = tf.reduce_sum(tf.pow(self.prediction - expected[:, :, :, 0], 2))
 
     def weight_variable(self, shape, stddev):
         initial = tf.truncated_normal(shape, stddev=stddev)
@@ -292,30 +288,37 @@ if __name__ == '__main__':
     segmenter = LVSegmentation()
 
     if len(sys.argv) != 2:
-        print('The program must be run as : python3.5 step2_train_segmenter_v1.py [train|predict]')
+        print('The program must be run as : python3.5 step2_train_segmenter_v1.py [train|evaluate|predict]')
         sys.exit(2)
     else:
         if sys.argv[1] == 'train':
             print('Run Train .....')
 
-            segmenter.train(train, eval)
+            segmenter.train(train)
+
+        elif sys.argv[1] == 'evaluate':
+            print('Run Evaluate .....')
+
+            segmenter.evaluate(eval)
 
         elif sys.argv[1] == 'predict':
             print('Run Predict .....')
 
-            images, labels = segmenter.read_data(val)
-            prediction = segmenter.predict(images)
+            images, labels = sunnybrook.export_all_contours(val)
+
+            prepoces_images, _ = segmenter.read_data(val)
+            prediction = segmenter.predict(prepoces_images)
 
             for i in range(len(images)):
-                plt.imshow(images[i, :, :, 0], cmap='gray')
+                plt.imshow(images[i], cmap='gray')
                 plt.show()
 
-                plt.imshow(labels[i, :, :])
+                plt.imshow(labels[i])
                 plt.show()
 
-                plt.imshow(prediction[i, :, :])
+                plt.imshow(prediction[i])
                 plt.show()
 
         else:
-            print('The available options for this script are : train and eval')
+            print('The available options for this script are : train, evaluate and eval')
             sys.exit(2)
