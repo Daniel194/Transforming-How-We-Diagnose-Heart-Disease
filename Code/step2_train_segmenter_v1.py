@@ -38,23 +38,21 @@ class LVSegmentation(object):
 
         return global_step
 
-    def predict(self, data_path):
+    def predict(self, images):
         self.restore_session()
 
-        images, labels = self.read_data(data_path)
+        return self.prediction.eval(session=self.session, feed_dict={self.x: images})
 
-        return images, labels, self.prediction.eval(session=self.session, feed_dict={self.x: images})
-
-    def train(self, data_paths, training_steps=1000, restore_session=False, learning_rate=1e-6):
+    def train(self, train_paths, eval_paths, training_steps=1000, restore_session=False, learning_rate=1e-6):
         if restore_session:
             step_start = self.restore_session()
         else:
-            step_start = 0
+            step_start = 1
 
         for i in range(step_start, step_start + training_steps):
             # pick random data
-            data_path = random.sample(data_paths, 5)
-            images, labels = self.read_data(data_path)
+            train_path = random.sample(train_paths, 5)
+            images, labels = self.read_data(train_path)
 
             if i % 10 == 0:
                 print('run train step: ' + str(i))
@@ -65,13 +63,21 @@ class LVSegmentation(object):
                                 feed_dict={self.x: images, self.y: labels, self.rate: learning_rate})
 
             if i % 100 == 0:
-                print('step {} finished in {:.2f} s with loss of {:.6f}'
+                print('Step {} finished in {:.2f} s with Loss : {:.6f}'
                       .format(i, time.time() - start,
                               self.loss.eval(session=self.session, feed_dict={self.x: images, self.y: labels})))
 
                 self.saver.save(self.session, self.checkpoint_dir + 'model', global_step=i)
 
                 print('Model {} saved'.format(i))
+
+                if i % 1000 == 0:
+                    eval_images, eval_labels = self.read_data(eval_paths)
+
+                    accuracy = self.accuracy.eval(session=self.session,
+                                                  feed_dict={self.x: eval_images, self.y: eval_labels})
+
+                    print('Model {} has accuracy : {:.6f} '.format(i, accuracy))
 
     def read_data(self, paths):
         images, labels = sunnybrook.export_all_contours(paths)
@@ -185,19 +191,23 @@ class LVSegmentation(object):
             cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits,
                                                                            labels=tf.reshape(expected, [-1]),
                                                                            name='x_entropy')
+
             self.loss = tf.reduce_mean(cross_entropy, name='x_entropy_mean')
 
             self.train_step = tf.train.AdamOptimizer(self.rate).minimize(self.loss)
 
             self.prediction = tf.argmax(tf.reshape(tf.nn.softmax(logits), tf.shape(score_1)), dimension=3)
+
             self.accuracy = tf.reduce_sum(tf.pow(self.prediction - expected, 2))
 
     def weight_variable(self, shape, stddev):
         initial = tf.truncated_normal(shape, stddev=stddev)
+
         return tf.Variable(initial)
 
     def bias_variable(self, shape):
         initial = tf.constant(0.1, shape=shape)
+
         return tf.Variable(initial)
 
     def conv_layer(self, x, W_shape, b_shape, name, padding='SAME'):
@@ -238,6 +248,7 @@ class LVSegmentation(object):
         output_list = []
         output_list.append(argmax // (shape[2] * shape[3]))
         output_list.append(argmax % (shape[2] * shape[3]) // shape[3])
+
         return tf.stack(output_list)
 
     def unpool_layer2x2(self, bottom, argmax):
@@ -275,50 +286,6 @@ class LVSegmentation(object):
 
         return tf.scatter_nd(indices, values, tf.to_int64(top_shape))
 
-    def unpool_layer2x2_batch(self, x, argmax):
-        '''
-        Args:
-            x: 4D tensor of shape [batch_size x height x width x channels]
-            argmax: A Tensor of type Targmax. 4-D. The flattened indices of the max
-            values chosen for each output.
-        Return:
-            4D output tensor of shape [batch_size x 2*height x 2*width x channels]
-        '''
-        x_shape = tf.shape(x)
-        out_shape = [x_shape[0], x_shape[1] * 2, x_shape[2] * 2, x_shape[3]]
-
-        batch_size = out_shape[0]
-        height = out_shape[1]
-        width = out_shape[2]
-        channels = out_shape[3]
-
-        argmax_shape = tf.to_int64([batch_size, height, width, channels])
-        argmax = self.unravel_argmax(argmax, argmax_shape)
-
-        t1 = tf.to_int64(tf.range(channels))
-        t1 = tf.tile(t1, [batch_size * (width // 2) * (height // 2)])
-        t1 = tf.reshape(t1, [-1, channels])
-        t1 = tf.transpose(t1, perm=[1, 0])
-        t1 = tf.reshape(t1, [channels, batch_size, height // 2, width // 2, 1])
-        t1 = tf.transpose(t1, perm=[1, 0, 2, 3, 4])
-
-        t2 = tf.to_int64(tf.range(batch_size))
-        t2 = tf.tile(t2, [channels * (width // 2) * (height // 2)])
-        t2 = tf.reshape(t2, [-1, batch_size])
-        t2 = tf.transpose(t2, perm=[1, 0])
-        t2 = tf.reshape(t2, [batch_size, channels, height // 2, width // 2, 1])
-
-        t3 = tf.transpose(argmax, perm=[1, 4, 2, 3, 0])
-
-        t = tf.concat(4, [t2, t3, t1])
-        indices = tf.reshape(t, [(height // 2) * (width // 2) * channels * batch_size, 4])
-
-        x1 = tf.transpose(x, perm=[0, 3, 1, 2])
-        values = tf.reshape(x1, [-1])
-
-        delta = tf.SparseTensor(indices, values, tf.to_int64(out_shape))
-        return tf.sparse_tensor_to_dense(tf.sparse_reorder(delta))
-
 
 if __name__ == '__main__':
     train, eval, val = sunnybrook.get_all_contours()
@@ -331,12 +298,13 @@ if __name__ == '__main__':
         if sys.argv[1] == 'train':
             print('Run Train .....')
 
-            segmenter.train(train)
+            segmenter.train(train, eval)
 
         elif sys.argv[1] == 'predict':
             print('Run Predict .....')
 
-            images, labels, prediction = segmenter.predict(val)
+            images, labels = segmenter.read_data(val)
+            prediction = segmenter.predict(images)
 
             for i in range(len(images)):
                 plt.imshow(images[i, :, :, 0], cmap='gray')
