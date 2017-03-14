@@ -3,6 +3,7 @@ import random
 import tensorflow as tf
 import time
 import numpy as np
+import matplotlib.pyplot as plt
 import utils.sunnybrook as sunnybrook
 
 from tensorflow.python.framework import ops
@@ -37,9 +38,9 @@ class LVSegmentation(object):
     def predict(self, data_path):
         self.restore_session()
 
-        image, _ = self.read_data(data_path)
+        images, labels = self.read_data(data_path)
 
-        return self.prediction.eval(session=self.session, feed_dict={image: image})[0]
+        return images, labels, self.prediction.eval(session=self.session, feed_dict={self.x: images})
 
     def train(self, data_paths, training_steps=1000, restore_session=False, learning_rate=1e-6):
         if restore_session:
@@ -60,7 +61,7 @@ class LVSegmentation(object):
             self.train_step.run(session=self.session,
                                 feed_dict={self.x: images, self.y: labels, self.rate: learning_rate})
 
-            if i % 100 == 0 or i == training_steps - 1:
+            if i % 100 == 0:
                 print('step {} finished in {:.2f} s with loss of {:.6f}'
                       .format(i, time.time() - start,
                               self.loss.eval(session=self.session, feed_dict={self.x: images, self.y: labels})))
@@ -79,7 +80,7 @@ class LVSegmentation(object):
         labels = labels[:, crop_y:crop_y + 224, crop_x: crop_x + 224]
         images = np.float32(images)
 
-        images = images.reshape(5, 224, 224, 1)
+        images = images.reshape(-1, 224, 224, 1)
 
         return images, labels
 
@@ -299,11 +300,19 @@ class LVSegmentation(object):
 
 
 if __name__ == '__main__':
-    train, val = sunnybrook.get_all_contours()
+    train, eval, val = sunnybrook.get_all_contours()
 
     deconvNet = LVSegmentation()
-    deconvNet.train(train, restore_session=True)
+    deconvNet.train(train)
 
-    # pred = deconvNet.predict(val[0:2])
+    # images, labels, prediction = deconvNet.predict(val)
     #
-    # print(len(pred))
+    # for i in range(len(images)):
+    #     plt.imshow(images[i, :, :, 0], cmap='gray')
+    #     plt.show()
+    #
+    #     plt.imshow(labels[i, :, :])
+    #     plt.show()
+    #
+    #     plt.imshow(prediction[i, :, :])
+    #     plt.show()

@@ -8,18 +8,15 @@ import matplotlib.pyplot as plt
 import warnings
 import scipy
 import scipy.misc
-import sys
 import random
 
 warnings.filterwarnings('ignore')  # we ignore a RuntimeWarning produced from dividing by zero
-np.random.seed(1301)
 random.seed(1301)
 
 SUNNYBROOK_ROOT_PATH = "../../data/"
 TRAIN_CONTOUR_PATH = os.path.join(SUNNYBROOK_ROOT_PATH, "Sunnybrook Cardiac MR Database ContoursPart3",
                                   "TrainingDataContours")
 TRAIN_IMG_PATH = os.path.join(SUNNYBROOK_ROOT_PATH, "challenge_training")
-SPLIT_RATIO = 0.1
 SAX_SERIES = {
     # challenge training
     "SC-HF-I-1": "0004",
@@ -97,8 +94,6 @@ def __get_all_contours(contour_path):
                 for dirpath, dirnames, files in os.walk(contour_path)
                 for f in fnmatch.filter(files, 'IM-0001-*-icontour-manual.txt')]
 
-    print("Shuffle data")
-    np.random.shuffle(contours)
     print("Number of examples: {:d}".format(len(contours)))
     extracted = list(map(Contour, contours))
 
@@ -126,10 +121,10 @@ def __export_all_contours(batch, img_path):
 
             if idx % 50 == 0:
                 print(ctr)
-                # plt.imshow(img, cmap='gray')
-                # plt.show()
-                # plt.imshow(label)
-                # plt.show()
+                plt.imshow(img, cmap='gray')
+                plt.show()
+                plt.imshow(label)
+                plt.show()
 
         except IOError:
             continue
@@ -206,10 +201,11 @@ def get_all_contours():
     """
 
     ctrs = __get_all_contours(TRAIN_CONTOUR_PATH)
-    val_ctrs = ctrs[0:int(SPLIT_RATIO * len(ctrs))]
-    train_ctrs = ctrs[int(SPLIT_RATIO * len(ctrs)):]
+    val_ctrs = ctrs[0:5]
+    eval_ctrs = ctrs[5:10]
+    train_ctrs = ctrs[10:]
 
-    return train_ctrs, val_ctrs
+    return train_ctrs, eval_ctrs, val_ctrs
 
 
 if __name__ == "__main__":
