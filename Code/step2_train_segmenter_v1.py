@@ -54,7 +54,7 @@ class LVSegmentation(object):
 
     def train(self, train_paths, training_steps=1000, restore_session=False, learning_rate=1e-6):
         if restore_session:
-            step_start = self.restore_session()
+            step_start = self.restore_session() + 1
         else:
             step_start = 1
 
@@ -296,7 +296,7 @@ if __name__ == '__main__':
         if sys.argv[1] == 'train':
             print('Run Train .....')
 
-            segmenter.train(train)
+            segmenter.train(train, restore_session=True, learning_rate=1e-10)
 
         elif sys.argv[1] == 'evaluate':
             print('Run Evaluate .....')
@@ -320,5 +320,5 @@ if __name__ == '__main__':
                 plt.show()
 
         else:
-            print('The available options for this script are : train, evaluate and eval')
+            print('The available options for this script are : train, evaluate and predict')
             sys.exit(2)
