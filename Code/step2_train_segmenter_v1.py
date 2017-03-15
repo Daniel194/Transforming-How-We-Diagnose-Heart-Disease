@@ -46,7 +46,7 @@ class LVSegmentation(object):
     def evaluate(self, eval_paths):
         self.restore_session()
 
-        images, labels = self.read_data(eval_paths)
+        _, images, labels = self.read_data(eval_paths)
 
         accuracy = self.accuracy.eval(session=self.session, feed_dict={self.x: images, self.y: labels})
 
@@ -61,7 +61,7 @@ class LVSegmentation(object):
         for i in range(step_start, step_start + training_steps):
             # pick random data
             train_path = random.sample(train_paths, 5)
-            images, labels = self.read_data(train_path)
+            _, images, labels = self.read_data(train_path)
 
             if i % 10 == 0:
                 print('run train step: ' + str(i))
@@ -90,12 +90,14 @@ class LVSegmentation(object):
         labels = labels[:, crop_y:crop_y + 224, crop_x: crop_x + 224]
         images = np.float32(images)
 
+        before_normalization = images
+
         images -= np.mean(images, dtype=np.float32)  # zero-centered
         images /= np.std(images, dtype=np.float32)  # normalization
 
         images = np.reshape(images, (-1, 224, 224, 1))
 
-        return images, labels
+        return before_normalization, images, labels
 
     @ops.RegisterGradient("MaxPoolWithArgmax")
     def _MaxPoolGradWithArgmax(op, grad, unused_argmax_grad):
@@ -304,9 +306,7 @@ if __name__ == '__main__':
         elif sys.argv[1] == 'predict':
             print('Run Predict .....')
 
-            images, labels = sunnybrook.export_all_contours(val)
-
-            prepoces_images, _ = segmenter.read_data(val)
+            images, prepoces_images, labels = segmenter.read_data(val)
             prediction = segmenter.predict(prepoces_images)
 
             for i in range(len(images)):
