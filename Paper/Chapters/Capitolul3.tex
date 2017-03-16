@@ -4,7 +4,27 @@ Re\c{t}elele neuronale convolu\c{t}ionale  sunt foarte similare cu re\c{t}elele 
 
 La prima vedere re\c{t}elele neuronale convolu\c{t}ionale seamana foarte mult cu re\c{t}elele neuronale obi\c{s}nuite, un lucru adevarat, \^{i}ns\u{a} exista unele diferen\c{t}e \^{i}ntre ele. Rec\c{t}elele neuronale convolutionale pleac\u{a} de la prezum\c{t}ia c\u{a} datele de intrare de pe primul nivel sunt imagini, fa\c{t}\u{a} de re\c{t}elele neuronale obi\c{s}nuite unde datele de intrare de pe primul nivel sunt ni\c{s}te vectori, din aceast\u{a} cauz\u{a} re\c{t}elele neuronale convolu\c{t}ionale se pot folosii de unele propiet\u{a}\c{t}i ale imaginilor asfel \^{i}nc\^{a}t acestea s\u{a} fiu mai eficiente in sarcini ce implica imaginile \c{s}i mai u\c{s}or de antrenat deoarece au nevoie de mai pu\c{t}ini parametrii dec\^{a}t ar avea nevoie o re\c{t}ea nuronale obi\c{s}nuit\u{a} \^{i}n \^{i}ndeplinirea aceleia\c{s}i sarcini.
 
-\section{Arhitectura unei re\c{t}ele neuronale convolutionale}
+\section{Arhitectura unei re\c{t}ele neuronale convolu\c{t}ionale}
+
+Cum am v\u{a}zut in capitolul anterior, re\c{t}elele neuronale obi\c{s}nuite primesc ca date de intrare un  vector pe care \^{i}l trec prin mai multe nivele de neuroni, unde fiecare neuron de pe un nivel este conectat cu to\c{t}i neuronii de pe nivelul urm\u{a}tor \c{s}i cu to\c{t}i neuronii de pe nivelul inferior lui, \^{i}ns\u{a} nu este conectat cu neuronii de pe acela\c{s} nivel cu el. 
+
+\par
+
+Faptul c\u{a} re\c{t}elele neuronale convolu\c{t}ionale sunt concepute special pentru sarcini ce implic\u{a} imagini \c{s}i c\u{a} datele de intrare  au trei dimensiuni ( l\u{a}\c{t}ime, \^{i}n\u{a}l\c{t}ime \c{s}i ad\^{a}ncime ),  fa\c{t}\u{a} de re\c{t}elele neuronale obi\c{s}nuite unde datele de intrare au o singur\u{a} dimensiune, neuronii de pe nivele trebuiesc rearanja\c{t}i astfel \^{i}nc\^{a}t s\u{a} \^{i}ndeplineasc\u{a} c\^{a}t mai bine sarcina pe care o au de f\u{a}cut \c{s}i s\u{a} se folosesc\u{a} c\^{a}t mai bine de propriet\u{a}\c{t}ile pe care le au imaginile, din aceast\u{a} cauz\u{a} neuronii de pe un nivel la o re\c{t}ea neuronal\u{a} convolu\c{t}ional\u{a} sunt aranja\c{t}i pe trei dimensiuni ( l\u{a}\c{t}ime, \^{i}n\u{a}l\c{t}ime \c{s}i ad\^{a}ncime ), \^{i}n comapra\c{t}ie cu re\c{t}elele neuronale obi\c{s}nuite unde neuronii erau aranjati pe o singura dimensiune, cu acest timp de aranjament neuronii vor creea \^{i}nt\u{a}rir ce vor pune \^{i}n eviden\c{t}\u{a} anumite caracteristici ale unei imagine, caracteristici ce vor asigura o mai bun\u{a} performan\c{t}\u{a} a re\c{t}elei. Astfel c\u{a} un nivel dintr-o re\c{t}ea neuronal\u{a} convolu\c{t}ional\u{a} prime\c{s}te un volum de date cu trei dimensiuni \c{s}i produce un volum de date tot cu trei dimensiuni, volum de date care va fi dat mai departe la nivelul urm\u{a}tor lui.
+
+\includegraphics[width=450]{nn_cnn.png}
+
+Imaginea de mai sus arat\u{a} diferen\c{t}a \^{i}ntre modul de aranjare a neuronilor pe o re\c{t}ea neuronal\u{a} obi\c{s}nuit\u{a} \c{s}i o re\c{t}ea neuronal\u{a} convolu\c{t}ional\u{a}.
+
+\^{I}n re\c{t}elele neuronale convolu\c{t}ionale exit\u{a} trei tipuri de nivele, fa\c{t}\u{a} de re\c{t}elele neuronale obi\c{s}nuite unde exist\u{a} doar un singur tip, aceste nivele dintr-o re\c{t}ea neuronal\u{a} se numesc: nivelul convolu\c{t}ional, nivelul de pool \c{s}i nivelul conectat complet.
+
+\subsection{Nivelul convolu\c{t}ional}
+
+Nivelul convolu\c{t}ional este cel mai important nivel din cele trei \c{s}i cel care influen\c{t}eaz\u{a} cel mai mult deciziile re\c{t}elei neuronale. Acest nivel ca \c{s}i nivelele din re\c{t}elele neuronale are doi paramterii, \^{i}nt\u{a}ririle \c{s}i bias-urile, ins\u{a} \^{i}nt\u{a}ririle sunt organizate pe trei dimensiuni cum am discutat mai sus, astfle \^{i}nc\^{a}t acestea s\u{a} devina ni\c{s}te filtere care \^{i}n urma aplic\u{a}rii lor asupra datelor de intrare s\u{a} scoat\u{a} \^{i}n eviden\c{t}u unele detalii descriminatorii care s\u{a} ajute la indeplinirea sarcinii, \^{i}ns\u{a} bias-urile sunt la fel ca la neuronii din re\c{t}elele neuronale obi\c{s}nuite. 
+
+\par
+
+De cele mai multe ori \^{i}nt\u{a}ririle sunt mici \^{i}n \^{i}n\u{a}l\c{t}ime \c{s}i l\u{a}\c{t}ime dar sunt foarte mari in ad\^{a}ncime. [3x3x512] este un exemplu de dimensiune a unei \^{i}nt\u{a}riri, unde \^{i}n\u{a}\c{t}imea \c{s}i l\u{a}\c{t}imea au dimensiune 3 iar ad\^{a}ncimea are dimensiunea 512, motivul pentru care ad\^{a}ncimea este a\c{s}a de mare iar \^{i}n\u{a}l\c{t}imea \c{s}i l\u{a}\c{t}imea au dimensiuni a\c{s}a de mici  este pentru c\u{a} \^{i}n acest mod se pot construii mai multe filtre pe o por\c{t}iune mai mic\u{a} din datele de intrare \c{s}i, cum vom vedea in capitolele urm\u{a}toare, acest lucru faciliteaz\u{a} \^{i}n mod pozitiv acurate\c{t}ea re\c{t}elei neuronale.
 
 Re\c{t}elele neuronale convolutionale folosesc trei idei de baz\i{a} : local receptive fields, shared weights \c{s}i pooling.
 
