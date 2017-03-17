@@ -12,7 +12,11 @@ Cum am v\u{a}zut in capitolul anterior, re\c{t}elele neuronale obi\c{s}nuite pri
 
 Faptul c\u{a} re\c{t}elele neuronale convolu\c{t}ionale sunt concepute special pentru sarcini ce implic\u{a} imagini \c{s}i c\u{a} datele de intrare  au trei dimensiuni ( l\u{a}\c{t}ime, \^{i}n\u{a}l\c{t}ime \c{s}i ad\^{a}ncime ),  fa\c{t}\u{a} de re\c{t}elele neuronale obi\c{s}nuite unde datele de intrare au o singur\u{a} dimensiune, neuronii de pe nivele trebuiesc rearanja\c{t}i astfel \^{i}nc\^{a}t s\u{a} \^{i}ndeplineasc\u{a} c\^{a}t mai bine sarcina pe care o au de f\u{a}cut \c{s}i s\u{a} se folosesc\u{a} c\^{a}t mai bine de propriet\u{a}\c{t}ile pe care le au imaginile, din aceast\u{a} cauz\u{a} neuronii de pe un nivel la o re\c{t}ea neuronal\u{a} convolu\c{t}ional\u{a} sunt aranja\c{t}i pe trei dimensiuni ( l\u{a}\c{t}ime, \^{i}n\u{a}l\c{t}ime \c{s}i ad\^{a}ncime ), \^{i}n comapra\c{t}ie cu re\c{t}elele neuronale obi\c{s}nuite unde neuronii erau aranjati pe o singura dimensiune, cu acest timp de aranjament neuronii vor creea \^{i}nt\u{a}rir ce vor pune \^{i}n eviden\c{t}\u{a} anumite caracteristici ale unei imagine, caracteristici ce vor asigura o mai bun\u{a} performan\c{t}\u{a} a re\c{t}elei. Astfel c\u{a} un nivel dintr-o re\c{t}ea neuronal\u{a} convolu\c{t}ional\u{a} prime\c{s}te un volum de date cu trei dimensiuni \c{s}i produce un volum de date tot cu trei dimensiuni, volum de date care va fi dat mai departe la nivelul urm\u{a}tor lui.
 
+\par 
+
+\begin{center}
 \includegraphics[width=450]{nn_cnn.png}
+\end{center}
 
 Imaginea de mai sus arat\u{a} diferen\c{t}a \^{i}ntre modul de aranjare a neuronilor pe o re\c{t}ea neuronal\u{a} obi\c{s}nuit\u{a} \c{s}i o re\c{t}ea neuronal\u{a} convolu\c{t}ional\u{a}.
 
@@ -20,25 +24,25 @@ Imaginea de mai sus arat\u{a} diferen\c{t}a \^{i}ntre modul de aranjare a neuron
 
 \subsection{Nivelul convolu\c{t}ional}
 
-Nivelul convolu\c{t}ional este cel mai important nivel din cele trei \c{s}i cel care influen\c{t}eaz\u{a} cel mai mult deciziile re\c{t}elei neuronale. Acest nivel ca \c{s}i nivelele din re\c{t}elele neuronale are doi paramterii, \^{i}nt\u{a}ririle \c{s}i bias-urile, ins\u{a} \^{i}nt\u{a}ririle sunt organizate pe trei dimensiuni cum am discutat mai sus, astfle \^{i}nc\^{a}t acestea s\u{a} devina ni\c{s}te filtere care \^{i}n urma aplic\u{a}rii lor asupra datelor de intrare s\u{a} scoat\u{a} \^{i}n eviden\c{t}u unele detalii descriminatorii care s\u{a} ajute la indeplinirea sarcinii, \^{i}ns\u{a} bias-urile sunt la fel ca la neuronii din re\c{t}elele neuronale obi\c{s}nuite. 
+Nivelul convolu\c{t}ional este cel mai important nivel din cele trei \c{s}i cel care influen\c{t}eaz\u{a} cel mai mult deciziile re\c{t}elei neuronale. Acest nivel ca \c{s}i nivelele din re\c{t}elele neuronale are doi paramterii, \^{i}nt\u{a}ririle \c{s}i bias-urile, ins\u{a} \^{i}nt\u{a}ririle sunt organizate pe trei dimensiuni cum am discutat mai sus, astfle \^{i}nc\^{a}t acestea s\u{a} devina ni\c{s}te filtre care \^{i}n urma aplic\u{a}rii lor asupra datelor de intrare s\u{a} scoat\u{a} \^{i}n eviden\c{t}u unele detalii descriminatorii care s\u{a} ajute la indeplinirea sarcinii, \^{i}ns\u{a} bias-urile sunt la fel ca la neuronii din re\c{t}elele neuronale obi\c{s}nuite. 
 
 \par
 
 De cele mai multe ori \^{i}nt\u{a}ririle sunt mici \^{i}n \^{i}n\u{a}l\c{t}ime \c{s}i l\u{a}\c{t}ime dar sunt foarte mari in ad\^{a}ncime. [3x3x512] este un exemplu de dimensiune a unei \^{i}nt\u{a}riri, unde \^{i}n\u{a}\c{t}imea \c{s}i l\u{a}\c{t}imea au dimensiune 3 iar ad\^{a}ncimea are dimensiunea 512, motivul pentru care ad\^{a}ncimea este a\c{s}a de mare iar \^{i}n\u{a}l\c{t}imea \c{s}i l\u{a}\c{t}imea au dimensiuni a\c{s}a de mici  este pentru c\u{a} \^{i}n acest mod se pot construii mai multe filtre pe o por\c{t}iune mai mic\u{a} din datele de intrare \c{s}i, cum vom vedea in capitolele urm\u{a}toare, acest lucru faciliteaz\u{a} \^{i}n mod pozitiv acurate\c{t}ea re\c{t}elei neuronale.
 
-Re\c{t}elele neuronale convolutionale folosesc trei idei de baz\i{a} : local receptive fields, shared weights \c{s}i pooling.
+\par
+
+Nivelul convolu\c{t}ional gliseaz\u{a} o fereastr\u{a} de dimensiunea \^{i}nt\u{a}ririlor de-a lungul \c{s}i de-a latul datelor de intrare pornind de la col\c{t}ul de sus stanga a datelor de intrare \c{s}i face o \^{i}nmul\c{t}ire \^{i}ntre  datele de intrare aflate \^{i}n fereastr\u{a} \c{s}i cu \^{i}nt\u{a}ririle si  dup\u{a} la rezultat este adunat bias-ul. Acest proces este repetat p\^{a}n\u{a} c\^{a}nd fereastra ajunge in col\c{t}ul de jos dreapta a datelor de intrare. \^{I}n umra acestui proces va rezulta un volum de date bidimensional, dar acest procest este repetat pentru fiecare \^{i}nt\u{a}rire asftel c\u{a} la final vom avea un volum de date tridimensional. Cum am mai spus \c{s}i mai sus \^{i}nt\u{a}ririle \^{i}ntr-o re\c{t}ea neuronal\u{a} convolu\c{t}ional\u{a} sunt ni\c{s}te filtre care scot \^{i}n eviden\c{t}\u{a} anumte aspecte ale datelor de intrare, cum ar fi marginea unui obiect aflat \^{i}n imagine, o anumit\u{a} structur\u{a} care este caractersitic\u{a} unei anumite categorii de obiecte sau un patern.
 
 \par
 
-Local receptive fields : in loc sa mai luam fiecare valoare a unui pixel separat \c{s}i s\u{a} o introducem intr-un neuron de pe un nivel intermediar ( hidden layer ) ca dat\u{a} de intrare putem s\u{a} grup\u{a}m pixelii in blocuri de pixeli \c{s}i s\u{a} \^{i}i trimitem grupa\c{t}i la un neuron de pe primul nivel intermediar ( hidden layer ).   Cum se observ\u{a} \c{s}i \^{i}n imaginea de mai jos, un grup de 5 x 5 pixeli este trimis grupat c\u{a}tre un singru neuron de pe primul nivel intermediar.
+Pentru a se \^{i}n\c{t}elege mai bine cum func\c{t}ioneaz\u{a} nivelul convolu\c{t}ional s\u{a} presupunem c\u{a} avem o imagine de dimesniune [28x28x3] iar o \^{i}nt\u{a}rire are dimensiunea [5x5x3], a se observa faptul c\u{a} at\^{a}t  \^{i}nt\u{a}rirea c\^{a}t \c{s}i imaginea au aceea\c{s}i ad\^{a}ncime, respectiv 3, tot timpul ad\^{a}ncimea \^{i}nt\u{a}ririlr trebuie s\u{a} fie identic\u{a} cu cea a datelor de intrare pentru c\u{a} \^{i}n caz contrar nu s-ar putea face \^{i}nmul\c{t}irea \^{i}ntre datele de intrare \c{s}i \^{i}nt\u{a}riri, \^{i}ns\u{a} \^{i}n\u{a}l\c{t}imea si l\u{a}\c{t}imea \^{i}nt\u{a}ririlor trebuie s\u{a} fiu neap\u{a}rat mai mici dec\^{a}t a datelor de intrare altfle nu s-ar putea face glisarea. Dimensiunea \^{i}nt\u{a}ririlor \^{i}n \^{i}n\u{a}l\c{t}ime \c{s}i l\u{a}\c{t}ime este setat\u{a} manual, fiind un parametru important de setat \^{i}ntr-o re\c{t}ea neuronal\u{a} convolu\c{t}ional\u{a}. 
 
+\begin{center}
 \includegraphics[width=300]{conv.png}
+\end{center}
 
-Fieacre bloc de pixeli are c\^{a}te o greutate ( weights ), iar neuronul de pe nivelul intermediar care prime\c{s}te acest bloc de pixeli ca dat\u{a} de intreare are un bias / un trashold.
-
-\par
-
-Dac\u{a} spargem o imagine de 28 x 28 pixeli in blocuri de 5 x 5 pixeli \c{s}i ne mi\c{s}c\u{a}m cu un pixel la dreapta sau in jos pentru fiecare bloc de pixeli pe care vrem s\u{a} \^{i}l extragem, atunci pe primul nivel intermediar vom avea 24 x 24 de valori.
+Cum se observ\u{a} \c{s}i \^{i}n imaginea de mai sus \^{i}n loc s\u{a} mai lu\u{a}m fiecare valoare a unui pixel separat \c{s}i s\u{a} o introducem \^{i}ntr-un neuron de pe un nivel intermediar ( hidden layer ) ca dat\u{a} de intrare putem s\u{a} grup\u{a}m pixelii in blocuri de pixeli \c{s}i s\u{a} \^{i}i trimitem grupa\c{t}i la un neuron de pe nivelul intermediar. \^{I}n cazul nostru vom face glisarea pe un grup de pixeli de dimensiunea [5x5x3] care va fi \^{i}nmul\c{t}it cu \^{i}nt\u{a}ririle noastre de dimensiune [5x5x3], \^{i}n umra rezultatului vom ob\c{t}ine o singur\u{a} valoare la care vom aduna bias-ul. Dac\u{a} se repeta procedeul  \c{s}i ne mi\c{s}c\u{a}m cu un pixel la dreapta sau in jos pentru fiecare bloc de pixeli pe care vrem s\u{a} \^{i}l extragem, atunci ca rezultat vom avea [24x24x1] de valori. Acum s\u{a} presupunem c\u{a} avem 32 de astfel de \^{i}nt\u{a}rir pe acest nivel \c{s}i reptet\u{a}m procedeul pentru fiecare, atunci ca rezultat final vom avea [24x24x32] de valori, valori care vor fi trimise mai departe c\u{a}tre urm\u{a}torul nivel. Un mare beneficiu al acestui mod de a grupa valorile \^{i}n blocuri de date mai mici peste care s\u{a} efectu\u{a}m opera\c{t}ia de \^{i}nmu\c{t}ire \c{s}i de adunare este c\u{a} se reduce semnificativ numarul de valori la o  \^{i}nt\u{a}riri de care am fi avut nevoie dac\u{a} am fi f\u{a}cut acela\c{s} lucru pentru toate datele dintr-o dat\u{a}, cum se face \^{i}ntr-o re\c{t}ea neuronal\u{a} obi\c{s}nuit\u{a}, spre exemplu \^{i}n cazul exemplificat mai sus avem nevoie doar de 5 x 5 x 3 = 75 de valori pentru o \^{i}nt\u{a}rire, \^{i}n cazul unei re\c{t}ele neuronale obi\c{s}nuite am fi avut nevoie de 28 x 28 x 3 = 2352 de valori pentru o \^{i}nt\u{a}rire. Prin reducerea numarului de valori de care avem nevoie pentru o \^{i}nt\u{a}rire vom cre\c{s}te viteza de \^{i}nv\u{a}\c{t}are a re\c{t}elei neuronale \c{s}i vom putea cre\c{s}te complexitatea acesteia.
 
 \par
 
@@ -48,6 +52,8 @@ Shared weights and biases : se va folosii acela\c{s} weights si bias pentru fiec
 
 Pooling layers: nivelul de pooling se pune intre doua nivele convolutionale pentru a se reduce cantitatea de informa\c{t}ie care se duce c\u{a}tre urm\u{a}torul nivel convolutional. Cel mai folosit tip de pooling este max-pooling care prime\c{s}te ca date de intrare valorile rezultate de la precedentul nivel convolutional \c{s}i le las\u{a} s\u{a} treac\u{a} doar pe cel cu valoarea cea mai mare catre urmatorul nivel convolutional ( vede\c{t}i imaginea de mai jos ), astfle c\u{a} acest nivel ne ajut\u{a} s\u{a} reducem cantitatea de date \c{s}i s\u{a} sc\u{a}p\u{a}m de datele nerelevante dintr-o re\c{t}ea convolutional\u{a}.
 
+\begin{center}
 \includegraphics[width=300]{pool.png}
+\end{center}
 
 Cum se observ\u{a} \^{i}n imaginea de mai sus, nivelul de max-pooling prime\c{s}te patru valori de pe nivelul preceden \c{s}i las\u{a} o singur\u{a} valoarea s\u{a} treac\u{a} mai departe.
