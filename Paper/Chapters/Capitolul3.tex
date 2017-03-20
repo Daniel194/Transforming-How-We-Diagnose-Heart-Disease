@@ -54,12 +54,28 @@ $$ \frac{W - F + 2P }{S} + 1 $$
 
 \^{I}n formula de mai sus W este marimea volumui de date, F este m\u{a}rimea ferestrei prin care se face glisarea peste date, S este pasul de mi\c{s}care a ferestre peste volumul de date iar P este padding-ul care se adauga \^{i}n jurlul volumului de date. Spre exemplu dac\u{a} avem un volum de date de dimensiune 7x7 \c{s}i int\u{a}riri de dimensiunea 3x3 cu un pas de 1 si un padding de 0 atunci vom avea un rezultat de dimensiunea 5x5, \^{i}ns\u{a} dac\u{a} cre\c{s}tem pasul la 2 atunci vom avea un rezultat de dimensiunea 3x3.
 
+\par
+
+La o mic\u{a} analiz\u{a} se poate observa faptul c\u{a} pasul glis\u{a}rii ferestrei are anumite constr\^{a}ngeri, spre exemplu dac\u{a} volumul de date are o dimesniune de [10x10], padding-ul este 0 iar m\u{a}rimea ferestrei este de [3x3], atunci ar fi imposibil s\u{a} folosim un pas de 2, deoarece
+
+$$ \frac{W - F + 2P }{S} + 1 = \frac{10 - 3 + 0 }{2} + 1 = 4.5 $$
+
+\c{s}i av\^{a}nd \^{i}n vedere faptul c\u{a} dimensiunea datelor de ie\c{s}ire trebuie s\u{a} fie un num\u{a}r \^{i}ntreg atunci ar fi imposibil s\u{a} folosim un pas de 2 \^{i}ntr-un astfel de caz. \^{I}n astfel de cazuri dac\u{a} nu vrem s\u{a} schimb\u{a}m pasul va trebuii s\u{a} adaug\u{a}m un padding \^{i}n jurul datelor de intrare astfel \^{i}nc\^{a}t s\u{a} ob\c{t}inem la final un num\u{a}r \^{i}ntreg ca dimensiune pentru volumul de date rezultat de c\u{a}tre nivelul convolu\c{t}ional, \^{i}n cazul nostru de mai sus dac\u{a} ad\u{a}ug\u{a}m un padding de 1 atunci vom avea  o dimensiune de [5x5] pentru volumul de date rezultat de c\u{a}tre nivelul convoli\c{t}ional.
+
 \subsection{Niveulul de pool}
 
-Pooling layers: nivelul de pooling se pune intre doua nivele convolutionale pentru a se reduce cantitatea de informa\c{t}ie care se duce c\u{a}tre urm\u{a}torul nivel convolutional. Cel mai folosit tip de pooling este max-pooling care prime\c{s}te ca date de intrare valorile rezultate de la precedentul nivel convolutional \c{s}i le las\u{a} s\u{a} treac\u{a} doar pe cel cu valoarea cea mai mare catre urmatorul nivel convolutional ( vede\c{t}i imaginea de mai jos ), astfle c\u{a} acest nivel ne ajut\u{a} s\u{a} reducem cantitatea de date \c{s}i s\u{a} sc\u{a}p\u{a}m de datele nerelevante dintr-o re\c{t}ea convolutional\u{a}.
+Nivelul de pooling se pune \^{i}ntre dou\u{a} nivele convolu\c{t}ionale pentru a se reduce cantitatea de informa\c{t}ie care se duce c\u{a}tre urm\u{a}torul nivel convolu\c{t}ional. Cel mai folosit tip de pooling este max-pooling care prime\c{s}te ca date de intrare valorile rezultate de la precedentul nivel convolu\c{t}ional \c{s}i le las\u{a} s\u{a} treac\u{a} doar pe cel cu valoarea cea mai mare c\u{a}tre urm\u{a}torul nivel convolu\c{t}ional ( vede\c{t}i imaginea de mai jos ), astfle c\u{a} acest nivel ne ajut\u{a} s\u{a} reducem cantitatea de date \c{s}i s\u{a} sc\u{a}p\u{a}m de datele nerelevante dintr-o re\c{t}ea convolu\c{t}ional\u{a}. 
+
+\par
+
+De cele mai multe ori nivelul max-pooling ia o fereastr\u{a} de dimensiune [2x2] \c{s}i o gliseaz\u{a} peste datele de intrare cu un pas de cu valoarea 2. La fiecare pas aceast\u{a} nivel ia valorile cuprinse \^{i}n fereastr\u{a} \c{s}i las\u{a} doar valoarea cea mai mare s\u{a} treac\u{a} mai departe, celelalte fiind eliminate. \^{I}n urma acestor opera\c{t}ii va fi redus\u{a} o catitate de 75\% din datele de intrare, spre exemplu dac\u{a} avem un volum de date de dimensiunea [32x32x32] \c{s}i aplic\u{a}m peste el un max-pool cu o fereastr\u{a} de dimensiunea [2x2] \c{s}i un pas de 2 atunci vom avea ca rezultat un volum de date de dinensiunea [16x16x32], de precizat faptul c\u{a} nivelul max-pool nu afecteaz\u{a} ad\^{a}ncimea datelor de intrare.
 
 \begin{center}
 \includegraphics[width=300]{pool.png}
 \end{center}
 
-Cum se observ\u{a} \^{i}n imaginea de mai sus, nivelul de max-pooling prime\c{s}te patru valori de pe nivelul preceden \c{s}i las\u{a} o singur\u{a} valoarea s\u{a} treac\u{a} mai departe.
+Cum se observ\u{a} \c{s}i \^{i}n imaginea de mai sus, nivelul de max-pooling prime\c{s}te patru valori de pe nivelul preceden \c{s}i las\u{a} o singur\u{a} valoarea s\u{a} treac\u{a} mai departe.
+
+Un mare beneficiu pe care nivelul max-pool \^{i}l are asupra unei re\c{t}ele neuronale convolu\c{t}ionale este acela c\u{a} ne permite s\u{a} aplic\u{a}m nivele convolu\c{t}ionale mai mari peste date dup\u{a} ce am aplicat nivelul max-pool, acest lucru este posibil deoarece, cum am mai zis \c{s}i mai sus, nivelul max-pool ne scap\u{a} de o cantitate semnificativ\u{a} de date, prin urmare cantitate de date va fi mai mic\u{a} \c{s}i timpul de aplicare a unei \^{i}nt\u{a}riri va fi mai mic, prin urmare vom putea s\u{a} aplicam mai multe \^{i}nt\u{a}riri la urmatatorul nivel convolu\c{t}ional f\u{a}r\u{a} s\u{a} cre\c{s}tem timpul de calcul.
+
+\subsection{Nivelul conectat complet}

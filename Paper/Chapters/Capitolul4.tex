@@ -22,8 +22,10 @@ $$g_{i,j} = floor\bigg( 255 \sum_{n=0}^{f{i,j}} p_n \bigg)$$
 
 \^{I}n formula de mai sus floor face rotunjirea la cel mai apropiat num\u{a}r \^{i}ntreg inferior, iar g reprezint\u{a} noua imagine derivat\u{a} din f care are histograma pixelilor egalizat\u{a}. Fa\c{t}\u{a} de tehnica de egalizare a histogramei care lucreaz\u{a} pe toat\u{a} imaginea, CLAHE aplic\u{a} acela\c{s} principiu doar c\u{a} pe un bloc de pixeli, spre exemplu un bloc de pixeli de dimensiune 8x8, dintr-o imagine, acest lucru este necesar pentru a evita schimbarea contrastului \^{i}n regiuni unde acest lucru ar duce la deteliorarea calita\c{t}ii imaginii.
 
-\includegraphics[width=150]{before.png}
-\includegraphics[width=150]{after.png}
+\begin{center}
+\includegraphics[width=200]{before.png}
+\includegraphics[width=200]{after.png}
+\end{center}
 
 Cele dou\u{a} imagini de mai sus reprezint\u{a} un exempu de imagine din setul de date \^{i}nainte de a fi procesat\u{a} \c{s}i dup\u{a} ce a fost procesat\u{a}, cum se poate observa imaginea procesat\u{a} a fost decupat\u{a} din mijlocul imaginii neprocesate astfel \^{i}nc\^{a}t s\u{a} se elimine o cantitate c\^{a}t mai mare de date care nu sunt necesare pentru scopul nostru, de asemenea se mai poate observa c\u{a} imaginea procesat\u{a} are un contrast mai mare fa\c{t}\u{a} de imaginea neprocesat\u{a} iar detaliile imaginii se pot observa mai bine, aceste lucruri vor duce la o vitez\u{a} de calcul \c{s}i la o acurate\c{t}e mai mare a re\c{t}elei neuronale.
 
@@ -39,4 +41,6 @@ Toate valorile salvate mai sus \^{i}n fi\c{s}ierul CSV au fost valori pe care nu
 
 Cum se poate observa \c{s}i \^{i}n imaginea de mai jos inima este destul de u\c{s}or de identificat cu ochiul libert pentru un om, \^{i}ns\u{a} pentru un calculator aceasta este \^{i}nc\u{a} greu de g\u{a}sit.
 
+\begin{center}
 \includegraphics[width=200]{after.png}
+\end{center}
