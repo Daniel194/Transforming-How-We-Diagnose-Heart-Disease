@@ -79,3 +79,13 @@ Cum se observ\u{a} \c{s}i \^{i}n imaginea de mai sus, nivelul de max-pooling pri
 Un mare beneficiu pe care nivelul max-pool \^{i}l are asupra unei re\c{t}ele neuronale convolu\c{t}ionale este acela c\u{a} ne permite s\u{a} aplic\u{a}m nivele convolu\c{t}ionale mai mari peste date dup\u{a} ce am aplicat nivelul max-pool, acest lucru este posibil deoarece, cum am mai zis \c{s}i mai sus, nivelul max-pool ne scap\u{a} de o cantitate semnificativ\u{a} de date, prin urmare cantitate de date va fi mai mic\u{a} \c{s}i timpul de aplicare a unei \^{i}nt\u{a}riri va fi mai mic, prin urmare vom putea s\u{a} aplicam mai multe \^{i}nt\u{a}riri la urmatatorul nivel convolu\c{t}ional f\u{a}r\u{a} s\u{a} cre\c{s}tem timpul de calcul.
 
 \subsection{Nivelul conectat complet}
+
+Nivelul conectat complet este identic cu un nivel dintr-o re\c{t}ea neuronal\u{a} obi\c{s}nuit\u{a}, \^{i}n ideea c\u{a} fiecare neuron de pe nivelul inferior este conectat cu fiecare neuron de nivelul superior lui.
+
+\par
+
+Pentru a ad\u{a}uga un nivel conectat complet dup\u{a} un nivel convolu\c{t}ional, sau un nivel de pool, va trebuii s\u{a} redimension\u{a}m volumul de date trimidimensional care rezult\u{a} din astfel de nivele, pentru c\u{a}, nivelul conectat complet accept\u{a} ca date de intrare un volum de date unidimensional (vector). A\c{s}a c\u{a}, spre exemplu, atunci c\^{a}nd avem un volum de date rezultat dintr-un nivel convolu\c{t}ional de marimea, s\u{a} zicem, [7x7x512] va trebuii s\u{a} \^{i}l redimensionam la un vector cu 25088 de elemente, deoarece 7 x 7 x 512 = 25088, iar dup\u{a} aceea s\u{a} \^{i}numl\c{t}im datele redimensionate cu o \^{i}nt\u{a}rire de dimensiune, spre exemplu \^{i}n cazul pe care \^{i}l exemplific\u{a}m acum, [1024x25088] ,iar la rezultatul ob\c{t}inut \^{i}n umra \^{i}nmul\c{t}irii s\u{a} adun\u{a}m un bias, \^{i}n cazul nostru bias-ul  va avea 1024 de elemente.
+
+\subsection{A\c{s}ezarea nivelelor}
+
+TODO

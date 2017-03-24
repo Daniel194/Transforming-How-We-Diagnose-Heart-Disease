@@ -41,6 +41,18 @@ Toate valorile salvate mai sus \^{i}n fi\c{s}ierul CSV au fost valori pe care nu
 
 Cum se poate observa \c{s}i \^{i}n imaginea de mai jos inima este destul de u\c{s}or de identificat cu ochiul liber pentru un om, \^{i}ns\u{a} pentru un calculator aceasta este \^{i}nc\u{a} greu de g\u{a}sit.
 
+\par
+
+Pentru a putea identifica inmia din astfel de imagine vom avea nevoie de o re\c{t}ea neuronal\u{a} care s\u{a} fac\u{a} segmentarea inimii de restul de date, iar dup\u{a} aceea inima va putea fi trecut\u{a} printr-o alt\u{a} re\c{t}ea neuronal\u{a} pentru a se calcula volum de s\^{a}nge care curge.
+
+\par
+
+Pentru antrenarea re\c{t}elei neuronale care va face segmentarea inimii vom avea nevoie de un alt set de date, deoarece setul de date pe care \^{i}l avem de la Institutul Na\c{t}ional pentru Inim\u{a}, Pl\u{a}m\^{a}ni \c{s}i S\^{a}nge din America nu ne ofer\u{a} date care s\u{a} indice pozi\c{t}ia exact\u{a} a inimii \^{i}n radiografie, \^{i}ns\u{a} spitalul Sunnybrook din Canada, Toronto pune la dispozi\c{t}ie date identice care ne ofer\u{a} pozi\c{t}ia exact\u{a} a inimii \^{i}n radiografie.
+
 \begin{center}
 \includegraphics[width=200]{after.png}
 \end{center}
+
+\subsection{Datele de la spitalul Sunnybrook}
+
+TODO
