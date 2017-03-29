@@ -88,4 +88,38 @@ Pentru a ad\u{a}uga un nivel conectat complet dup\u{a} un nivel convolu\c{t}iona
 
 \subsection{A\c{s}ezarea nivelelor}
 
+Am v\u{a}zut p\^{a}n\u{a} acum c\u{a} re\c{t}elele neuronale convolu\c{t}ionale sun alc\u{a}tuite din trei tipuri de nivele (nivelul convolu\c{t}ional, nivelul de pool \c{s}i nivelul conectat complet). \^{I}n aceast\u{a} sec\c{t}iune vom discuta despre modalit\u{a}\c{t}ile de a a\c{s}eza aceste nivel \^{i}ntr-o re\c{t}ea neuronal\u{a} convolu\c{t}ional\u{a}.
+
+\par
+
+De cele mai multe ori o re\c{t}ea neuronal\u{a} convolu\c{t}ional\u{a} este alc\u{a}tuit\u{a} din mai multe nivele convolu\c{t}ionale, unde dup\u{a} fiecare nivel convolu\c{t}ional poate urma un nivel de pool, iar la final este ad\u{a}ugat unu sau mai multe nivele conectate complet unde ultimul nivel conectat complet va \^{i}ntoarce datele de ie\c{s}ire din re\c{t}eaua neuronal\u{a}. Cu alte cuvinte, de cele mai multe ori o re\c{t}ea neuronal\u{a} convolu\c{t}ional\u{a} respect\u{a} urm\u{a}torul tip de \c{s}ablon c\^{a}nd vine vorba de a\c{s}ezarea nivelelor :
+
+\par
+
+\text{Date de intrare} \longrightarrow [[\text{Nivel convolu\c{t}ional} \longrightarrow \text{ReLU}]*N \longrightarrow \\
+\longrightarrow \text{Nivel pool ? } ] * M \longrightarrow [\text{Nivelul conectat complet} \longrightarrow \text{ReLU}] * K  \longrightarrow \\
+\longrightarrow \text{Nivelul conectat complet} \longrightarrow \text{Date de ie\c{s}ire}
+
+\^{I}n \c{s}ablonul de mai sus, stelu\c{t}a reprezint\u{a} de c\^{a}te ori se repet\u{a} secven\c{t}a de nivele din parantezele p\u{a}trate, iar N, M \c{s}i K reprezint\u{a} num\u{a}rul de repeti\c{t}ii, unde fiecarea valoare trebuie s\u{a} fie mai mare sau egal\u{a} cu zero. Am notat cu semnul \^{i}ntreb\u{a}rii nivelul pool doarece acesta poate ap\u{a}rea sau nu dup\u{a} nivelul convolu\c{t}ional.
+
+\par
+
+Un exemplu de astfle de re\c{t}ea neuronal\u{a} care s\u{a} respecte \c{s}ablonul de mai sus ar fi urm\u{a}toarea:
+
+\text{Date de intrare} \longrightarrow \text{Nivel convolu\c{t}ional 1} \longrightarrow \text{ReLU} \longrightarrow \text{Nivel pool 1} \longrightarrow \\ 
+\longrightarrow \text{Nivel convolu\c{t}ional 2} \longrightarrow \text{ReLU} \longrightarrow \text{Nivel pool 2} \longrightarrow \\ 
+\longrightarrow  \text{Nivelul conectat complet} \longrightarrow \text{Date de ie\c{s}ire}
+
+\^{I}n exemplul dat mai sus, N are valoarea 1, M are valoarea 2, iar K are valoarea 0.
+
+\section{Prevenirea efectului de overfitting}
+
+TODO
+
+\subsection{Dropout}
+
+TODO
+
+\subsection{Batch Normalization}
+
 TODO
