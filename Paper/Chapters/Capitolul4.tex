@@ -55,4 +55,19 @@ Pentru antrenarea re\c{t}elei neuronale care va face segmentarea inimii vom avea
 
 \subsection{Datele de la spitalul Sunnybrook}
 
+Cum am precizat \c{s}i mai sus, spitalul Sunnybrook pune la dispozi\c{t}ie un set de date care arat\u{a} pozi\c{t}ia exact\u{a} a ventricului st\^{a}ng a inimii \^{i}n radiografie. Fiecare radiografie a fost f\u{a}cut\u{a} pe parcursul a unui ciclu a inimii, av\^{a}nd o dimensiune de [ 256 x 256 ] de pixeli, iar pentru fiecare radiografie este asociat  un fisier txt cu pozi\c{t}ia exact\u{a} a ventricului st\^{a}ng a inimii.
+
+\begin{center}
+\includegraphics[width=200]{sbh.png}
+\includegraphics[width=200]{sbl.png}
+\end{center}
+
+\^{I}n imaginile de mai sus, avem o radiografie din setul de date Sunnybrook \^{i}n partea din st\^{a}nga, iar \^{i}n partea din dreapta avem pozi\c{t}ia exact\u{a} a ventricului st\^{a}ng \^{i}n radiografie, unde ce este colorat cu mov reprezint\u{a} faptul c\u{a} acolo nu se afl\u{a} ventriculul st\^{a}ng (culoarea mov are asociat\u{a} valoarea 0), iar ce este colorat cu galben reprezint\u{a} faptul c\u{a} acolo se afl\u{a} ventriculul st\^{a}ng (culoarea galben\u{a} are asociat\u{a} valoarea 1). Cu astfel de tipuri de date vom lucra pentru a antrena o re\c{t}ea neuronal\u{a} care s\u{a} fac\u{a} segmentarea ventricului st\^{a}ng a inimii de restul radiografiei. 
+
+\par
+
+La final dup\u{a} ce vom termina s\u{a} antren\u{a}m re\c{t}eaua neuronal\u{a}, vom introduce radiografii de la Institutul Na\c{t}ional pentru Inim\u{a}, Pl\u{a}m\^{a}ni \c{s}i S\^{a}nge din America, ca radiografia de mai sus din st\^{a}nga, iar la final vom ob\c{t}ine pozi\c{t}ia exact\u{a} a ventricului st\^{a}ng, ca \^{i}n imaginea din dreapta, unde 0 reprezint\u{a} faptul c\u{a} pixelul de la pozi\c{t}ia respectiv\u{a} nu apar\c{t}ine ventricului st\^{a}ng, iar valoarea 1 reprezint\u{a} faptul c\u{a} pixelul de la pozi\c{t}ia respectiv\u{a} apar\c{t}ine ventricului st\^{a}ng, iar pe baza acestor valori vom putea face segmentarea.
+
+\subsection{Preprocesarea setului de date Sunnybrook}
+
 TODO
