@@ -24,6 +24,8 @@ class LVSegmentation(object):
         self.session.run(tf.global_variables_initializer())
         self.checkpoint_dir = checkpoint_dir
 
+        self.EPSILON = 1e-3
+
     def restore_session(self):
         global_step = 0
         if not os.path.exists(self.checkpoint_dir):
@@ -150,7 +152,9 @@ class LVSegmentation(object):
 
             pool_5, pool_5_argmax = self.pool_layer(conv_5_3)
 
-            fc_6 = self.conv_layer(pool_5, [7, 7, 512, 4096], 4096, 'fc_6')
+            dropout = tf.nn.dropout(pool_5, 0.5)
+
+            fc_6 = self.conv_layer(dropout, [7, 7, 512, 4096], 4096, 'fc_6')
             fc_7 = self.conv_layer(fc_6, [1, 1, 4096, 4096], 4096, 'fc_7')
 
             deconv_fc_6 = self.deconv_layer(fc_7, [7, 7, 512, 4096], 512, 'fc6_deconv')
@@ -203,21 +207,26 @@ class LVSegmentation(object):
 
         return tf.Variable(initial)
 
-    def bias_variable(self, shape):
-        initial = tf.constant(0.1, shape=shape)
+    def variable(self, shape, constant):
+        initial = tf.constant(constant, shape=shape)
 
         return tf.Variable(initial)
 
-    def conv_layer(self, x, W_shape, b_shape, name, padding='SAME'):
+    def conv_layer(self, x, W_shape, v_shape, name, padding='SAME'):
 
         nr_units = functools.reduce(lambda x, y: x * y, W_shape)
         stddev = 1.0 / math.sqrt(float(nr_units))
 
         weights = self.weight_variable(W_shape, stddev)
-        biases = self.bias_variable([b_shape])
+        scale = self.variable([v_shape], 1.0)
+        beta = self.variable([v_shape], 0.0)
 
         hidden = tf.nn.conv2d(x, weights, strides=[1, 1, 1, 1], padding=padding)
-        hidden = tf.add(hidden, biases)
+
+        batch_mean, batch_var = tf.nn.moments(hidden, [0])
+
+        hidden = tf.nn.batch_normalization(hidden, batch_mean, batch_var, beta, scale, self.EPSILON)
+
         hidden = tf.nn.relu(hidden)
 
         return hidden
@@ -226,19 +235,25 @@ class LVSegmentation(object):
         with tf.device('/gpu:0'):
             return tf.nn.max_pool_with_argmax(x, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
 
-    def deconv_layer(self, x, W_shape, b_shape, name, padding='SAME'):
+    def deconv_layer(self, x, W_shape, v_shape, name, padding='SAME'):
 
         nr_units = functools.reduce(lambda x, y: x * y, W_shape)
         stddev = 1.0 / math.sqrt(float(nr_units))
 
         weights = self.weight_variable(W_shape, stddev)
-        biases = self.bias_variable([b_shape])
+        scale = self.variable([v_shape], 1.0)
+        beta = self.variable([v_shape], 0.0)
 
         x_shape = tf.shape(x)
         out_shape = tf.stack([x_shape[0], x_shape[1], x_shape[2], W_shape[2]])
 
         hidden = tf.nn.conv2d_transpose(x, weights, out_shape, [1, 1, 1, 1], padding=padding)
-        hidden = tf.add(hidden, biases)
+
+        batch_mean, batch_var = tf.nn.moments(hidden, [0])
+
+        hidden = tf.nn.batch_normalization(hidden, batch_mean, batch_var, beta, scale, self.EPSILON)
+
+        hidden = tf.nn.relu(hidden)
 
         return hidden
 
