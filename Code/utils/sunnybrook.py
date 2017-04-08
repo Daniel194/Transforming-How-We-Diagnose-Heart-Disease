@@ -13,7 +13,7 @@ import random
 warnings.filterwarnings('ignore')  # we ignore a RuntimeWarning produced from dividing by zero
 random.seed(1301)
 
-SUNNYBROOK_ROOT_PATH = "../../../data/"
+SUNNYBROOK_ROOT_PATH = "../../data/"
 CONTOUR_PATH = os.path.join(SUNNYBROOK_ROOT_PATH, "Sunnybrook Contours")
 IMG_PATH = os.path.join(SUNNYBROOK_ROOT_PATH, "Sunnybrook IMG")
 

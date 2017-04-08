@@ -3,6 +3,7 @@ import time
 import sys
 import random
 import math
+import pickle
 import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
@@ -24,6 +25,8 @@ class LVSegmentation(object):
         self.session.run(tf.global_variables_initializer())
         self.checkpoint_dir = checkpoint_dir
 
+        self.loss_array = []
+
     def restore_session(self):
         global_step = 0
         if not os.path.exists(self.checkpoint_dir):
@@ -36,7 +39,18 @@ class LVSegmentation(object):
                 self.saver.restore(self.session, path.model_checkpoint_path)
                 global_step = int(path.model_checkpoint_path.split('-')[-1])
 
+        with open(self.checkpoint_dir + 'loss.pickle') as f:
+            self.loss_array = pickle.load(f)
+
         return global_step
+
+    def save_loss(self):
+
+        if os.path.exists(self.checkpoint_dir + 'loss.pickle'):
+            os.remove(self.checkpoint_dir + 'loss.pickle')
+
+        with open(self.checkpoint_dir + 'loss.pickle', 'w') as f:
+            pickle.dump(self.loss_array, f)
 
     def predict(self, images):
         self.restore_session()
@@ -72,11 +86,14 @@ class LVSegmentation(object):
                                 feed_dict={self.x: images, self.y: labels, self.rate: learning_rate})
 
             if i % 100 == 0:
-                print('Step {} finished in {:.2f} s with Loss : {:.6f}'
-                      .format(i, time.time() - start,
-                              self.loss.eval(session=self.session, feed_dict={self.x: images, self.y: labels})))
+                loss = self.loss.eval(session=self.session, feed_dict={self.x: images, self.y: labels})
+
+                print('Step {} finished in {:.2f} s with Loss : {:.6f}'.format(i, time.time() - start, loss))
 
                 self.saver.save(self.session, self.checkpoint_dir + 'model', global_step=i)
+
+                self.loss_array.append(loss)
+                self.save_loss()
 
                 print('Model {} saved'.format(i))
 
@@ -286,22 +303,17 @@ class LVSegmentation(object):
 
 
 if __name__ == '__main__':
-    train, eval, val = sunnybrook.get_all_contours()
+    train, val = sunnybrook.get_all_contours()
     segmenter = LVSegmentation()
 
     if len(sys.argv) != 2:
-        print('The program must be run as : python3.5 step2_train_segmenter_v1.py [train|evaluate|predict]')
+        print('The program must be run as : python3.5 step2_train_segmenter_v1.py [train|predict]')
         sys.exit(2)
     else:
         if sys.argv[1] == 'train':
             print('Run Train .....')
 
-            segmenter.train(train, restore_session=True, learning_rate=1e-10)
-
-        elif sys.argv[1] == 'evaluate':
-            print('Run Evaluate .....')
-
-            segmenter.evaluate(eval)
+            segmenter.train(train)
 
         elif sys.argv[1] == 'predict':
             print('Run Predict .....')
