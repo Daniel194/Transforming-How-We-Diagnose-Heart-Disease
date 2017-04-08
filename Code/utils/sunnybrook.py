@@ -14,17 +14,8 @@ warnings.filterwarnings('ignore')  # we ignore a RuntimeWarning produced from di
 random.seed(1301)
 
 SUNNYBROOK_ROOT_PATH = "../../../data/"
-
-TRAIN_CONTOUR_PATH = os.path.join(SUNNYBROOK_ROOT_PATH, "Sunnybrook Cardiac MR Database ContoursPart3",
-                                  "TrainingDataContours")
-VALIDATION_CONTOUR_PATH = os.path.join(SUNNYBROOK_ROOT_PATH, "Sunnybrook Cardiac MR Database ContoursPart2",
-                                       "ValidationDataContours")
-ONLINE_CONTOUR_PATH = os.path.join(SUNNYBROOK_ROOT_PATH, "Sunnybrook Cardiac MR Database ContoursPart1",
-                                   "OnlineDataContours")
-
-TRAIN_IMG_PATH = os.path.join(SUNNYBROOK_ROOT_PATH, "challenge_training")
-VALIDATION_IMG_PATH = os.path.join(SUNNYBROOK_ROOT_PATH, "challenge_validation")
-ONLINE_IMG_PATH = os.path.join(SUNNYBROOK_ROOT_PATH, "challenge_online/challenge_online")
+CONTOUR_PATH = os.path.join(SUNNYBROOK_ROOT_PATH, "Sunnybrook Contours")
+IMG_PATH = os.path.join(SUNNYBROOK_ROOT_PATH, "Sunnybrook IMG")
 
 SAX_SERIES = {
     'SC-HF-I-1': '0004',
@@ -184,7 +175,7 @@ def export_all_contours(batch):
 
     for idx, ctr in enumerate(batch):
         try:
-            img, label = load_contour(ctr, TRAIN_IMG_PATH)
+            img, label = load_contour(ctr, IMG_PATH)
             imgs.append(img)
             labels.append(label)
 
@@ -238,21 +229,17 @@ def get_all_contours():
     :return: return paths to all countours
     """
 
-    ctrs = __get_all_contours(TRAIN_CONTOUR_PATH)
-    val_ctrs = ctrs[0:5]
-    eval_ctrs = ctrs[5:10]
-    train_ctrs = ctrs[10:]
+    ctrs = __get_all_contours(CONTOUR_PATH)
 
-    return train_ctrs, eval_ctrs, val_ctrs
+    val_ctrs = ctrs[0:5]
+    train_ctrs = ctrs[5:]
+
+    return train_ctrs, val_ctrs
 
 
 if __name__ == "__main__":
     # Convert Sunnybrook dataset from DICOM form to PNG format
 
-    train_ctrs = __get_all_contours(TRAIN_CONTOUR_PATH)
-    validation_ctrs = __get_all_contours(VALIDATION_CONTOUR_PATH)
-    online_ctrs = __get_all_contours(ONLINE_CONTOUR_PATH)
+    ctrs = __get_all_contours(CONTOUR_PATH)
 
-    convert_dicom_to_png(train_ctrs, TRAIN_IMG_PATH)
-    convert_dicom_to_png(validation_ctrs, VALIDATION_IMG_PATH)
-    convert_dicom_to_png(online_ctrs, ONLINE_IMG_PATH)
+    convert_dicom_to_png(ctrs, IMG_PATH)
