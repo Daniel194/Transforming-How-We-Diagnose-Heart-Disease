@@ -39,7 +39,7 @@ class LVSegmentation(object):
                 self.saver.restore(self.session, path.model_checkpoint_path)
                 global_step = int(path.model_checkpoint_path.split('-')[-1])
 
-        with open(self.checkpoint_dir + 'loss.pickle') as f:
+        with open(self.checkpoint_dir + 'loss.pickle', 'rb') as f:
             self.loss_array = pickle.load(f)
 
         return global_step
@@ -49,7 +49,7 @@ class LVSegmentation(object):
         if os.path.exists(self.checkpoint_dir + 'loss.pickle'):
             os.remove(self.checkpoint_dir + 'loss.pickle')
 
-        with open(self.checkpoint_dir + 'loss.pickle', 'w') as f:
+        with open(self.checkpoint_dir + 'loss.pickle', 'wb') as f:
             pickle.dump(self.loss_array, f)
 
     def predict(self, images):
