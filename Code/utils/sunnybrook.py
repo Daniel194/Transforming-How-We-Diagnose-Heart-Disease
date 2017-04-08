@@ -13,27 +13,65 @@ import random
 warnings.filterwarnings('ignore')  # we ignore a RuntimeWarning produced from dividing by zero
 random.seed(1301)
 
-SUNNYBROOK_ROOT_PATH = "../../data/"
+SUNNYBROOK_ROOT_PATH = "../../../data/"
+
 TRAIN_CONTOUR_PATH = os.path.join(SUNNYBROOK_ROOT_PATH, "Sunnybrook Cardiac MR Database ContoursPart3",
                                   "TrainingDataContours")
+VALIDATION_CONTOUR_PATH = os.path.join(SUNNYBROOK_ROOT_PATH, "Sunnybrook Cardiac MR Database ContoursPart2",
+                                       "ValidationDataContours")
+ONLINE_CONTOUR_PATH = os.path.join(SUNNYBROOK_ROOT_PATH, "Sunnybrook Cardiac MR Database ContoursPart1",
+                                   "OnlineDataContours")
+
 TRAIN_IMG_PATH = os.path.join(SUNNYBROOK_ROOT_PATH, "challenge_training")
+VALIDATION_IMG_PATH = os.path.join(SUNNYBROOK_ROOT_PATH, "challenge_validation")
+ONLINE_IMG_PATH = os.path.join(SUNNYBROOK_ROOT_PATH, "challenge_online/challenge_online")
+
 SAX_SERIES = {
-    # challenge training
-    "SC-HF-I-1": "0004",
-    "SC-HF-I-2": "0106",
-    "SC-HF-I-4": "0116",
-    "SC-HF-I-40": "0134",
-    "SC-HF-NI-3": "0379",
-    "SC-HF-NI-4": "0501",
-    "SC-HF-NI-34": "0446",
-    "SC-HF-NI-36": "0474",
-    "SC-HYP-1": "0550",
-    "SC-HYP-3": "0650",
-    "SC-HYP-38": "0734",
-    "SC-HYP-40": "0755",
-    "SC-N-2": "0898",
-    "SC-N-3": "0915",
-    "SC-N-40": "0944",
+    'SC-HF-I-1': '0004',
+    'SC-HF-I-2': '0106',
+    'SC-HF-I-4': '0116',
+    'SC-HF-I-5': '0156',
+    'SC-HF-I-6': '0180',
+    'SC-HF-I-7': '0209',
+    'SC-HF-I-8': '0226',
+    'SC-HF-I-9': '0241',
+    'SC-HF-I-10': '0024',
+    'SC-HF-I-11': '0043',
+    'SC-HF-I-12': '0062',
+    'SC-HF-I-40': '0134',
+    'SC-HF-NI-3': '0379',
+    'SC-HF-NI-4': '0501',
+    'SC-HF-NI-7': '0523',
+    'SC-HF-NI-12': '0286',
+    'SC-HF-NI-11': '0270',
+    'SC-HF-NI-13': '0304',
+    'SC-HF-NI-14': '0331',
+    'SC-HF-NI-15': '0359',
+    'SC-HF-NI-31': '0401',
+    'SC-HF-NI-33': '0424',
+    'SC-HF-NI-34': '0446',
+    'SC-HF-NI-36': '0474',
+    'SC-HYP-1': '0550',
+    'SC-HYP-3': '0650',
+    'SC-HYP-6': '0767',
+    'SC-HYP-7': '0007',
+    'SC-HYP-8': '0796',
+    'SC-HYP-9': '0003',
+    'SC-HYP-10': '0579',
+    'SC-HYP-11': '0601',
+    'SC-HYP-12': '0629',
+    'SC-HYP-37': '0702',
+    'SC-HYP-38': '0734',
+    'SC-HYP-40': '0755',
+    'SC-N-2': '0898',
+    'SC-N-3': '0915',
+    'SC-N-5': '0963',
+    'SC-N-6': '0981',
+    'SC-N-7': '1009',
+    'SC-N-9': '1031',
+    'SC-N-10': '0851',
+    'SC-N-11': '0878',
+    'SC-N-40': '0944',
 }
 
 
@@ -172,7 +210,7 @@ def convert_dicom_to_png(ctrs, img_path):
         img_new_path = full_path.replace(".dcm", ".png")
         scipy.misc.imsave(img_new_path, dicom_data.pixel_array)
 
-        img = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE).astype(float)
+        img = cv2.imread(img_new_path, cv2.IMREAD_GRAYSCALE)
         clahe = cv2.createCLAHE(tileGridSize=(1, 1))
         cl_img = clahe.apply(img)
         cv2.imwrite(img_new_path, cl_img)
@@ -210,5 +248,11 @@ def get_all_contours():
 
 if __name__ == "__main__":
     # Convert Sunnybrook dataset from DICOM form to PNG format
-    ctrs = __get_all_contours(TRAIN_CONTOUR_PATH)
-    convert_dicom_to_png(ctrs, TRAIN_IMG_PATH)
+
+    train_ctrs = __get_all_contours(TRAIN_CONTOUR_PATH)
+    validation_ctrs = __get_all_contours(VALIDATION_CONTOUR_PATH)
+    online_ctrs = __get_all_contours(ONLINE_CONTOUR_PATH)
+
+    convert_dicom_to_png(train_ctrs, TRAIN_IMG_PATH)
+    convert_dicom_to_png(validation_ctrs, VALIDATION_IMG_PATH)
+    convert_dicom_to_png(online_ctrs, ONLINE_IMG_PATH)
