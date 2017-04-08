@@ -313,7 +313,7 @@ if __name__ == '__main__':
         if sys.argv[1] == 'train':
             print('Run Train .....')
 
-            segmenter.train(train)
+            segmenter.train(train, training_steps=10000)
 
         elif sys.argv[1] == 'predict':
             print('Run Predict .....')
