@@ -8,6 +8,7 @@ import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
 import functools
+from collections import OrderedDict
 import utils.sunnybrook as sunnybrook
 
 from tensorflow.python.framework import ops
@@ -15,10 +16,25 @@ from tensorflow.python.ops import gen_nn_ops
 
 
 class LVSegmentation(object):
-    def __init__(self, use_cpu=False, checkpoint_dir='../../result/segmenter/train_result/v2/'):
+    def __init__(self, use_cpu=False, checkpoint_dir='../../result/segmenter/train_result/v3/'):
         random.seed(time.time())
 
-        self.build(use_cpu=use_cpu)
+        self.x = tf.placeholder(tf.float32, shape=(None, 224, 224, 1))
+        self.y = tf.placeholder(tf.int64, shape=(None, 224, 224))
+        self.keep_prob = tf.placeholder(tf.float32)
+
+        logits, self.variables, self.offset = self.create_conv_net()
+        self.cost = self.cost_function(logits)
+
+        self.gradients_node = tf.gradients(self.cost, self.variables)
+
+        self.cross_entropy = tf.reduce_mean(
+            self.cross_entropy(tf.reshape(self.y, [-1]), tf.reshape(self.pixel_wise_softmax_2(logits), [-1, 2])))
+
+        self.predicter = self.pixel_wise_softmax_2(logits)
+        self.correct_pred = tf.equal(tf.argmax(self.predicter, 3), tf.argmax(self.y, 3))
+        self.accuracy = tf.reduce_mean(tf.cast(self.correct_pred, tf.float32))
+
         self.saver = tf.train.Saver(max_to_keep=5, keep_checkpoint_every_n_hours=1)
         config = tf.ConfigProto(allow_soft_placement=True)
         self.session = tf.Session(config=config)
@@ -26,7 +42,30 @@ class LVSegmentation(object):
         self.checkpoint_dir = checkpoint_dir
 
         self.loss_array = []
-        self.EPSILON = 1e-3
+
+    def predict(self, model_path, x_test):
+        init = tf.global_variables_initializer()
+
+        with tf.Session() as sess:
+            # Initialize variables
+            sess.run(init)
+
+            # Restore model weights from previously saved model
+            self.restore(sess, model_path)
+
+            y_dummy = np.empty((x_test.shape[0], x_test.shape[1], x_test.shape[2], 2))
+            prediction = sess.run(self.predicter, feed_dict={self.x: x_test, self.y: y_dummy, self.keep_prob: 1.})
+
+        return prediction
+
+    def save(self, sess, model_path):
+        saver = tf.train.Saver()
+        save_path = saver.save(sess, model_path)
+        return save_path
+
+    def restore(self, sess, model_path):
+        saver = tf.train.Saver()
+        saver.restore(sess, model_path)
 
     def restore_session(self):
         global_step = 0
@@ -67,7 +106,7 @@ class LVSegmentation(object):
 
         print('Model has accuracy : {:.6f} '.format(accuracy))
 
-    def train(self, train_paths, training_steps=1000, restore_session=False, learning_rate=1e-6):
+    def train(self, train_paths, training_steps=1000, restore_session=False, learning_rate=1e-3):
         if restore_session:
             step_start = self.restore_session() + 1
         else:
@@ -117,108 +156,122 @@ class LVSegmentation(object):
 
         return before_normalization, images, labels
 
-    @ops.RegisterGradient("MaxPoolWithArgmax")
-    def _MaxPoolGradWithArgmax(op, grad, unused_argmax_grad):
-        return gen_nn_ops._max_pool_grad_with_argmax(op.inputs[0],
-                                                     grad,
-                                                     op.outputs[1],
-                                                     op.get_attr("ksize"),
-                                                     op.get_attr("strides"),
-                                                     padding=op.get_attr("padding"))
+    def create_conv_net(self, layers=3, features_root=16, filter_size=3, pool_size=2):
 
-    def build(self, use_cpu=False):
+        weights = []
+        biases = []
+        convs = []
+        pools = OrderedDict()
+        deconv = OrderedDict()
+        dw_h_convs = OrderedDict()
+        up_h_convs = OrderedDict()
 
-        if use_cpu:
-            device = '/cpu:0'
-        else:
-            device = '/gpu:0'
+        in_size = 1000
+        size = in_size
 
-        with tf.device(device):
-            self.x = tf.placeholder(tf.float32, shape=(None, 224, 224, 1))
-            self.y = tf.placeholder(tf.int64, shape=(None, 224, 224))
+        expected = tf.expand_dims(self.y, -1)
+        self.rate = tf.placeholder(tf.float32, shape=[])
 
-            expected = tf.expand_dims(self.y, -1)
-            self.rate = tf.placeholder(tf.float32, shape=[])
+        in_node = self.x
 
-            conv_1_1 = self.conv_layer(self.x, [3, 3, 1, 64], 64, 'conv_1_1')
-            conv_1_2 = self.conv_layer(conv_1_1, [3, 3, 64, 64], 64, 'conv_1_2')
+        # down layers
+        for layer in range(0, layers):
+            features = 2 ** layer * features_root
 
-            pool_1, pool_1_argmax = self.pool_layer(conv_1_2)
+            if layer == 0:
+                w1 = self.weight_variable([filter_size, filter_size, 1, features])
+            else:
+                w1 = self.weight_variable([filter_size, filter_size, features // 2, features])
 
-            conv_2_1 = self.conv_layer(pool_1, [3, 3, 64, 128], 128, 'conv_2_1')
-            conv_2_2 = self.conv_layer(conv_2_1, [3, 3, 128, 128], 128, 'conv_2_2')
+            w2 = self.weight_variable([filter_size, filter_size, features, features])
 
-            pool_2, pool_2_argmax = self.pool_layer(conv_2_2)
+            b1 = self.variable([features], 0.0)
+            b2 = self.variable([features], 0.0)
 
-            conv_3_1 = self.conv_layer(pool_2, [3, 3, 128, 256], 256, 'conv_3_1')
-            conv_3_2 = self.conv_layer(conv_3_1, [3, 3, 256, 256], 256, 'conv_3_2')
-            conv_3_3 = self.conv_layer(conv_3_2, [3, 3, 256, 256], 256, 'conv_3_3')
+            conv1 = self.conv_layer(in_node, w1, self.keep_prob)
+            tmp_h_conv = tf.nn.relu(conv1 + b1)
+            conv2 = self.conv_layer(tmp_h_conv, w2, self.keep_prob)
+            dw_h_convs[layer] = tf.nn.relu(conv2 + b2)
 
-            pool_3, pool_3_argmax = self.pool_layer(conv_3_3)
+            weights.append((w1, w2))
+            biases.append((b1, b2))
+            convs.append((conv1, conv2))
 
-            conv_4_1 = self.conv_layer(pool_3, [3, 3, 256, 512], 512, 'conv_4_1')
-            conv_4_2 = self.conv_layer(conv_4_1, [3, 3, 512, 512], 512, 'conv_4_2')
-            conv_4_3 = self.conv_layer(conv_4_2, [3, 3, 512, 512], 512, 'conv_4_3')
+            size -= 4
+            if layer < layers - 1:
+                pools[layer] = self.max_pool(dw_h_convs[layer], pool_size)
+                in_node = pools[layer]
+                size /= 2
 
-            pool_4, pool_4_argmax = self.pool_layer(conv_4_3)
+        in_node = dw_h_convs[layers - 1]
 
-            conv_5_1 = self.conv_layer(pool_4, [3, 3, 512, 512], 512, 'conv_5_1')
-            conv_5_2 = self.conv_layer(conv_5_1, [3, 3, 512, 512], 512, 'conv_5_2')
-            conv_5_3 = self.conv_layer(conv_5_2, [3, 3, 512, 512], 512, 'conv_5_3')
+        # up layers
+        for layer in range(layers - 2, -1, -1):
+            features = 2 ** (layer + 1) * features_root
 
-            pool_5, pool_5_argmax = self.pool_layer(conv_5_3)
+            wd = self.weight_variable([pool_size, pool_size, features // 2, features])
+            bd = self.variable([features // 2], 0.0)
+            h_deconv = tf.nn.relu(self.deconv_layer(in_node, wd, pool_size) + bd)
+            h_deconv_concat = self.crop_and_concat(dw_h_convs[layer], h_deconv)
+            deconv[layer] = h_deconv_concat
 
-            dropout = tf.nn.dropout(pool_5, 0.5)
+            w1 = self.weight_variable([filter_size, filter_size, features, features // 2])
+            w2 = self.weight_variable([filter_size, filter_size, features // 2, features // 2])
+            b1 = self.variable([features // 2], 0.0)
+            b2 = self.variable([features // 2], 0.0)
 
-            fc_6 = self.conv_layer(dropout, [7, 7, 512, 4096], 4096, 'fc_6')
-            fc_7 = self.conv_layer(fc_6, [1, 1, 4096, 4096], 4096, 'fc_7')
+            conv1 = self.conv_layer(h_deconv_concat, w1, self.keep_prob)
+            h_conv = tf.nn.relu(conv1 + b1)
+            conv2 = self.conv_layer(h_conv, w2, self.keep_prob)
+            in_node = tf.nn.relu(conv2 + b2)
+            up_h_convs[layer] = in_node
 
-            deconv_fc_6 = self.deconv_layer(fc_7, [7, 7, 512, 4096], 512, 'fc6_deconv')
+            weights.append((w1, w2))
+            biases.append((b1, b2))
+            convs.append((conv1, conv2))
 
-            unpool_5 = self.unpool_layer2x2(deconv_fc_6, pool_5_argmax)
+            size *= 2
+            size -= 4
 
-            deconv_5_3 = self.deconv_layer(unpool_5, [3, 3, 512, 512], 512, 'deconv_5_3')
-            deconv_5_2 = self.deconv_layer(deconv_5_3, [3, 3, 512, 512], 512, 'deconv_5_2')
-            deconv_5_1 = self.deconv_layer(deconv_5_2, [3, 3, 512, 512], 512, 'deconv_5_1')
+        # Output Map
+        weight = self.weight_variable([1, 1, features_root, 2])
+        bias = self.variable([2], 0.0)
+        conv = self.conv_layer(in_node, weight, tf.constant(1.0))
+        output_map = tf.nn.relu(conv + bias)
+        up_h_convs["out"] = output_map
 
-            unpool_4 = self.unpool_layer2x2(deconv_5_1, pool_4_argmax)
+        variables = []
+        for w1, w2 in weights:
+            variables.append(w1)
+            variables.append(w2)
 
-            deconv_4_3 = self.deconv_layer(unpool_4, [3, 3, 512, 512], 512, 'deconv_4_3')
-            deconv_4_2 = self.deconv_layer(deconv_4_3, [3, 3, 512, 512], 512, 'deconv_4_2')
-            deconv_4_1 = self.deconv_layer(deconv_4_2, [3, 3, 256, 512], 256, 'deconv_4_1')
+        for b1, b2 in biases:
+            variables.append(b1)
+            variables.append(b2)
 
-            unpool_3 = self.unpool_layer2x2(deconv_4_1, pool_3_argmax)
+        self.train_step = tf.train.AdamOptimizer(self.rate).minimize(self.loss)
 
-            deconv_3_3 = self.deconv_layer(unpool_3, [3, 3, 256, 256], 256, 'deconv_3_3')
-            deconv_3_2 = self.deconv_layer(deconv_3_3, [3, 3, 256, 256], 256, 'deconv_3_2')
-            deconv_3_1 = self.deconv_layer(deconv_3_2, [3, 3, 128, 256], 128, 'deconv_3_1')
+        self.prediction = tf.argmax(tf.reshape(tf.nn.softmax(logits), tf.shape(score_1)), dimension=3)
 
-            unpool_2 = self.unpool_layer2x2(deconv_3_1, pool_2_argmax)
+        self.accuracy = tf.reduce_sum(tf.pow(self.prediction - expected[:, :, :, 0], 2))
 
-            deconv_2_2 = self.deconv_layer(unpool_2, [3, 3, 128, 128], 128, 'deconv_2_2')
-            deconv_2_1 = self.deconv_layer(deconv_2_2, [3, 3, 64, 128], 64, 'deconv_2_1')
+        return output_map, variables, int(in_size - size)
 
-            unpool_1 = self.unpool_layer2x2(deconv_2_1, pool_1_argmax)
+    def cost_function(self, logits):
+        flat_logits = tf.reshape(logits, [-1, 2])
+        flat_labels = tf.reshape(self.y, [-1])
 
-            deconv_1_2 = self.deconv_layer(unpool_1, [3, 3, 64, 64], 64, 'deconv_1_2')
-            deconv_1_1 = self.deconv_layer(deconv_1_2, [3, 3, 32, 64], 32, 'deconv_1_1')
+        loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=flat_logits, labels=flat_labels))
 
-            score_1 = self.deconv_layer(deconv_1_1, [1, 1, 2, 32], 2, 'score_1')
+        regularizers = sum([tf.nn.l2_loss(variable) for variable in self.variables])
+        loss += (0.5 * regularizers)
 
-            logits = tf.reshape(score_1, (-1, 2))
-            cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits,
-                                                                           labels=tf.reshape(expected, [-1]),
-                                                                           name='x_entropy')
+        return loss
 
-            self.loss = tf.reduce_mean(cross_entropy, name='x_entropy_mean')
+    def weight_variable(self, shape):
+        nr_units = functools.reduce(lambda x, y: x * y, shape)
+        stddev = 1.0 / math.sqrt(float(nr_units))
 
-            self.train_step = tf.train.AdamOptimizer(self.rate).minimize(self.loss)
-
-            self.prediction = tf.argmax(tf.reshape(tf.nn.softmax(logits), tf.shape(score_1)), dimension=3)
-
-            self.accuracy = tf.reduce_sum(tf.pow(self.prediction - expected[:, :, :, 0], 2))
-
-    def weight_variable(self, shape, stddev):
         initial = tf.truncated_normal(shape, stddev=stddev)
 
         return tf.Variable(initial)
@@ -228,92 +281,51 @@ class LVSegmentation(object):
 
         return tf.Variable(initial)
 
-    def conv_layer(self, x, W_shape, v_shape, name, padding='SAME'):
+    def conv_layer(self, x, weights, keep_prob_):
+        hidden = tf.nn.conv2d(x, weights, strides=[1, 1, 1, 1], padding='VALID')
 
-        nr_units = functools.reduce(lambda x, y: x * y, W_shape)
-        stddev = 1.0 / math.sqrt(float(nr_units))
+        return tf.nn.dropout(hidden, keep_prob_)
 
-        weights = self.weight_variable(W_shape, stddev)
-        scale = self.variable([v_shape], 1.0)
-        beta = self.variable([v_shape], 0.0)
-
-        hidden = tf.nn.conv2d(x, weights, strides=[1, 1, 1, 1], padding=padding)
-
-        batch_mean, batch_var = tf.nn.moments(hidden, [0])
-
-        hidden = tf.nn.batch_normalization(hidden, batch_mean, batch_var, beta, scale, self.EPSILON)
-
-        hidden = tf.nn.relu(hidden)
-
-        return hidden
-
-    def pool_layer(self, x):
-        with tf.device('/gpu:0'):
-            return tf.nn.max_pool_with_argmax(x, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
-
-    def deconv_layer(self, x, W_shape, v_shape, name, padding='SAME'):
-
-        nr_units = functools.reduce(lambda x, y: x * y, W_shape)
-        stddev = 1.0 / math.sqrt(float(nr_units))
-
-        weights = self.weight_variable(W_shape, stddev)
-        scale = self.variable([v_shape], 1.0)
-        beta = self.variable([v_shape], 0.0)
+    def deconv_layer(self, x, weights, stride):
 
         x_shape = tf.shape(x)
-        out_shape = tf.stack([x_shape[0], x_shape[1], x_shape[2], W_shape[2]])
+        out_shape = tf.stack([x_shape[0], x_shape[1] * 2, x_shape[2] * 2, x_shape[3] // 2])
 
-        hidden = tf.nn.conv2d_transpose(x, weights, out_shape, [1, 1, 1, 1], padding=padding)
+        return tf.nn.conv2d_transpose(x, weights, out_shape, strides=[1, stride, stride, 1], padding='VALID')
+
+    def max_pool(self, x, n):
+        return tf.nn.max_pool(x, ksize=[1, n, n, 1], strides=[1, n, n, 1], padding='VALID')
+
+    def batch_normalization(self, hidden, v_shape):
+        scale = self.variable([v_shape], 1.0)
+        beta = self.variable([v_shape], 0.0)
 
         batch_mean, batch_var = tf.nn.moments(hidden, [0])
 
-        hidden = tf.nn.batch_normalization(hidden, batch_mean, batch_var, beta, scale, self.EPSILON)
+        return tf.nn.batch_normalization(hidden, batch_mean, batch_var, beta, scale, 1e-3)
 
-        hidden = tf.nn.relu(hidden)
+    def crop_and_concat(self, x1, x2):
+        x1_shape = tf.shape(x1)
+        x2_shape = tf.shape(x2)
+        # offsets for the top left corner of the crop
+        offsets = [0, (x1_shape[1] - x2_shape[1]) // 2, (x1_shape[2] - x2_shape[2]) // 2, 0]
+        size = [-1, x2_shape[1], x2_shape[2], -1]
+        x1_crop = tf.slice(x1, offsets, size)
+        return tf.concat([x1_crop, x2], 3)
 
-        return hidden
+    def pixel_wise_softmax(self, output_map):
+        exponential_map = tf.exp(output_map)
+        evidence = tf.add(exponential_map, tf.reverse(exponential_map, [False, False, False, True]))
+        return tf.div(exponential_map, evidence, name="pixel_wise_softmax")
 
-    def unravel_argmax(self, argmax, shape):
-        output_list = []
-        output_list.append(argmax // (shape[2] * shape[3]))
-        output_list.append(argmax % (shape[2] * shape[3]) // shape[3])
+    def pixel_wise_softmax_2(self, output_map):
+        exponential_map = tf.exp(output_map)
+        sum_exp = tf.reduce_sum(exponential_map, 3, keep_dims=True)
+        tensor_sum_exp = tf.tile(sum_exp, tf.stack([1, 1, 1, tf.shape(output_map)[3]]))
+        return tf.div(exponential_map, tensor_sum_exp)
 
-        return tf.stack(output_list)
-
-    def unpool_layer2x2(self, bottom, argmax):
-        bottom_shape = tf.shape(bottom)
-        top_shape = [bottom_shape[0], bottom_shape[1] * 2, bottom_shape[2] * 2, bottom_shape[3]]
-
-        batch_size = top_shape[0]
-        height = top_shape[1]
-        width = top_shape[2]
-        channels = top_shape[3]
-
-        argmax_shape = tf.to_int64([batch_size, height, width, channels])
-        argmax = self.unravel_argmax(argmax, argmax_shape)
-
-        t1 = tf.to_int64(tf.range(channels))
-        t1 = tf.tile(t1, [batch_size * (width // 2) * (height // 2)])
-        t1 = tf.reshape(t1, [-1, channels])
-        t1 = tf.transpose(t1, perm=[1, 0])
-        t1 = tf.reshape(t1, [channels, batch_size, height // 2, width // 2, 1])
-        t1 = tf.transpose(t1, perm=[1, 0, 2, 3, 4])
-
-        t2 = tf.to_int64(tf.range(batch_size))
-        t2 = tf.tile(t2, [channels * (width // 2) * (height // 2)])
-        t2 = tf.reshape(t2, [-1, batch_size])
-        t2 = tf.transpose(t2, perm=[1, 0])
-        t2 = tf.reshape(t2, [batch_size, channels, height // 2, width // 2, 1])
-
-        t3 = tf.transpose(argmax, perm=[1, 4, 2, 3, 0])
-
-        t = tf.concat([t2, t3, t1], 4)
-        indices = tf.reshape(t, [(height // 2) * (width // 2) * channels * batch_size, 4])
-
-        x1 = tf.transpose(bottom, perm=[0, 3, 1, 2])
-        values = tf.reshape(x1, [-1])
-
-        return tf.scatter_nd(indices, values, tf.to_int64(top_shape))
+    def cross_entropy(self, y_, output_map):
+        return -tf.reduce_mean(y_ * tf.log(tf.clip_by_value(output_map, 1e-10, 1.0)), name="cross_entropy")
 
 
 if __name__ == '__main__':
@@ -321,13 +333,13 @@ if __name__ == '__main__':
     segmenter = LVSegmentation()
 
     if len(sys.argv) != 2:
-        print('The program must be run as : python3.5 step2_train_segmenter_v2.py [train|predict]')
+        print('The program must be run as : python3.5 step2_train_segmenter_v3.py [train|predict]')
         sys.exit(2)
     else:
         if sys.argv[1] == 'train':
             print('Run Train .....')
 
-            segmenter.train(train)
+            segmenter.train(train, training_steps=10000)
 
         elif sys.argv[1] == 'predict':
             print('Run Predict .....')
