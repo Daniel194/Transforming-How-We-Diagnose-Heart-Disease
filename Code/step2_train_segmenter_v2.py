@@ -140,30 +140,30 @@ class LVSegmentation(object):
             self.rate = tf.placeholder(tf.float32, shape=[])
 
             conv_1_1 = self.conv_layer(self.x, [3, 3, 1, 64], 64, 'conv_1_1')
-            conv_1_2 = self.conv_layer(conv_1_1, [3, 3, 64, 64], 64, 'conv_1_2')
+            conv_1_2 = self.conv_layer(conv_1_1, [3, 3, 64, 64], 64, 'conv_1_2', bn=True)
 
             pool_1, pool_1_argmax = self.pool_layer(conv_1_2)
 
             conv_2_1 = self.conv_layer(pool_1, [3, 3, 64, 128], 128, 'conv_2_1')
-            conv_2_2 = self.conv_layer(conv_2_1, [3, 3, 128, 128], 128, 'conv_2_2')
+            conv_2_2 = self.conv_layer(conv_2_1, [3, 3, 128, 128], 128, 'conv_2_2', bn=True)
 
             pool_2, pool_2_argmax = self.pool_layer(conv_2_2)
 
             conv_3_1 = self.conv_layer(pool_2, [3, 3, 128, 256], 256, 'conv_3_1')
             conv_3_2 = self.conv_layer(conv_3_1, [3, 3, 256, 256], 256, 'conv_3_2')
-            conv_3_3 = self.conv_layer(conv_3_2, [3, 3, 256, 256], 256, 'conv_3_3')
+            conv_3_3 = self.conv_layer(conv_3_2, [3, 3, 256, 256], 256, 'conv_3_3', bn=True)
 
             pool_3, pool_3_argmax = self.pool_layer(conv_3_3)
 
             conv_4_1 = self.conv_layer(pool_3, [3, 3, 256, 512], 512, 'conv_4_1')
             conv_4_2 = self.conv_layer(conv_4_1, [3, 3, 512, 512], 512, 'conv_4_2')
-            conv_4_3 = self.conv_layer(conv_4_2, [3, 3, 512, 512], 512, 'conv_4_3')
+            conv_4_3 = self.conv_layer(conv_4_2, [3, 3, 512, 512], 512, 'conv_4_3', bn=True)
 
             pool_4, pool_4_argmax = self.pool_layer(conv_4_3)
 
             conv_5_1 = self.conv_layer(pool_4, [3, 3, 512, 512], 512, 'conv_5_1')
             conv_5_2 = self.conv_layer(conv_5_1, [3, 3, 512, 512], 512, 'conv_5_2')
-            conv_5_3 = self.conv_layer(conv_5_2, [3, 3, 512, 512], 512, 'conv_5_3')
+            conv_5_3 = self.conv_layer(conv_5_2, [3, 3, 512, 512], 512, 'conv_5_3', bn=True)
 
             pool_5, pool_5_argmax = self.pool_layer(conv_5_3)
 
@@ -176,30 +176,30 @@ class LVSegmentation(object):
 
             unpool_5 = self.unpool_layer2x2(deconv_fc_6, pool_5_argmax)
 
-            deconv_5_3 = self.deconv_layer(unpool_5, [3, 3, 512, 512], 512, 'deconv_5_3')
+            deconv_5_3 = self.deconv_layer(unpool_5, [3, 3, 512, 512], 512, 'deconv_5_3', bn=True)
             deconv_5_2 = self.deconv_layer(deconv_5_3, [3, 3, 512, 512], 512, 'deconv_5_2')
             deconv_5_1 = self.deconv_layer(deconv_5_2, [3, 3, 512, 512], 512, 'deconv_5_1')
 
             unpool_4 = self.unpool_layer2x2(deconv_5_1, pool_4_argmax)
 
-            deconv_4_3 = self.deconv_layer(unpool_4, [3, 3, 512, 512], 512, 'deconv_4_3')
+            deconv_4_3 = self.deconv_layer(unpool_4, [3, 3, 512, 512], 512, 'deconv_4_3', bn=True)
             deconv_4_2 = self.deconv_layer(deconv_4_3, [3, 3, 512, 512], 512, 'deconv_4_2')
             deconv_4_1 = self.deconv_layer(deconv_4_2, [3, 3, 256, 512], 256, 'deconv_4_1')
 
             unpool_3 = self.unpool_layer2x2(deconv_4_1, pool_3_argmax)
 
-            deconv_3_3 = self.deconv_layer(unpool_3, [3, 3, 256, 256], 256, 'deconv_3_3')
+            deconv_3_3 = self.deconv_layer(unpool_3, [3, 3, 256, 256], 256, 'deconv_3_3', bn=True)
             deconv_3_2 = self.deconv_layer(deconv_3_3, [3, 3, 256, 256], 256, 'deconv_3_2')
             deconv_3_1 = self.deconv_layer(deconv_3_2, [3, 3, 128, 256], 128, 'deconv_3_1')
 
             unpool_2 = self.unpool_layer2x2(deconv_3_1, pool_2_argmax)
 
-            deconv_2_2 = self.deconv_layer(unpool_2, [3, 3, 128, 128], 128, 'deconv_2_2')
+            deconv_2_2 = self.deconv_layer(unpool_2, [3, 3, 128, 128], 128, 'deconv_2_2', bn=True)
             deconv_2_1 = self.deconv_layer(deconv_2_2, [3, 3, 64, 128], 64, 'deconv_2_1')
 
             unpool_1 = self.unpool_layer2x2(deconv_2_1, pool_1_argmax)
 
-            deconv_1_2 = self.deconv_layer(unpool_1, [3, 3, 64, 64], 64, 'deconv_1_2')
+            deconv_1_2 = self.deconv_layer(unpool_1, [3, 3, 64, 64], 64, 'deconv_1_2', bn=True)
             deconv_1_1 = self.deconv_layer(deconv_1_2, [3, 3, 32, 64], 32, 'deconv_1_1')
 
             score_1 = self.deconv_layer(deconv_1_1, [1, 1, 2, 32], 2, 'score_1')
@@ -227,20 +227,25 @@ class LVSegmentation(object):
 
         return tf.Variable(initial)
 
-    def conv_layer(self, x, W_shape, v_shape, name, padding='SAME'):
+    def conv_layer(self, x, W_shape, v_shape, name, padding='SAME', bn=False):
 
         nr_units = functools.reduce(lambda x, y: x * y, W_shape)
         stddev = 1.0 / math.sqrt(float(nr_units))
 
         weights = self.weight_variable(W_shape, stddev)
-        scale = self.variable([v_shape], 1.0)
-        beta = self.variable([v_shape], 0.0)
 
         hidden = tf.nn.conv2d(x, weights, strides=[1, 1, 1, 1], padding=padding)
 
-        batch_mean, batch_var = tf.nn.moments(hidden, [0])
+        if bn:
+            scale = self.variable([v_shape], 1.0)
+            beta = self.variable([v_shape], 0.0)
 
-        hidden = tf.nn.batch_normalization(hidden, batch_mean, batch_var, beta, scale, 1e-3)
+            batch_mean, batch_var = tf.nn.moments(hidden, [0])
+            hidden = tf.nn.batch_normalization(hidden, batch_mean, batch_var, beta, scale, 1e-3)
+        else:
+            biases = self.variable([v_shape], 0.0)
+
+            hidden = tf.add(hidden, biases)
 
         hidden = tf.nn.relu(hidden)
 
@@ -250,25 +255,28 @@ class LVSegmentation(object):
         with tf.device('/gpu:0'):
             return tf.nn.max_pool_with_argmax(x, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
 
-    def deconv_layer(self, x, W_shape, v_shape, name, padding='SAME'):
+    def deconv_layer(self, x, W_shape, v_shape, name, padding='SAME', bn=False):
 
         nr_units = functools.reduce(lambda x, y: x * y, W_shape)
         stddev = 1.0 / math.sqrt(float(nr_units))
 
         weights = self.weight_variable(W_shape, stddev)
-        scale = self.variable([v_shape], 1.0)
-        beta = self.variable([v_shape], 0.0)
 
         x_shape = tf.shape(x)
         out_shape = tf.stack([x_shape[0], x_shape[1], x_shape[2], W_shape[2]])
 
         hidden = tf.nn.conv2d_transpose(x, weights, out_shape, [1, 1, 1, 1], padding=padding)
 
-        batch_mean, batch_var = tf.nn.moments(hidden, [0])
+        if bn:
+            scale = self.variable([v_shape], 1.0)
+            beta = self.variable([v_shape], 0.0)
 
-        hidden = tf.nn.batch_normalization(hidden, batch_mean, batch_var, beta, scale, 1e-3)
+            batch_mean, batch_var = tf.nn.moments(hidden, [0])
+            hidden = tf.nn.batch_normalization(hidden, batch_mean, batch_var, beta, scale, 1e-3)
+        else:
+            biases = self.variable([v_shape], 0.0)
 
-        hidden = tf.nn.relu(hidden)
+            hidden = tf.add(hidden, biases)
 
         return hidden
 
