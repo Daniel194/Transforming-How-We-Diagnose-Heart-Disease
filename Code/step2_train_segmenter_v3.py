@@ -25,22 +25,18 @@ class LVSegmentation(object):
 
         self.gradients_node = tf.gradients(self.cost, self.variables)
 
-        self.cross_entropy = tf.reduce_mean(
-            self.cross_entropy(tf.reshape(self.y, [-1]), tf.reshape(self.pixel_wise_softmax_2(logits), [-1, 2])))
-
-        self.predicter = self.pixel_wise_softmax_2(logits)
-        self.correct_pred = tf.equal(tf.argmax(self.predicter, 3), tf.argmax(self.y, 3))
+        self.prediction = tf.argmax(tf.nn.softmax(logits), dimension=3)
+        self.correct_pred = tf.equal(self.prediction, self.y)
         self.accuracy = tf.reduce_mean(tf.cast(self.correct_pred, tf.float32))
 
         self.global_step = tf.Variable(0)
 
         self.norm_gradients_node = tf.Variable(tf.constant(0.0, shape=[len(self.gradients_node)]))
 
-        tf.summary.scalar('loss', self.cost)
-        tf.summary.scalar('cross_entropy', self.cross_entropy)
-        tf.summary.scalar('accuracy', self.accuracy)
-
         self.optimizer = self.adam_optimizer(learning_rate)
+
+        tf.summary.scalar('loss', self.cost)
+        tf.summary.scalar('accuracy', self.accuracy)
         tf.summary.scalar('learning_rate', self.learning_rate_node)
 
         self.summary_op = tf.summary.merge_all()
@@ -51,32 +47,11 @@ class LVSegmentation(object):
 
         self.checkpoint_dir = checkpoint_dir
 
-    def predict(self, model_path, x_test):
-        init = tf.global_variables_initializer()
-
-        with tf.Session() as sess:
-            # Initialize variables
-            sess.run(init)
-
-            # Restore model weights from previously saved model
-            self.restore(sess, model_path)
-
-            y_dummy = np.empty((x_test.shape[0], x_test.shape[1], x_test.shape[2], 2))
-            prediction = sess.run(self.predicter, feed_dict={self.x: x_test, self.y: y_dummy, self.keep_prob: 1.})
-
-        return prediction
-
-    def save(self, sess, model_path):
-        saver = tf.train.Saver()
-        save_path = saver.save(sess, model_path)
-        return save_path
-
-    def restore(self, sess, model_path):
-        saver = tf.train.Saver()
-        saver.restore(sess, model_path)
+    def save(self):
+        self.saver.save(self.session, self.checkpoint_dir + 'model.cpkt')
 
     def restore_session(self):
-        global_step = 0
+
         if not os.path.exists(self.checkpoint_dir):
             raise IOError(self.checkpoint_dir + ' does not exist.')
         else:
@@ -85,12 +60,6 @@ class LVSegmentation(object):
                 raise IOError('No checkpoint to restore in ' + self.checkpoint_dir)
             else:
                 self.saver.restore(self.session, path.model_checkpoint_path)
-                global_step = int(path.model_checkpoint_path.split('-')[-1])
-
-        with open(self.checkpoint_dir + 'loss.pickle', 'rb') as f:
-            self.loss_array = pickle.load(f)
-
-        return global_step
 
     def predict(self, images):
         self.restore_session()
@@ -106,18 +75,10 @@ class LVSegmentation(object):
 
         print('Model has accuracy : {:.6f} '.format(accuracy))
 
-    def train(self, train_paths, epochs=100, dropout=0.75, restore_session=False, display_step=100):
-
-        save_path = os.path.join(self.checkpoint_dir, "model.cpkt")
-
-        if epochs == 0:
-            return save_path
+    def train(self, train_paths, train_size, batch_size, epochs=100, dropout=0.75, restore_session=False):
 
         if restore_session:
-            ckpt = tf.train.get_checkpoint_state(self.checkpoint_dir)
-
-            if ckpt and ckpt.model_checkpoint_path:
-                self.restore(ckpt.model_checkpoint_path)
+            self.restore_session()
 
         summary_writer = tf.summary.FileWriter(self.checkpoint_dir, graph=self.session)
 
@@ -126,10 +87,10 @@ class LVSegmentation(object):
         for epoch in range(epochs):
             total_loss = 0
 
-            for step in range(0, 800, 2):
-                current_step = 800 * epoch + step
+            for step in range(0, train_size, batch_size):
+                current_step = train_size * epoch + step
 
-                train_path = train_paths[step:step + 2]
+                train_path = train_paths[step:step + batch_size]
                 _, images, labels = self.read_data(train_path)
 
                 # Run optimization op (backprop)
@@ -148,14 +109,14 @@ class LVSegmentation(object):
                 norm_gradients = [np.linalg.norm(gradient) for gradient in avg_gradients]
                 self.norm_gradients_node.assign(norm_gradients).eval()
 
-                if current_step % display_step == 0:
-                    self.output_minibatch_stats(self.session, summary_writer, step, images, labels)
+                if current_step % 100 == 0:
+                    self.output_minibatch_stats(summary_writer, current_step, images, labels)
 
                 total_loss += loss
 
-            self.output_epoch_stats(epoch, total_loss, 800, lr)
+            self.output_epoch_stats(epoch, total_loss, train_size, lr)
 
-            save_path = self.save(save_path)
+            self.save()
 
     def read_data(self, paths):
         images, labels = sunnybrook.export_all_contours(paths)
@@ -189,7 +150,6 @@ class LVSegmentation(object):
         in_size = 1000
         size = in_size
 
-        expected = tf.expand_dims(self.y, -1)
         self.rate = tf.placeholder(tf.float32, shape=[])
 
         in_node = self.x
@@ -335,29 +295,12 @@ class LVSegmentation(object):
         x1_crop = tf.slice(x1, offsets, size)
         return tf.concat([x1_crop, x2], 3)
 
-    def pixel_wise_softmax(self, output_map):
-        exponential_map = tf.exp(output_map)
-        evidence = tf.add(exponential_map, tf.reverse(exponential_map, [False, False, False, True]))
-        return tf.div(exponential_map, evidence, name="pixel_wise_softmax")
-
-    def pixel_wise_softmax_2(self, output_map):
-        exponential_map = tf.exp(output_map)
-        sum_exp = tf.reduce_sum(exponential_map, 3, keep_dims=True)
-        tensor_sum_exp = tf.tile(sum_exp, tf.stack([1, 1, 1, tf.shape(output_map)[3]]))
-        return tf.div(exponential_map, tensor_sum_exp)
-
-    def cross_entropy(self, y_, output_map):
-        return -tf.reduce_mean(y_ * tf.log(tf.clip_by_value(output_map, 1e-10, 1.0)), name="cross_entropy")
-
-    def output_minibatch_stats(self, sess, summary_writer, step, batch_x, batch_y):
+    def output_minibatch_stats(self, summary_writer, step, batch_x, batch_y):
         # Calculate batch loss and accuracy
-        summary_str, loss, acc, predictions = sess.run([self.summary_op,
-                                                        self.cost,
-                                                        self.accuracy,
-                                                        self.predicter],
-                                                       feed_dict={self.x: batch_x,
-                                                                  self.y: batch_y,
-                                                                  self.keep_prob: 1.})
+        summary_str, loss, acc, predictions = self.session.run([self.summary_op, self.cost, self.accuracy],
+                                                               feed_dict={self.x: batch_x,
+                                                                          self.y: batch_y,
+                                                                          self.keep_prob: 1.})
         summary_writer.add_summary(summary_str, step)
         summary_writer.flush()
 
@@ -367,7 +310,7 @@ class LVSegmentation(object):
 
 if __name__ == '__main__':
     train, val = sunnybrook.get_all_contours()
-    segmenter = LVSegmentation()
+    segmenter = LVSegmentation(1e-3)
 
     if len(sys.argv) != 2:
         print('The program must be run as : python3.5 step2_train_segmenter_v3.py [train|predict]')
@@ -376,7 +319,7 @@ if __name__ == '__main__':
         if sys.argv[1] == 'train':
             print('Run Train .....')
 
-            segmenter.train(train, training_steps=10000)
+            segmenter.train(train, 800, 2, epochs=30)
 
         elif sys.argv[1] == 'predict':
             print('Run Predict .....')
@@ -395,5 +338,5 @@ if __name__ == '__main__':
                 plt.show()
 
         else:
-            print('The available options for this script are : train, evaluate and predict')
+            print('The available options for this script are : train and predict')
             sys.exit(2)
