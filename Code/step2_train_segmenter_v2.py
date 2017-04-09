@@ -26,7 +26,6 @@ class LVSegmentation(object):
         self.checkpoint_dir = checkpoint_dir
 
         self.loss_array = []
-        self.EPSILON = 1e-3
 
     def restore_session(self):
         global_step = 0
@@ -67,7 +66,7 @@ class LVSegmentation(object):
 
         print('Model has accuracy : {:.6f} '.format(accuracy))
 
-    def train(self, train_paths, training_steps=1000, restore_session=False, learning_rate=1e-6):
+    def train(self, train_paths, training_steps=1000, restore_session=False, learning_rate=1e-3):
         if restore_session:
             step_start = self.restore_session() + 1
         else:
@@ -241,7 +240,7 @@ class LVSegmentation(object):
 
         batch_mean, batch_var = tf.nn.moments(hidden, [0])
 
-        hidden = tf.nn.batch_normalization(hidden, batch_mean, batch_var, beta, scale, self.EPSILON)
+        hidden = tf.nn.batch_normalization(hidden, batch_mean, batch_var, beta, scale, 1e-3)
 
         hidden = tf.nn.relu(hidden)
 
@@ -267,7 +266,7 @@ class LVSegmentation(object):
 
         batch_mean, batch_var = tf.nn.moments(hidden, [0])
 
-        hidden = tf.nn.batch_normalization(hidden, batch_mean, batch_var, beta, scale, self.EPSILON)
+        hidden = tf.nn.batch_normalization(hidden, batch_mean, batch_var, beta, scale, 1e-3)
 
         hidden = tf.nn.relu(hidden)
 
@@ -327,7 +326,7 @@ if __name__ == '__main__':
         if sys.argv[1] == 'train':
             print('Run Train .....')
 
-            segmenter.train(train)
+            segmenter.train(train, training_steps=10000)
 
         elif sys.argv[1] == 'predict':
             print('Run Predict .....')
