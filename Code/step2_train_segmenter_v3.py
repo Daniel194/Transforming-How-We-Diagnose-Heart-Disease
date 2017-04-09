@@ -11,12 +11,9 @@ import functools
 from collections import OrderedDict
 import utils.sunnybrook as sunnybrook
 
-from tensorflow.python.framework import ops
-from tensorflow.python.ops import gen_nn_ops
-
 
 class LVSegmentation(object):
-    def __init__(self, use_cpu=False, checkpoint_dir='../../result/segmenter/train_result/v3/'):
+    def __init__(self, learning_rate, checkpoint_dir='../../result/segmenter/train_result/v3/'):
         random.seed(time.time())
 
         self.x = tf.placeholder(tf.float32, shape=(None, 224, 224, 1))
@@ -35,13 +32,24 @@ class LVSegmentation(object):
         self.correct_pred = tf.equal(tf.argmax(self.predicter, 3), tf.argmax(self.y, 3))
         self.accuracy = tf.reduce_mean(tf.cast(self.correct_pred, tf.float32))
 
-        self.saver = tf.train.Saver(max_to_keep=5, keep_checkpoint_every_n_hours=1)
-        config = tf.ConfigProto(allow_soft_placement=True)
-        self.session = tf.Session(config=config)
-        self.session.run(tf.global_variables_initializer())
-        self.checkpoint_dir = checkpoint_dir
+        self.global_step = tf.Variable(0)
 
-        self.loss_array = []
+        self.norm_gradients_node = tf.Variable(tf.constant(0.0, shape=[len(self.gradients_node)]))
+
+        tf.summary.scalar('loss', self.cost)
+        tf.summary.scalar('cross_entropy', self.cross_entropy)
+        tf.summary.scalar('accuracy', self.accuracy)
+
+        self.optimizer = self.adam_optimizer(learning_rate)
+        tf.summary.scalar('learning_rate', self.learning_rate_node)
+
+        self.summary_op = tf.summary.merge_all()
+
+        self.saver = tf.train.Saver()
+        self.session = tf.Session()
+        self.session.run(tf.global_variables_initializer())
+
+        self.checkpoint_dir = checkpoint_dir
 
     def predict(self, model_path, x_test):
         init = tf.global_variables_initializer()
@@ -84,14 +92,6 @@ class LVSegmentation(object):
 
         return global_step
 
-    def save_loss(self):
-
-        if os.path.exists(self.checkpoint_dir + 'loss.pickle'):
-            os.remove(self.checkpoint_dir + 'loss.pickle')
-
-        with open(self.checkpoint_dir + 'loss.pickle', 'wb') as f:
-            pickle.dump(self.loss_array, f)
-
     def predict(self, images):
         self.restore_session()
 
@@ -106,36 +106,56 @@ class LVSegmentation(object):
 
         print('Model has accuracy : {:.6f} '.format(accuracy))
 
-    def train(self, train_paths, training_steps=1000, restore_session=False, learning_rate=1e-3):
+    def train(self, train_paths, epochs=100, dropout=0.75, restore_session=False, display_step=100):
+
+        save_path = os.path.join(self.checkpoint_dir, "model.cpkt")
+
+        if epochs == 0:
+            return save_path
+
         if restore_session:
-            step_start = self.restore_session() + 1
-        else:
-            step_start = 1
+            ckpt = tf.train.get_checkpoint_state(self.checkpoint_dir)
 
-        for i in range(step_start, step_start + training_steps):
-            # pick random data
-            train_path = random.sample(train_paths, 5)
-            _, images, labels = self.read_data(train_path)
+            if ckpt and ckpt.model_checkpoint_path:
+                self.restore(ckpt.model_checkpoint_path)
 
-            if i % 10 == 0:
-                print('run train step: ' + str(i))
+        summary_writer = tf.summary.FileWriter(self.checkpoint_dir, graph=self.session)
 
-            start = time.time()
+        avg_gradients = None
 
-            self.train_step.run(session=self.session,
-                                feed_dict={self.x: images, self.y: labels, self.rate: learning_rate})
+        for epoch in range(epochs):
+            total_loss = 0
 
-            if i % 100 == 0:
-                loss = self.loss.eval(session=self.session, feed_dict={self.x: images, self.y: labels})
+            for step in range(0, 800, 2):
+                current_step = 800 * epoch + step
 
-                print('Step {} finished in {:.2f} s with Loss : {:.6f}'.format(i, time.time() - start, loss))
+                train_path = train_paths[step:step + 2]
+                _, images, labels = self.read_data(train_path)
 
-                self.saver.save(self.session, self.checkpoint_dir + 'model', global_step=i)
+                # Run optimization op (backprop)
+                _, loss, lr, gradients = self.session.run(
+                    (self.optimizer, self.cost, self.learning_rate_node, self.gradients_node),
+                    feed_dict={self.x: images,
+                               self.y: labels,
+                               self.keep_prob: dropout})
 
-                self.loss_array.append(loss)
-                self.save_loss()
+                if avg_gradients is None:
+                    avg_gradients = [np.zeros_like(gradient) for gradient in gradients]
 
-                print('Model {} saved'.format(i))
+                for i in range(len(gradients)):
+                    avg_gradients[i] = (avg_gradients[i] * (1.0 - (1.0 / (step + 1)))) + (gradients[i] / (step + 1))
+
+                norm_gradients = [np.linalg.norm(gradient) for gradient in avg_gradients]
+                self.norm_gradients_node.assign(norm_gradients).eval()
+
+                if current_step % display_step == 0:
+                    self.output_minibatch_stats(self.session, summary_writer, step, images, labels)
+
+                total_loss += loss
+
+            self.output_epoch_stats(epoch, total_loss, 800, lr)
+
+            save_path = self.save(save_path)
 
     def read_data(self, paths):
         images, labels = sunnybrook.export_all_contours(paths)
@@ -249,13 +269,15 @@ class LVSegmentation(object):
             variables.append(b1)
             variables.append(b2)
 
-        self.train_step = tf.train.AdamOptimizer(self.rate).minimize(self.loss)
-
-        self.prediction = tf.argmax(tf.reshape(tf.nn.softmax(logits), tf.shape(score_1)), dimension=3)
-
-        self.accuracy = tf.reduce_sum(tf.pow(self.prediction - expected[:, :, :, 0], 2))
-
         return output_map, variables, int(in_size - size)
+
+    def adam_optimizer(self, learning_rate):
+        self.learning_rate_node = tf.Variable(learning_rate)
+
+        optimizer = tf.train.AdamOptimizer(learning_rate=self.learning_rate_node) \
+            .minimize(self.cost, global_step=self.global_step)
+
+        return optimizer
 
     def cost_function(self, logits):
         flat_logits = tf.reshape(logits, [-1, 2])
@@ -326,6 +348,21 @@ class LVSegmentation(object):
 
     def cross_entropy(self, y_, output_map):
         return -tf.reduce_mean(y_ * tf.log(tf.clip_by_value(output_map, 1e-10, 1.0)), name="cross_entropy")
+
+    def output_minibatch_stats(self, sess, summary_writer, step, batch_x, batch_y):
+        # Calculate batch loss and accuracy
+        summary_str, loss, acc, predictions = sess.run([self.summary_op,
+                                                        self.cost,
+                                                        self.accuracy,
+                                                        self.predicter],
+                                                       feed_dict={self.x: batch_x,
+                                                                  self.y: batch_y,
+                                                                  self.keep_prob: 1.})
+        summary_writer.add_summary(summary_str, step)
+        summary_writer.flush()
+
+    def output_epoch_stats(self, epoch, total_loss, training_iters, lr):
+        print("Epoch {:}, Average loss: {:.4f}, learning rate: {:.4f}".format(epoch, (total_loss / training_iters), lr))
 
 
 if __name__ == '__main__':
