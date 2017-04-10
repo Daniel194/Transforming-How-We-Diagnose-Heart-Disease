@@ -90,7 +90,7 @@ class LVSegmentation(object):
                         gradients[i] / (current_step + 1))
 
                 norm_gradients = [np.linalg.norm(gradient) for gradient in avg_gradients]
-                self.norm_gradients_node.assign(norm_gradients).eval()
+                self.norm_gradients_node.assign(norm_gradients).eval(session=self.session)
 
                 if current_step % 100 == 0:
                     self.__output_minibatch_stats(summary_writer, current_step, images, labels)
@@ -252,7 +252,7 @@ class LVSegmentation(object):
         return tf.Variable(initial)
 
     def __conv_layer(self, x, weights, keep_prob_):
-        hidden = tf.nn.conv2d(x, weights, strides=[1, 1, 1, 1], padding='VALID')
+        hidden = tf.nn.conv2d(x, weights, strides=[1, 1, 1, 1], padding='SAME')
 
         return tf.nn.dropout(hidden, keep_prob_)
 
@@ -261,10 +261,10 @@ class LVSegmentation(object):
         x_shape = tf.shape(x)
         out_shape = tf.stack([x_shape[0], x_shape[1] * 2, x_shape[2] * 2, x_shape[3] // 2])
 
-        return tf.nn.conv2d_transpose(x, weights, out_shape, strides=[1, stride, stride, 1], padding='VALID')
+        return tf.nn.conv2d_transpose(x, weights, out_shape, strides=[1, stride, stride, 1], padding='SAME')
 
     def __max_pool(self, x, n):
-        return tf.nn.max_pool(x, ksize=[1, n, n, 1], strides=[1, n, n, 1], padding='VALID')
+        return tf.nn.max_pool(x, ksize=[1, n, n, 1], strides=[1, n, n, 1], padding='SAME')
 
     def __batch_normalization(self, hidden, v_shape):
         scale = self.__variable([v_shape], 1.0)
@@ -285,10 +285,10 @@ class LVSegmentation(object):
 
     def __output_minibatch_stats(self, summary_writer, step, batch_x, batch_y):
         # Calculate batch loss and accuracy
-        summary_str, loss, acc, predictions = self.session.run([self.summary_op, self.cost, self.accuracy],
-                                                               feed_dict={self.x: batch_x,
-                                                                          self.y: batch_y,
-                                                                          self.keep_prob: 1.})
+        summary_str, loss, acc = self.session.run([self.summary_op, self.cost, self.accuracy],
+                                                  feed_dict={self.x: batch_x,
+                                                             self.y: batch_y,
+                                                             self.keep_prob: 1.})
         summary_writer.add_summary(summary_str, step)
         summary_writer.flush()
 
