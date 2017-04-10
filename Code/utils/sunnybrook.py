@@ -185,7 +185,7 @@ def export_all_contours(batch):
     return np.array(imgs), np.array(labels)
 
 
-def convert_dicom_to_png(ctrs, img_path):
+def convert_dicom_to_png(ctrs):
     """
     Convert DICOM format to PNG format
     :param ctrs: dicom paths
@@ -195,7 +195,7 @@ def convert_dicom_to_png(ctrs, img_path):
 
     for idx, ctr in enumerate(ctrs):
         filename = "IM-%s-%04d.dcm" % (SAX_SERIES[ctr.case], ctr.img_no)
-        full_path = os.path.join(img_path, ctr.case, filename)
+        full_path = os.path.join(IMG_PATH, ctr.case, filename)
         dicom_data = dicom.read_file(full_path)
 
         img_new_path = full_path.replace(".dcm", ".png")
@@ -235,11 +235,3 @@ def get_all_contours():
     train_ctrs = ctrs[5:]
 
     return train_ctrs, val_ctrs
-
-
-if __name__ == "__main__":
-    # Convert Sunnybrook dataset from DICOM form to PNG format
-
-    ctrs = __get_all_contours(CONTOUR_PATH)
-
-    convert_dicom_to_png(ctrs, IMG_PATH)

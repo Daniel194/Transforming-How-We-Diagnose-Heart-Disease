@@ -5,6 +5,8 @@ import pandas
 import scipy
 import scipy.misc
 import cv2
+import numpy as np
+import utils.sunnybrook as sunnybrook
 
 
 def create_csv_data():
@@ -291,4 +293,10 @@ if __name__ == "__main__":
     create_csv_data()
     enrich_dicom_csvdata()
     enrich_traindata()
+
+    # Convert Sunnybrook dataset from DICOM form to PNG format
+    train, val = sunnybrook.get_all_contours()
+    ctrs = np.append(train, val)
+    sunnybrook.convert_dicom_to_png(ctrs)
+
     print("Done")
