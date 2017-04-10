@@ -1,9 +1,7 @@
 import os
-import time
 import sys
 import random
 import math
-import pickle
 import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
@@ -14,8 +12,6 @@ import utils.sunnybrook as sunnybrook
 
 class LVSegmentation(object):
     def __init__(self, learning_rate, checkpoint_dir='../../result/segmenter/train_result/v3/'):
-        random.seed(time.time())
-
         self.x = tf.placeholder(tf.float32, shape=(None, 224, 224, 1))
         self.y = tf.placeholder(tf.int64, shape=(None, 224, 224))
         self.keep_prob = tf.placeholder(tf.float32)
@@ -80,7 +76,7 @@ class LVSegmentation(object):
         if restore_session:
             self.restore_session()
 
-        summary_writer = tf.summary.FileWriter(self.checkpoint_dir, graph=self.session)
+        summary_writer = tf.summary.FileWriter(self.checkpoint_dir, graph=self.session.graph)
 
         avg_gradients = None
 
