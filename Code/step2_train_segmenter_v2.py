@@ -51,7 +51,7 @@ class LVSegmentation(object):
 
         return self.prediction.eval(session=self.session, feed_dict={self.x: images, self.keep_prob: 1.0})
 
-    def train(self, train_paths, epochs=30, batch_size=2, restore_session=False, learning_rate=1e-3):
+    def train(self, train_paths, epochs=11, batch_size=2, restore_session=False, learning_rate=1e-6):
         if restore_session:
             self.restore_session()
 
@@ -59,13 +59,13 @@ class LVSegmentation(object):
 
         for epoch in range(epochs):
             for step in range(0, train_size, batch_size):
-                current_step = train_size * epoch + step + 1
+                current_step = train_size * epoch + step + 2
 
                 train_path = train_paths[step:step + batch_size]
                 _, images, labels = self.read_data(train_path)
 
                 if current_step % 10 == 0:
-                    print('Run epoch {} and step {}'.format(epoch, step + 1))
+                    print('Run epoch {} and step {}'.format(epoch, step + 2))
 
                 start = time.time()
 
@@ -80,7 +80,7 @@ class LVSegmentation(object):
                     print('Step {} finished in {:.2f} s with Loss : {:.6f}'.format(current_step, time.time() - start,
                                                                                    loss))
 
-                    self.saver.save(self.session, self.checkpoint_dir + 'model', global_step=i)
+                    self.saver.save(self.session, self.checkpoint_dir + 'model', global_step=current_step)
 
                     self.loss_array.append(loss)
                     self.save_loss()
@@ -155,9 +155,7 @@ class LVSegmentation(object):
 
             pool_5, pool_5_argmax = self.pool_layer(conv_5_2)
 
-            drop = tf.nn.dropout(pool_5, self.keep_prob)
-
-            fc_6 = self.conv_layer(drop, [7, 7, 512, 4096], 4096, 'fc_6')
+            fc_6 = self.conv_layer(pool_5, [7, 7, 512, 4096], 4096, 'fc_6')
 
             deconv_fc_6 = self.deconv_layer(fc_6, [7, 7, 512, 4096], 512, 'fc6_deconv')
 
@@ -297,7 +295,7 @@ if __name__ == '__main__':
         if sys.argv[1] == 'train':
             print('Run Train .....')
 
-            segmenter.train(train, training_steps=10000)
+            segmenter.train(train)
 
         elif sys.argv[1] == 'predict':
             print('Run Predict .....')
