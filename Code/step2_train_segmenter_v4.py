@@ -187,7 +187,7 @@ class LVSegmentation(object):
             deconv_1_2 = self.deconv_layer(unpool_1, [3, 3, 32, 32], 32, 'deconv_1_2')
             deconv_1_1 = self.deconv_layer(deconv_1_2, [3, 3, 32, 32], 32, 'deconv_1_1')
 
-            score_1 = self.deconv_layer(deconv_1_1, [1, 1, 2, 32], 2, 'score_1')
+            score_1 = self.deconv_layer(deconv_1_1, [1, 1, 2, 32], 2, 'score_1', bn=False)
 
             logits = tf.reshape(score_1, (-1, 2))
             cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits,
