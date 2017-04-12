@@ -24,6 +24,7 @@ class LVSegmentation(object):
         self.checkpoint_dir = checkpoint_dir
 
         self.loss_array = []
+        self.weights_array = []
 
     def restore_session(self):
         if not os.path.exists(self.checkpoint_dir):
@@ -51,7 +52,7 @@ class LVSegmentation(object):
 
         return self.prediction.eval(session=self.session, feed_dict={self.x: images, self.keep_prob: 1.0})
 
-    def train(self, train_paths, epochs=30, batch_size=2, restore_session=False, learning_rate=1e-6):
+    def train(self, train_paths, epochs=50, batch_size=2, restore_session=False, learning_rate=1e-6):
         if restore_session:
             self.restore_session()
 
@@ -193,7 +194,9 @@ class LVSegmentation(object):
                                                                            labels=tf.reshape(expected, [-1]),
                                                                            name='x_entropy')
 
-            self.loss = tf.reduce_mean(cross_entropy, name='x_entropy_mean')
+            regularizers = sum([tf.nn.l2_loss(variable) for variable in self.weights_array])
+
+            self.loss = tf.reduce_mean(cross_entropy, name='x_entropy_mean') + 0.5 * regularizers
 
             self.train_step = tf.train.AdamOptimizer(self.rate).minimize(self.loss)
 
@@ -202,23 +205,34 @@ class LVSegmentation(object):
     def weight_variable(self, shape, stddev):
         initial = tf.truncated_normal(shape, stddev=stddev)
 
+        w = tf.Variable(initial)
+
+        self.weights_array.append(w)
+
+        return w
+
+    def variable(self, shape, value):
+        initial = tf.constant(value, shape=shape)
+
         return tf.Variable(initial)
 
-    def bias_variable(self, shape):
-        initial = tf.constant(0.1, shape=shape)
-
-        return tf.Variable(initial)
-
-    def conv_layer(self, x, W_shape, b_shape, name, padding='SAME'):
+    def conv_layer(self, x, W_shape, b_shape, name, padding='SAME', bn=True):
         nr_units = functools.reduce(lambda x, y: x * y, W_shape)
         stddev = 1.0 / math.sqrt(float(nr_units))
 
         weights = self.weight_variable(W_shape, stddev)
-        biases = self.bias_variable([b_shape])
+        biases = self.variable([b_shape], 0.0)
 
         hidden = tf.nn.conv2d(x, weights, strides=[1, 1, 1, 1], padding=padding)
         hidden = tf.add(hidden, biases)
         hidden = tf.nn.relu(hidden)
+
+        if bn:
+            scale = self.variable([b_shape], 1.0)
+            beta = self.variable([b_shape], 0.0)
+            batch_mean, batch_var = tf.nn.moments(hidden, [0])
+
+            hidden = tf.nn.batch_normalization(hidden, batch_mean, batch_var, beta, scale, 1e-3)
 
         return hidden
 
@@ -226,18 +240,25 @@ class LVSegmentation(object):
         with tf.device('/gpu:0'):
             return tf.nn.max_pool_with_argmax(x, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
 
-    def deconv_layer(self, x, W_shape, b_shape, name, padding='SAME'):
+    def deconv_layer(self, x, W_shape, b_shape, name, padding='SAME', bn=True):
         nr_units = functools.reduce(lambda x, y: x * y, W_shape)
         stddev = 1.0 / math.sqrt(float(nr_units))
 
         weights = self.weight_variable(W_shape, stddev)
-        biases = self.bias_variable([b_shape])
+        biases = self.variable([b_shape], 0.0)
 
         x_shape = tf.shape(x)
         out_shape = tf.stack([x_shape[0], x_shape[1], x_shape[2], W_shape[2]])
 
         hidden = tf.nn.conv2d_transpose(x, weights, out_shape, [1, 1, 1, 1], padding=padding)
         hidden = tf.add(hidden, biases)
+
+        if bn:
+            scale = self.variable([b_shape], 1.0)
+            beta = self.variable([b_shape], 0.0)
+            batch_mean, batch_var = tf.nn.moments(hidden, [0])
+
+            hidden = tf.nn.batch_normalization(hidden, batch_mean, batch_var, beta, scale, 1e-3)
 
         return hidden
 
