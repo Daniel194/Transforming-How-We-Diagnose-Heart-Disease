@@ -1,5 +1,4 @@
 import os
-import time
 import sys
 import random
 import math
@@ -15,16 +14,16 @@ from tensorflow.python.ops import gen_nn_ops
 
 
 class LVSegmentation(object):
-    def __init__(self, use_cpu=False, checkpoint_dir='../../result/segmenter/train_result/v3/'):
+    def __init__(self, use_cpu=False, checkpoint_dir='../../result/segmenter/train_result/v4/'):
+        self.loss_array = []
+        self.weights_array = []
+
         self.build(use_cpu=use_cpu)
         self.saver = tf.train.Saver(max_to_keep=30, keep_checkpoint_every_n_hours=1)
         config = tf.ConfigProto(allow_soft_placement=True)
         self.session = tf.Session(config=config)
         self.session.run(tf.global_variables_initializer())
         self.checkpoint_dir = checkpoint_dir
-
-        self.loss_array = []
-        self.weights_array = []
 
     def restore_session(self):
         if not os.path.exists(self.checkpoint_dir):
@@ -52,7 +51,7 @@ class LVSegmentation(object):
 
         return self.prediction.eval(session=self.session, feed_dict={self.x: images, self.keep_prob: 1.0})
 
-    def train(self, train_paths, epochs=50, batch_size=2, restore_session=False, learning_rate=1e-6):
+    def train(self, train_paths, epochs=30, batch_size=2, restore_session=False, learning_rate=1e-6):
         if restore_session:
             self.restore_session()
 
@@ -310,7 +309,7 @@ if __name__ == '__main__':
     segmenter = LVSegmentation()
 
     if len(sys.argv) != 2:
-        print('The program must be run as : python3.5 step2_train_segmenter_v3.py [train|predict]')
+        print('The program must be run as : python3.5 step2_train_segmenter_v4.py [train|predict]')
         sys.exit(2)
     else:
         if sys.argv[1] == 'train':
