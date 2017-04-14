@@ -186,7 +186,7 @@ class LVSegmentation(object):
             deconv_1_2 = self.deconv_layer(unpool_1, [3, 3, 32, 32], 32, 'deconv_1_2')
             deconv_1_1 = self.deconv_layer(deconv_1_2, [3, 3, 32, 32], 32, 'deconv_1_1')
 
-            score_1 = self.deconv_layer(deconv_1_1, [1, 1, 2, 32], 2, 'score_1', bn=False)
+            score_1 = self.deconv_layer(deconv_1_1, [1, 1, 2, 32], 2, 'score_1')
 
             logits = tf.reshape(score_1, (-1, 2))
             cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits,
@@ -239,7 +239,7 @@ class LVSegmentation(object):
         with tf.device('/gpu:0'):
             return tf.nn.max_pool_with_argmax(x, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
 
-    def deconv_layer(self, x, W_shape, b_shape, name, padding='SAME', bn=True):
+    def deconv_layer(self, x, W_shape, b_shape, name, padding='SAME'):
         nr_units = functools.reduce(lambda x, y: x * y, W_shape)
         stddev = 1.0 / math.sqrt(float(nr_units))
 
@@ -251,13 +251,6 @@ class LVSegmentation(object):
 
         hidden = tf.nn.conv2d_transpose(x, weights, out_shape, [1, 1, 1, 1], padding=padding)
         hidden = tf.add(hidden, biases)
-
-        if bn:
-            scale = self.variable([b_shape], 1.0)
-            beta = self.variable([b_shape], 0.0)
-            batch_mean, batch_var = tf.nn.moments(hidden, [0])
-
-            hidden = tf.nn.batch_normalization(hidden, batch_mean, batch_var, beta, scale, 1e-3)
 
         return hidden
 
