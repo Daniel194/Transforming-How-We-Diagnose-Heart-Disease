@@ -215,7 +215,7 @@ class LVSegmentation(object):
 
         return tf.Variable(initial)
 
-    def conv_layer(self, x, W_shape, b_shape, name, padding='SAME', bn=True):
+    def conv_layer(self, x, W_shape, b_shape, name, padding='SAME'):
         nr_units = functools.reduce(lambda x, y: x * y, W_shape)
         stddev = 1.0 / math.sqrt(float(nr_units))
 
@@ -225,13 +225,6 @@ class LVSegmentation(object):
         hidden = tf.nn.conv2d(x, weights, strides=[1, 1, 1, 1], padding=padding)
         hidden = tf.add(hidden, biases)
         hidden = tf.nn.relu(hidden)
-
-        if bn:
-            scale = self.variable([b_shape], 1.0)
-            beta = self.variable([b_shape], 0.0)
-            batch_mean, batch_var = tf.nn.moments(hidden, [0])
-
-            hidden = tf.nn.batch_normalization(hidden, batch_mean, batch_var, beta, scale, 1e-3)
 
         return hidden
 
