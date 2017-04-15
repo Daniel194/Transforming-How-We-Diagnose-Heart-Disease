@@ -16,7 +16,6 @@ from tensorflow.python.ops import gen_nn_ops
 class LVSegmentation(object):
     def __init__(self, use_cpu=False, checkpoint_dir='../../result/segmenter/train_result/v4/'):
         self.loss_array = []
-        self.weights_array = []
 
         self.build(use_cpu=use_cpu)
         self.saver = tf.train.Saver(max_to_keep=30, keep_checkpoint_every_n_hours=1)
@@ -186,16 +185,14 @@ class LVSegmentation(object):
             deconv_1_2 = self.deconv_layer(unpool_1, [3, 3, 32, 32], 32, 'deconv_1_2')
             deconv_1_1 = self.deconv_layer(deconv_1_2, [3, 3, 32, 32], 32, 'deconv_1_1')
 
-            score_1 = self.deconv_layer(deconv_1_1, [1, 1, 2, 32], 2, 'score_1')
+            score_1 = self.deconv_layer(deconv_1_1, [1, 1, 2, 32], 2, 'score_1', bn=False)
 
             logits = tf.reshape(score_1, (-1, 2))
             cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits,
                                                                            labels=tf.reshape(expected, [-1]),
                                                                            name='x_entropy')
 
-            regularizers = sum([tf.nn.l2_loss(variable) for variable in self.weights_array])
-
-            self.loss = tf.reduce_mean(cross_entropy, name='x_entropy_mean') + 0.5 * regularizers
+            self.loss = tf.reduce_mean(cross_entropy, name='x_entropy_mean')
 
             self.train_step = tf.train.AdamOptimizer(self.rate).minimize(self.loss)
 
@@ -204,18 +201,14 @@ class LVSegmentation(object):
     def weight_variable(self, shape, stddev):
         initial = tf.truncated_normal(shape, stddev=stddev)
 
-        w = tf.Variable(initial)
-
-        self.weights_array.append(w)
-
-        return w
+        return tf.Variable(initial)
 
     def variable(self, shape, value):
         initial = tf.constant(value, shape=shape)
 
         return tf.Variable(initial)
 
-    def conv_layer(self, x, W_shape, b_shape, name, padding='SAME'):
+    def conv_layer(self, x, W_shape, b_shape, name, padding='SAME', bn=True):
         nr_units = functools.reduce(lambda x, y: x * y, W_shape)
         stddev = 1.0 / math.sqrt(float(nr_units))
 
@@ -226,13 +219,20 @@ class LVSegmentation(object):
         hidden = tf.add(hidden, biases)
         hidden = tf.nn.relu(hidden)
 
+        if bn:
+            scale = self.variable([b_shape], 1.0)
+            beta = self.variable([b_shape], 0.0)
+            batch_mean, batch_var = tf.nn.moments(hidden, [0])
+
+            hidden = tf.nn.batch_normalization(hidden, batch_mean, batch_var, beta, scale, 1e-3)
+
         return hidden
 
     def pool_layer(self, x):
         with tf.device('/gpu:0'):
             return tf.nn.max_pool_with_argmax(x, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
 
-    def deconv_layer(self, x, W_shape, b_shape, name, padding='SAME'):
+    def deconv_layer(self, x, W_shape, b_shape, name, padding='SAME', bn=True):
         nr_units = functools.reduce(lambda x, y: x * y, W_shape)
         stddev = 1.0 / math.sqrt(float(nr_units))
 
@@ -244,6 +244,13 @@ class LVSegmentation(object):
 
         hidden = tf.nn.conv2d_transpose(x, weights, out_shape, [1, 1, 1, 1], padding=padding)
         hidden = tf.add(hidden, biases)
+
+        if bn:
+            scale = self.variable([b_shape], 1.0)
+            beta = self.variable([b_shape], 0.0)
+            batch_mean, batch_var = tf.nn.moments(hidden, [0])
+
+            hidden = tf.nn.batch_normalization(hidden, batch_mean, batch_var, beta, scale, 1e-3)
 
         return hidden
 
