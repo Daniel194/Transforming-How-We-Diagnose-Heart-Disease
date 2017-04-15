@@ -50,11 +50,13 @@ class LVSegmentation(object):
 
         return self.prediction.eval(session=self.session, feed_dict={self.x: images, self.keep_prob: 1.0})
 
-    def train(self, train_paths, epochs=30, batch_size=2, restore_session=False, learning_rate=1e-6):
+    def train(self, train_paths, epochs=30, batch_size=2, restore_session=False, learning_rate=1e-3):
         if restore_session:
             self.restore_session()
 
         train_size = len(train_paths)
+
+        previous_epoch_loss = 9999999.99
 
         for epoch in range(epochs):
             total_loss = 0
@@ -72,12 +74,19 @@ class LVSegmentation(object):
 
                 total_loss += loss
 
-            print('Epoch {} - Loss : {:.6f}'.format(epoch, total_loss / train_size))
+            epoch_loss = total_loss / train_size
+
+            print('Epoch {} - Loss : {:.6f}'.format(epoch, epoch_loss))
 
             self.saver.save(self.session, self.checkpoint_dir + 'model', global_step=epoch)
 
-            self.loss_array.append(total_loss / train_size)
+            self.loss_array.append(epoch_loss)
             self.save_loss()
+
+            if previous_epoch_loss < epoch_loss:
+                learning_rate *= 0.1
+
+            previous_epoch_loss = epoch_loss
 
     def read_data(self, paths):
         images, labels = sunnybrook.export_all_contours(paths)
