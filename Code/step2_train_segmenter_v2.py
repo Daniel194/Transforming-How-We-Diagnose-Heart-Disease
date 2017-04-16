@@ -17,7 +17,7 @@ from tensorflow.python.ops import gen_nn_ops
 class LVSegmentation(object):
     def __init__(self, use_cpu=False, checkpoint_dir='../../result/segmenter/train_result/v2/'):
         self.build(use_cpu=use_cpu)
-        self.saver = tf.train.Saver(max_to_keep=5, keep_checkpoint_every_n_hours=1)
+        self.saver = tf.train.Saver(max_to_keep=30, keep_checkpoint_every_n_hours=1)
         config = tf.ConfigProto(allow_soft_placement=True)
         self.session = tf.Session(config=config)
         self.session.run(tf.global_variables_initializer())
@@ -51,41 +51,34 @@ class LVSegmentation(object):
 
         return self.prediction.eval(session=self.session, feed_dict={self.x: images, self.keep_prob: 1.0})
 
-    def train(self, train_paths, epochs=11, batch_size=2, restore_session=False, learning_rate=1e-6):
+    def train(self, train_paths, epochs=30, batch_size=2, restore_session=False, learning_rate=1e-6):
         if restore_session:
             self.restore_session()
 
         train_size = len(train_paths)
 
         for epoch in range(epochs):
-            for step in range(0, train_size, batch_size):
-                current_step = train_size * epoch + step + 2
+            total_loss = 0
 
+            for step in range(0, train_size, batch_size):
                 train_path = train_paths[step:step + batch_size]
                 _, images, labels = self.read_data(train_path)
 
-                if current_step % 10 == 0:
-                    print('Run epoch {} and step {}'.format(epoch, step + 2))
-
-                start = time.time()
-
                 self.train_step.run(session=self.session,
                                     feed_dict={self.x: images, self.y: labels, self.rate: learning_rate,
-                                               self.keep_prob: 0.5})
+                                               self.keep_prob: 0.75})
 
-                if current_step % 100 == 0:
-                    loss = self.loss.eval(session=self.session,
-                                          feed_dict={self.x: images, self.y: labels, self.keep_prob: 1.0})
+                loss = self.loss.eval(session=self.session,
+                                      feed_dict={self.x: images, self.y: labels, self.keep_prob: 1.0})
 
-                    print('Step {} finished in {:.2f} s with Loss : {:.6f}'.format(current_step, time.time() - start,
-                                                                                   loss))
+                total_loss += loss
 
-                    self.saver.save(self.session, self.checkpoint_dir + 'model', global_step=current_step)
+            print('Epoch {} - Loss : {:.6f}'.format(epoch, total_loss / train_size))
 
-                    self.loss_array.append(loss)
-                    self.save_loss()
+            self.saver.save(self.session, self.checkpoint_dir + 'model', global_step=epoch)
 
-                    print('Model {} saved'.format(current_step))
+            self.loss_array.append(total_loss / train_size)
+            self.save_loss()
 
     def read_data(self, paths):
         images, labels = sunnybrook.export_all_contours(paths)
@@ -116,7 +109,6 @@ class LVSegmentation(object):
                                                      padding=op.get_attr("padding"))
 
     def build(self, use_cpu=False):
-
         if use_cpu:
             device = '/cpu:0'
         else:
@@ -135,27 +127,37 @@ class LVSegmentation(object):
 
             pool_1, pool_1_argmax = self.pool_layer(conv_1_2)
 
-            conv_2_1 = self.conv_layer(pool_1, [3, 3, 32, 64], 64, 'conv_2_1')
+            dropout1 = tf.nn.dropout(pool_1, self.keep_prob)
+
+            conv_2_1 = self.conv_layer(dropout1, [3, 3, 32, 64], 64, 'conv_2_1')
             conv_2_2 = self.conv_layer(conv_2_1, [3, 3, 64, 64], 64, 'conv_2_2')
 
             pool_2, pool_2_argmax = self.pool_layer(conv_2_2)
 
-            conv_3_1 = self.conv_layer(pool_2, [3, 3, 64, 128], 128, 'conv_3_1')
+            dropout2 = tf.nn.dropout(pool_2, self.keep_prob)
+
+            conv_3_1 = self.conv_layer(dropout2, [3, 3, 64, 128], 128, 'conv_3_1')
             conv_3_2 = self.conv_layer(conv_3_1, [3, 3, 128, 128], 128, 'conv_3_2')
 
             pool_3, pool_3_argmax = self.pool_layer(conv_3_2)
 
-            conv_4_1 = self.conv_layer(pool_3, [3, 3, 128, 256], 256, 'conv_4_1')
+            dropout3 = tf.nn.dropout(pool_3, self.keep_prob)
+
+            conv_4_1 = self.conv_layer(dropout3, [3, 3, 128, 256], 256, 'conv_4_1')
             conv_4_2 = self.conv_layer(conv_4_1, [3, 3, 256, 256], 256, 'conv_4_2')
 
             pool_4, pool_4_argmax = self.pool_layer(conv_4_2)
 
-            conv_5_1 = self.conv_layer(pool_4, [3, 3, 256, 512], 512, 'conv_5_1')
+            dropout4 = tf.nn.dropout(pool_4, self.keep_prob)
+
+            conv_5_1 = self.conv_layer(dropout4, [3, 3, 256, 512], 512, 'conv_5_1')
             conv_5_2 = self.conv_layer(conv_5_1, [3, 3, 512, 512], 512, 'conv_5_2')
 
             pool_5, pool_5_argmax = self.pool_layer(conv_5_2)
 
-            fc_6 = self.conv_layer(pool_5, [7, 7, 512, 4096], 4096, 'fc_6')
+            dropout5 = tf.nn.dropout(pool_5, self.keep_prob)
+
+            fc_6 = self.conv_layer(dropout5, [7, 7, 512, 4096], 4096, 'fc_6')
 
             deconv_fc_6 = self.deconv_layer(fc_6, [7, 7, 512, 4096], 512, 'fc6_deconv')
 
@@ -208,7 +210,6 @@ class LVSegmentation(object):
         return tf.Variable(initial)
 
     def conv_layer(self, x, W_shape, b_shape, name, padding='SAME'):
-
         nr_units = functools.reduce(lambda x, y: x * y, W_shape)
         stddev = 1.0 / math.sqrt(float(nr_units))
 
@@ -226,7 +227,6 @@ class LVSegmentation(object):
             return tf.nn.max_pool_with_argmax(x, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
 
     def deconv_layer(self, x, W_shape, b_shape, name, padding='SAME'):
-
         nr_units = functools.reduce(lambda x, y: x * y, W_shape)
         stddev = 1.0 / math.sqrt(float(nr_units))
 
