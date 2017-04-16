@@ -16,28 +16,12 @@ class LVSegmentation(object):
         self.y = tf.placeholder(tf.int64, shape=(None, 224, 224))
         self.keep_prob = tf.placeholder(tf.float32)
 
-        logits, self.variables, self.offset = self.__create_conv_net()
+        logits = self.__create_conv_net()
         self.cost = self.__cost_function(logits)
-
-        self.gradients_node = tf.gradients(self.cost, self.variables)
-
-        self.prediction = self.__predict_function(logits)
-        self.correct_pred = tf.equal(self.prediction, self.y)
-        self.accuracy = tf.reduce_mean(tf.cast(self.correct_pred, tf.float32))
-
-        self.global_step = tf.Variable(0)
-
-        self.norm_gradients_node = tf.Variable(tf.constant(0.0, shape=[len(self.gradients_node)]))
-
         self.optimizer = self.__adam_optimizer(learning_rate)
+        self.prediction = self.__predict_function(logits)
 
-        tf.summary.scalar('loss', self.cost)
-        tf.summary.scalar('accuracy', self.accuracy)
-        tf.summary.scalar('learning_rate', self.learning_rate_node)
-
-        self.summary_op = tf.summary.merge_all()
-
-        self.saver = tf.train.Saver()
+        self.saver = tf.train.Saver(max_to_keep=30, keep_checkpoint_every_n_hours=1)
         self.session = tf.Session()
         self.session.run(tf.global_variables_initializer())
 
@@ -48,22 +32,10 @@ class LVSegmentation(object):
 
         return self.prediction.eval(session=self.session, feed_dict={self.x: images, self.keep_prob: 1.})
 
-    def evaluate(self, eval_paths):
-        self.__restore_session()
-
-        _, images, labels = self.read_data(eval_paths)
-
-        accuracy = self.accuracy.eval(session=self.session,
-                                      feed_dict={self.x: images, self.y: labels, self.keep_prob: 1.})
-
-        print('Model has accuracy : {:.6f} '.format(accuracy))
-
-    def train(self, train_paths, train_size, batch_size, epochs=100, dropout=0.75, restore_session=False):
+    def train(self, train_paths, train_size, batch_size, epochs=30, dropout=0.75, restore_session=False):
 
         if restore_session:
             self.__restore_session()
-
-        summary_writer = tf.summary.FileWriter(self.checkpoint_dir, graph=self.session.graph)
 
         avg_gradients = None
 
@@ -92,14 +64,11 @@ class LVSegmentation(object):
                 norm_gradients = [np.linalg.norm(gradient) for gradient in avg_gradients]
                 self.norm_gradients_node.assign(norm_gradients).eval(session=self.session)
 
-                if current_step % 100 == 0:
-                    self.__output_minibatch_stats(summary_writer, current_step, images, labels)
-
                 total_loss += loss
 
-            self.__output_epoch_stats(epoch, total_loss, train_size, lr)
+            self.__output_epoch_stats(epoch, total_loss, train_size)
 
-            self.__save()
+            self.__save(epoch)
 
     def read_data(self, paths):
         images, labels = sunnybrook.export_all_contours(paths)
@@ -122,9 +91,6 @@ class LVSegmentation(object):
 
     def __create_conv_net(self, layers=5, features_root=32, filter_size=3, pool_size=2):
 
-        weights = []
-        biases = []
-        convs = []
         pools = OrderedDict()
         deconv = OrderedDict()
         dw_h_convs = OrderedDict()
@@ -153,10 +119,6 @@ class LVSegmentation(object):
             tmp_h_conv = tf.nn.relu(conv1 + b1)
             conv2 = self.__conv_layer(tmp_h_conv, w2, self.keep_prob)
             dw_h_convs[layer] = tf.nn.relu(conv2 + b2)
-
-            weights.append((w1, w2))
-            biases.append((b1, b2))
-            convs.append((conv1, conv2))
 
             size -= 4
             if layer < layers - 1:
@@ -187,10 +149,6 @@ class LVSegmentation(object):
             in_node = tf.nn.relu(conv2 + b2)
             up_h_convs[layer] = in_node
 
-            weights.append((w1, w2))
-            biases.append((b1, b2))
-            convs.append((conv1, conv2))
-
             size *= 2
             size -= 4
 
@@ -201,22 +159,13 @@ class LVSegmentation(object):
         output_map = tf.nn.relu(conv + bias)
         up_h_convs["out"] = output_map
 
-        variables = []
-        for w1, w2 in weights:
-            variables.append(w1)
-            variables.append(w2)
-
-        for b1, b2 in biases:
-            variables.append(b1)
-            variables.append(b2)
-
-        return output_map, variables, int(in_size - size)
+        return output_map
 
     def __adam_optimizer(self, learning_rate):
         self.learning_rate_node = tf.Variable(learning_rate)
 
         optimizer = tf.train.AdamOptimizer(learning_rate=self.learning_rate_node) \
-            .minimize(self.cost, global_step=self.global_step)
+            .minimize(self.cost)
 
         return optimizer
 
@@ -232,9 +181,6 @@ class LVSegmentation(object):
         cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=flat_logits,
                                                                        labels=tf.reshape(expected, [-1]))
         loss = tf.reduce_mean(cross_entropy)
-
-        regularizers = sum([tf.nn.l2_loss(variable) for variable in self.variables])
-        loss += (0.5 * regularizers)
 
         return loss
 
@@ -266,14 +212,6 @@ class LVSegmentation(object):
     def __max_pool(self, x, n):
         return tf.nn.max_pool(x, ksize=[1, n, n, 1], strides=[1, n, n, 1], padding='SAME')
 
-    def __batch_normalization(self, hidden, v_shape):
-        scale = self.__variable([v_shape], 1.0)
-        beta = self.__variable([v_shape], 0.0)
-
-        batch_mean, batch_var = tf.nn.moments(hidden, [0])
-
-        return tf.nn.batch_normalization(hidden, batch_mean, batch_var, beta, scale, 1e-3)
-
     def __crop_and_concat(self, x1, x2):
         x1_shape = tf.shape(x1)
         x2_shape = tf.shape(x2)
@@ -283,20 +221,11 @@ class LVSegmentation(object):
         x1_crop = tf.slice(x1, offsets, size)
         return tf.concat([x1_crop, x2], 3)
 
-    def __output_minibatch_stats(self, summary_writer, step, batch_x, batch_y):
-        # Calculate batch loss and accuracy
-        summary_str, loss, acc = self.session.run([self.summary_op, self.cost, self.accuracy],
-                                                  feed_dict={self.x: batch_x,
-                                                             self.y: batch_y,
-                                                             self.keep_prob: 1.})
-        summary_writer.add_summary(summary_str, step)
-        summary_writer.flush()
+    def __output_epoch_stats(self, epoch, total_loss, training_iters):
+        print("Epoch {:}, Average loss: {:.4f}".format(epoch, (total_loss / training_iters)))
 
-    def __output_epoch_stats(self, epoch, total_loss, training_iters, lr):
-        print("Epoch {:}, Average loss: {:.4f}, learning rate: {:.4f}".format(epoch, (total_loss / training_iters), lr))
-
-    def __save(self):
-        self.saver.save(self.session, self.checkpoint_dir + 'model.cpkt')
+    def __save(self, epoch):
+        self.saver.save(self.session, self.checkpoint_dir + 'model', global_step=epoch)
 
     def __restore_session(self):
 
