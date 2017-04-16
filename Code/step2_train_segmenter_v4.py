@@ -1,4 +1,5 @@
 import os
+import time
 import sys
 import random
 import math
@@ -15,14 +16,14 @@ from tensorflow.python.ops import gen_nn_ops
 
 class LVSegmentation(object):
     def __init__(self, use_cpu=False, checkpoint_dir='../../result/segmenter/train_result/v4/'):
-        self.loss_array = []
-
         self.build(use_cpu=use_cpu)
         self.saver = tf.train.Saver(max_to_keep=30, keep_checkpoint_every_n_hours=1)
         config = tf.ConfigProto(allow_soft_placement=True)
         self.session = tf.Session(config=config)
         self.session.run(tf.global_variables_initializer())
         self.checkpoint_dir = checkpoint_dir
+
+        self.loss_array = []
 
     def restore_session(self):
         if not os.path.exists(self.checkpoint_dir):
@@ -50,13 +51,11 @@ class LVSegmentation(object):
 
         return self.prediction.eval(session=self.session, feed_dict={self.x: images, self.keep_prob: 1.0})
 
-    def train(self, train_paths, epochs=30, batch_size=2, restore_session=False, learning_rate=1e-3):
+    def train(self, train_paths, epochs=30, batch_size=2, restore_session=False, learning_rate=1e-6):
         if restore_session:
             self.restore_session()
 
         train_size = len(train_paths)
-
-        previous_epoch_loss = 9999999.99
 
         for epoch in range(epochs):
             total_loss = 0
@@ -74,19 +73,12 @@ class LVSegmentation(object):
 
                 total_loss += loss
 
-            epoch_loss = total_loss / train_size
-
-            print('Epoch {} - Loss : {:.6f}'.format(epoch, epoch_loss))
+            print('Epoch {} - Loss : {:.6f}'.format(epoch, total_loss / train_size))
 
             self.saver.save(self.session, self.checkpoint_dir + 'model', global_step=epoch)
 
-            self.loss_array.append(epoch_loss)
+            self.loss_array.append(total_loss / train_size)
             self.save_loss()
-
-            if previous_epoch_loss < epoch_loss:
-                learning_rate *= 0.1
-
-            previous_epoch_loss = epoch_loss
 
     def read_data(self, paths):
         images, labels = sunnybrook.export_all_contours(paths)
@@ -130,71 +122,78 @@ class LVSegmentation(object):
             expected = tf.expand_dims(self.y, -1)
             self.rate = tf.placeholder(tf.float32, shape=[])
 
-            conv_1_1 = self.conv_layer(self.x, [3, 3, 1, 32], 32, 'conv_1_1')
-            conv_1_2 = self.conv_layer(conv_1_1, [3, 3, 32, 32], 32, 'conv_1_2')
+            conv_1_1 = self.conv_layer(self.x, [3, 3, 1, 64], 64, 'conv_1_1')
+            conv_1_2 = self.conv_layer(conv_1_1, [3, 3, 64, 64], 64, 'conv_1_2')
 
             pool_1, pool_1_argmax = self.pool_layer(conv_1_2)
 
             dropout1 = tf.nn.dropout(pool_1, self.keep_prob)
 
-            conv_2_1 = self.conv_layer(dropout1, [3, 3, 32, 64], 64, 'conv_2_1')
-            conv_2_2 = self.conv_layer(conv_2_1, [3, 3, 64, 64], 64, 'conv_2_2')
+            conv_2_1 = self.conv_layer(dropout1, [3, 3, 64, 128], 128, 'conv_2_1')
+            conv_2_2 = self.conv_layer(conv_2_1, [3, 3, 128, 128], 128, 'conv_2_2')
 
             pool_2, pool_2_argmax = self.pool_layer(conv_2_2)
 
             dropout2 = tf.nn.dropout(pool_2, self.keep_prob)
 
-            conv_3_1 = self.conv_layer(dropout2, [3, 3, 64, 128], 128, 'conv_3_1')
-            conv_3_2 = self.conv_layer(conv_3_1, [3, 3, 128, 128], 128, 'conv_3_2')
+            conv_3_1 = self.conv_layer(dropout2, [3, 3, 128, 256], 256, 'conv_3_1')
+            conv_3_2 = self.conv_layer(conv_3_1, [3, 3, 256, 256], 256, 'conv_3_2')
+            conv_3_3 = self.conv_layer(conv_3_2, [3, 3, 256, 256], 256, 'conv_3_3')
 
-            pool_3, pool_3_argmax = self.pool_layer(conv_3_2)
+            pool_3, pool_3_argmax = self.pool_layer(conv_3_3)
 
             dropout3 = tf.nn.dropout(pool_3, self.keep_prob)
 
-            conv_4_1 = self.conv_layer(dropout3, [3, 3, 128, 256], 256, 'conv_4_1')
-            conv_4_2 = self.conv_layer(conv_4_1, [3, 3, 256, 256], 256, 'conv_4_2')
+            conv_4_1 = self.conv_layer(dropout3, [3, 3, 256, 512], 512, 'conv_4_1')
+            conv_4_2 = self.conv_layer(conv_4_1, [3, 3, 512, 512], 512, 'conv_4_2')
+            conv_4_3 = self.conv_layer(conv_4_2, [3, 3, 512, 512], 512, 'conv_4_3')
 
-            pool_4, pool_4_argmax = self.pool_layer(conv_4_2)
+            pool_4, pool_4_argmax = self.pool_layer(conv_4_3)
 
             dropout4 = tf.nn.dropout(pool_4, self.keep_prob)
 
-            conv_5_1 = self.conv_layer(dropout4, [3, 3, 256, 512], 512, 'conv_5_1')
+            conv_5_1 = self.conv_layer(dropout4, [3, 3, 512, 512], 512, 'conv_5_1')
             conv_5_2 = self.conv_layer(conv_5_1, [3, 3, 512, 512], 512, 'conv_5_2')
+            conv_5_3 = self.conv_layer(conv_5_2, [3, 3, 512, 512], 512, 'conv_5_3')
 
-            pool_5, pool_5_argmax = self.pool_layer(conv_5_2)
+            pool_5, pool_5_argmax = self.pool_layer(conv_5_3)
 
             dropout5 = tf.nn.dropout(pool_5, self.keep_prob)
 
             fc_6 = self.conv_layer(dropout5, [7, 7, 512, 4096], 4096, 'fc_6')
+            fc_7 = self.conv_layer(fc_6, [1, 1, 4096, 4096], 4096, 'fc_7')
 
-            deconv_fc_6 = self.deconv_layer(fc_6, [7, 7, 512, 4096], 512, 'fc6_deconv')
+            deconv_fc_6 = self.deconv_layer(fc_7, [7, 7, 512, 4096], 512, 'fc6_deconv')
 
             unpool_5 = self.unpool_layer2x2(deconv_fc_6, pool_5_argmax)
 
-            deconv_5_2 = self.deconv_layer(unpool_5, [3, 3, 512, 512], 512, 'deconv_5_2')
-            deconv_5_1 = self.deconv_layer(deconv_5_2, [3, 3, 256, 512], 256, 'deconv_5_1')
+            deconv_5_3 = self.deconv_layer(unpool_5, [3, 3, 512, 512], 512, 'deconv_5_3')
+            deconv_5_2 = self.deconv_layer(deconv_5_3, [3, 3, 512, 512], 512, 'deconv_5_2')
+            deconv_5_1 = self.deconv_layer(deconv_5_2, [3, 3, 512, 512], 512, 'deconv_5_1')
 
             unpool_4 = self.unpool_layer2x2(deconv_5_1, pool_4_argmax)
 
-            deconv_4_2 = self.deconv_layer(unpool_4, [3, 3, 256, 256], 256, 'deconv_4_2')
-            deconv_4_1 = self.deconv_layer(deconv_4_2, [3, 3, 128, 256], 128, 'deconv_4_1')
+            deconv_4_3 = self.deconv_layer(unpool_4, [3, 3, 512, 512], 512, 'deconv_4_3')
+            deconv_4_2 = self.deconv_layer(deconv_4_3, [3, 3, 512, 512], 512, 'deconv_4_2')
+            deconv_4_1 = self.deconv_layer(deconv_4_2, [3, 3, 256, 512], 256, 'deconv_4_1')
 
             unpool_3 = self.unpool_layer2x2(deconv_4_1, pool_3_argmax)
 
-            deconv_3_2 = self.deconv_layer(unpool_3, [3, 3, 128, 128], 128, 'deconv_3_2')
-            deconv_3_1 = self.deconv_layer(deconv_3_2, [3, 3, 64, 128], 64, 'deconv_3_1')
+            deconv_3_3 = self.deconv_layer(unpool_3, [3, 3, 256, 256], 256, 'deconv_3_3')
+            deconv_3_2 = self.deconv_layer(deconv_3_3, [3, 3, 256, 256], 256, 'deconv_3_2')
+            deconv_3_1 = self.deconv_layer(deconv_3_2, [3, 3, 128, 256], 128, 'deconv_3_1')
 
             unpool_2 = self.unpool_layer2x2(deconv_3_1, pool_2_argmax)
 
-            deconv_2_2 = self.deconv_layer(unpool_2, [3, 3, 64, 64], 64, 'deconv_2_2')
-            deconv_2_1 = self.deconv_layer(deconv_2_2, [3, 3, 32, 64], 32, 'deconv_2_1')
+            deconv_2_2 = self.deconv_layer(unpool_2, [3, 3, 128, 128], 128, 'deconv_2_2')
+            deconv_2_1 = self.deconv_layer(deconv_2_2, [3, 3, 64, 128], 64, 'deconv_2_1')
 
             unpool_1 = self.unpool_layer2x2(deconv_2_1, pool_1_argmax)
 
-            deconv_1_2 = self.deconv_layer(unpool_1, [3, 3, 32, 32], 32, 'deconv_1_2')
-            deconv_1_1 = self.deconv_layer(deconv_1_2, [3, 3, 32, 32], 32, 'deconv_1_1')
+            deconv_1_2 = self.deconv_layer(unpool_1, [3, 3, 64, 64], 64, 'deconv_1_2')
+            deconv_1_1 = self.deconv_layer(deconv_1_2, [3, 3, 32, 64], 32, 'deconv_1_1')
 
-            score_1 = self.deconv_layer(deconv_1_1, [1, 1, 2, 32], 2, 'score_1', bn=False)
+            score_1 = self.deconv_layer(deconv_1_1, [1, 1, 2, 32], 2, 'score_1')
 
             logits = tf.reshape(score_1, (-1, 2))
             cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits,
@@ -212,28 +211,21 @@ class LVSegmentation(object):
 
         return tf.Variable(initial)
 
-    def variable(self, shape, value):
-        initial = tf.constant(value, shape=shape)
+    def bias_variable(self, shape):
+        initial = tf.constant(0.1, shape=shape)
 
         return tf.Variable(initial)
 
-    def conv_layer(self, x, W_shape, b_shape, name, padding='SAME', bn=True):
+    def conv_layer(self, x, W_shape, b_shape, name, padding='SAME'):
         nr_units = functools.reduce(lambda x, y: x * y, W_shape)
         stddev = 1.0 / math.sqrt(float(nr_units))
 
         weights = self.weight_variable(W_shape, stddev)
-        biases = self.variable([b_shape], 0.0)
+        biases = self.bias_variable([b_shape])
 
         hidden = tf.nn.conv2d(x, weights, strides=[1, 1, 1, 1], padding=padding)
         hidden = tf.add(hidden, biases)
         hidden = tf.nn.relu(hidden)
-
-        if bn:
-            scale = self.variable([b_shape], 1.0)
-            beta = self.variable([b_shape], 0.0)
-            batch_mean, batch_var = tf.nn.moments(hidden, [0])
-
-            hidden = tf.nn.batch_normalization(hidden, batch_mean, batch_var, beta, scale, 1e-3)
 
         return hidden
 
@@ -241,25 +233,18 @@ class LVSegmentation(object):
         with tf.device('/gpu:0'):
             return tf.nn.max_pool_with_argmax(x, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
 
-    def deconv_layer(self, x, W_shape, b_shape, name, padding='SAME', bn=True):
+    def deconv_layer(self, x, W_shape, b_shape, name, padding='SAME'):
         nr_units = functools.reduce(lambda x, y: x * y, W_shape)
         stddev = 1.0 / math.sqrt(float(nr_units))
 
         weights = self.weight_variable(W_shape, stddev)
-        biases = self.variable([b_shape], 0.0)
+        biases = self.bias_variable([b_shape])
 
         x_shape = tf.shape(x)
         out_shape = tf.stack([x_shape[0], x_shape[1], x_shape[2], W_shape[2]])
 
         hidden = tf.nn.conv2d_transpose(x, weights, out_shape, [1, 1, 1, 1], padding=padding)
         hidden = tf.add(hidden, biases)
-
-        if bn:
-            scale = self.variable([b_shape], 1.0)
-            beta = self.variable([b_shape], 0.0)
-            batch_mean, batch_var = tf.nn.moments(hidden, [0])
-
-            hidden = tf.nn.batch_normalization(hidden, batch_mean, batch_var, beta, scale, 1e-3)
 
         return hidden
 
