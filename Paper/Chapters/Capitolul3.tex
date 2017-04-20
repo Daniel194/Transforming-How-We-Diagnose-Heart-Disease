@@ -123,3 +123,47 @@ TODO
 \subsection{Batch Normalization}
 
 TODO
+
+\section{Procesul de antrenare}
+
+A\c{s}a cum am precizat mai sus, la re\c{t}elele neuronale obi\c{s}nuite, procesul de antrenare const\u{a} \^{i}n actualizarea ponderilor \c{s}i bias-urilor dintr-o re\c{t}ea neuronal\u{a} cu o anumit\u{a} valoare, calculat\u{a} pe baza gradientului calculat \c{s}i \^{i}nmul\c{t}it\u{a} cu o constant\u{a}, care se nume\c{s}te rata de antrenare.
+
+C\^{a}nd am discutat despre procesul de antrenare la re\c{t}ele neuronale obi\c{s}nuite am descris metoda SGD, \^{i}ns\u{a} a\c{s}a cum am preciza, SGD nu este suficent de eficent \c{s}i exist\u{a} alte metode mai eficinete de antrenare a unei re\c{t}ele neuronale. Metoda pe care o vom descrie mai jos, \c{s}i pe care o vom folosi \^{i}n procesul de antrenare a re\c{t}elelor neuronale convolu\c{t}ionale pe care le vom construii pentru a reozolva problema noastr\u{a}, se nume\c{s}te Adam.
+
+\subsection{Adam}
+
+Adam este o metod\u{a} nou\u{a} folisit\u{a} pentru actualizarea paramtetrilor dintr-o re\c{t}ea neuronal\u{a} obi\c{s}nuit\u{a}. Numele s\u{a}u deriveaz\u{a} din cuvintele adaptive moment estimation \c{s}i a fost inventat\u{a} de Diederik P. Kingma de la Universitatea din Amsterdam \c{s}i de Jimmy Lei Ba de la Universitatea din Toronto. Metoda propusa de ace\c{s}tia are urmatoarea formul\u{a}:
+
+$$ m = \beta_1 \cdot m + ( 1 - \beta_1 ) \cdot \delta x $$
+$$ v = \beta_2 \cdot v + ( 1- \beta_2 ) \cdot \delta x^2 $$
+$$ x = x - \zeta \cdot \frac{m}{\sqrt{v} + \epsilon } $$
+
+\^{I}n formulele de mai sus $\beta_1, \beta_2 $ \c{s}i $ \epsilon $ sunt trei constante pentru care autorii sugereaz\u{a} urmatoarele valor, $\beta_1 = 0.9 $, $\beta_2 = 0.999 $ \c{s}i $ \epsilon = 1e^{-8} $, vom pastra aceste valori \^{i}n re\c{t}elele noastre convolu\c{t}ionale. Valorile m \c{s}i v sunt la inceput ini\c{t}ializate cu valoarea zero, aceste valori, confomr autorilor, au rolul de a corecta anumite erori atunci c\^{a}nd se actualizeaz\u{a} parametrii re\c{t}elei. Cu $\zeta$ am notat rata de \^{i}mv\u{a}\c{t}are a re\c{t}elei neuronale.
+
+\section{Procesarea datelor}
+
+\^{I}nainte ca datele s\u{a} intre \^{i}ntr-o re\c{t}ea neuronal\u{a}, acestea trebuiesc preprocesate, astfle \^{i}nc\^{a} re\c{t}elei neuronale s\u{a} \^{i}i fie mai u\c{s}or s\u{a} \^{i}nve\c{t}e. Cele mai folosite metode de preprocesare a datelor sunt centrarea la origine a datelor \c{s}i normalizarea. Exist\u{a} o gramad\u{a} de metode de procesare a datelor, \^{i}ns\u{a} acestea sunt aplicabile doar pentru anumite seturi de date, \^{i}n timp ce, cele do\u{a} men\c{t}ionate mai sus sunt generale pentru orice tip de date \c{s}i pentru orice tip de re\c{t}ea neuronal\u{a}.
+
+Pentru a exemplifica cum functioneaz\u{a} cele doua metode, vom presupune c\u{a} avem un set de date bidimensional ce are graficul urmator.
+
+\begin{center}
+\includegraphics[width=200]{original.png}
+\end{center}
+
+Centrarea la origine a datelor, presupune ca pentru fiecare valorea s\u{a} sc\u{a}dem media valorilor din respectivul set de date.
+
+            $$ X = X - \frac{1}{N}\sum_i^N X_i$$
+            
+Aceast\u{a} opera\c{t}ie va aduce centrul datelor la origine. \^{I}n cazul nostru de mai sus, dup\u{a} aplicarea opera\c{t}iei, graficul datelor va arata in felul urm\u{a}tor.
+
+\begin{center}
+\includegraphics[width=200]{zero-centered.png}
+\end{center}
+
+Se observ\u{a} faptul c\u{a}, centrul datelor s-a mutat la origine.
+
+Normalizarea datelor, presupune ca fiecare valoare din setul de date s\u{a} aibe acea\c{s}i scal\u{a}, modul de a efectua acest lucru este de a \^{i}mp\u{a}r\c{t}i fiecare valoare din setul de date cu devia\c{t}ia standard pe care o are setul de date. Dac\u{a} vom aplica aceast\u{a} opera\c{t}ie pe setul de date vom ob\c{t}ine urmatorul grafic.
+
+\begin{center}
+\includegraphics[width=200]{normalization.png}
+\end{center}
