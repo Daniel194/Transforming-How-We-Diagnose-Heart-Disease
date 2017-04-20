@@ -15,7 +15,7 @@ from tensorflow.python.ops import gen_nn_ops
 
 
 class LVSegmentation(object):
-    def __init__(self, checkpoint_dir='../../result/segmenter/train_result/v1/'):
+    def __init__(self, checkpoint_dir='../../result/segmenter/train_result/v3/'):
         self.build()
         self.saver = tf.train.Saver(max_to_keep=30, keep_checkpoint_every_n_hours=1)
         self.session = tf.Session()
@@ -119,7 +119,7 @@ class LVSegmentation(object):
         pool_1, pool_1_argmax = self.pool_layer(conv_1_2)
 
         conv_2_1 = self.conv_layer(pool_1, [3, 3, 16, 32], 32, 'conv_2_1')
-        conv_2_2 = self.conv_layer(conv_2_1, [3, 3, 64, 32], 32, 'conv_2_2')
+        conv_2_2 = self.conv_layer(conv_2_1, [3, 3, 32, 32], 32, 'conv_2_2')
 
         pool_2, pool_2_argmax = self.pool_layer(conv_2_2)
 
@@ -272,7 +272,7 @@ if __name__ == '__main__':
     segmenter = LVSegmentation()
 
     if len(sys.argv) != 2:
-        print('The program must be run as : python3.5 step2_train_segmenter_v1.py [train|predict]')
+        print('The program must be run as : python3.5 step2_train_segmenter_v3.py [train|predict]')
         sys.exit(2)
     else:
         if sys.argv[1] == 'train':
