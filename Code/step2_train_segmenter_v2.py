@@ -15,11 +15,10 @@ from tensorflow.python.ops import gen_nn_ops
 
 
 class LVSegmentation(object):
-    def __init__(self, use_cpu=False, checkpoint_dir='../../result/segmenter/train_result/v2/'):
-        self.build(use_cpu=use_cpu)
+    def __init__(self, checkpoint_dir='../../result/segmenter/train_result/v2/'):
+        self.build()
         self.saver = tf.train.Saver(max_to_keep=30, keep_checkpoint_every_n_hours=1)
-        config = tf.ConfigProto(allow_soft_placement=True)
-        self.session = tf.Session(config=config)
+        self.session = tf.Session()
         self.session.run(tf.global_variables_initializer())
         self.checkpoint_dir = checkpoint_dir
 
@@ -108,96 +107,91 @@ class LVSegmentation(object):
                                                      op.get_attr("strides"),
                                                      padding=op.get_attr("padding"))
 
-    def build(self, use_cpu=False):
-        if use_cpu:
-            device = '/cpu:0'
-        else:
-            device = '/gpu:0'
+    def build(self):
 
-        with tf.device(device):
-            self.x = tf.placeholder(tf.float32, shape=(None, 224, 224, 1))
-            self.y = tf.placeholder(tf.int64, shape=(None, 224, 224))
-            self.keep_prob = tf.placeholder(tf.float32)
+        self.x = tf.placeholder(tf.float32, shape=(None, 224, 224, 1))
+        self.y = tf.placeholder(tf.int64, shape=(None, 224, 224))
+        self.keep_prob = tf.placeholder(tf.float32)
 
-            expected = tf.expand_dims(self.y, -1)
-            self.rate = tf.placeholder(tf.float32, shape=[])
+        expected = tf.expand_dims(self.y, -1)
+        self.rate = tf.placeholder(tf.float32, shape=[])
 
-            conv_1_1 = self.conv_layer(self.x, [3, 3, 1, 32], 32, 'conv_1_1')
-            conv_1_2 = self.conv_layer(conv_1_1, [3, 3, 32, 32], 32, 'conv_1_2')
+        conv_1_1 = self.conv_layer(self.x, [3, 3, 1, 32], 32, 'conv_1_1')
+        conv_1_2 = self.conv_layer(conv_1_1, [3, 3, 32, 32], 32, 'conv_1_2')
 
-            pool_1, pool_1_argmax = self.pool_layer(conv_1_2)
+        pool_1, pool_1_argmax = self.pool_layer(conv_1_2)
 
-            dropout1 = tf.nn.dropout(pool_1, self.keep_prob)
+        dropout1 = tf.nn.dropout(pool_1, self.keep_prob)
 
-            conv_2_1 = self.conv_layer(dropout1, [3, 3, 32, 64], 64, 'conv_2_1')
-            conv_2_2 = self.conv_layer(conv_2_1, [3, 3, 64, 64], 64, 'conv_2_2')
+        conv_2_1 = self.conv_layer(dropout1, [3, 3, 32, 64], 64, 'conv_2_1')
+        conv_2_2 = self.conv_layer(conv_2_1, [3, 3, 64, 64], 64, 'conv_2_2')
 
-            pool_2, pool_2_argmax = self.pool_layer(conv_2_2)
+        pool_2, pool_2_argmax = self.pool_layer(conv_2_2)
 
-            dropout2 = tf.nn.dropout(pool_2, self.keep_prob)
+        dropout2 = tf.nn.dropout(pool_2, self.keep_prob)
 
-            conv_3_1 = self.conv_layer(dropout2, [3, 3, 64, 128], 128, 'conv_3_1')
-            conv_3_2 = self.conv_layer(conv_3_1, [3, 3, 128, 128], 128, 'conv_3_2')
+        conv_3_1 = self.conv_layer(dropout2, [3, 3, 64, 128], 128, 'conv_3_1')
+        conv_3_2 = self.conv_layer(conv_3_1, [3, 3, 128, 128], 128, 'conv_3_2')
 
-            pool_3, pool_3_argmax = self.pool_layer(conv_3_2)
+        pool_3, pool_3_argmax = self.pool_layer(conv_3_2)
 
-            dropout3 = tf.nn.dropout(pool_3, self.keep_prob)
+        dropout3 = tf.nn.dropout(pool_3, self.keep_prob)
 
-            conv_4_1 = self.conv_layer(dropout3, [3, 3, 128, 256], 256, 'conv_4_1')
-            conv_4_2 = self.conv_layer(conv_4_1, [3, 3, 256, 256], 256, 'conv_4_2')
+        conv_4_1 = self.conv_layer(dropout3, [3, 3, 128, 256], 256, 'conv_4_1')
+        conv_4_2 = self.conv_layer(conv_4_1, [3, 3, 256, 256], 256, 'conv_4_2')
 
-            pool_4, pool_4_argmax = self.pool_layer(conv_4_2)
+        pool_4, pool_4_argmax = self.pool_layer(conv_4_2)
 
-            dropout4 = tf.nn.dropout(pool_4, self.keep_prob)
+        dropout4 = tf.nn.dropout(pool_4, self.keep_prob)
 
-            conv_5_1 = self.conv_layer(dropout4, [3, 3, 256, 512], 512, 'conv_5_1')
-            conv_5_2 = self.conv_layer(conv_5_1, [3, 3, 512, 512], 512, 'conv_5_2')
+        conv_5_1 = self.conv_layer(dropout4, [3, 3, 256, 512], 512, 'conv_5_1')
+        conv_5_2 = self.conv_layer(conv_5_1, [3, 3, 512, 512], 512, 'conv_5_2')
 
-            pool_5, pool_5_argmax = self.pool_layer(conv_5_2)
+        pool_5, pool_5_argmax = self.pool_layer(conv_5_2)
 
-            dropout5 = tf.nn.dropout(pool_5, self.keep_prob)
+        dropout5 = tf.nn.dropout(pool_5, self.keep_prob)
 
-            fc_6 = self.conv_layer(dropout5, [7, 7, 512, 4096], 4096, 'fc_6')
+        fc_6 = self.conv_layer(dropout5, [7, 7, 512, 4096], 4096, 'fc_6')
 
-            deconv_fc_6 = self.deconv_layer(fc_6, [7, 7, 512, 4096], 512, 'fc6_deconv')
+        deconv_fc_6 = self.deconv_layer(fc_6, [7, 7, 512, 4096], 512, 'fc6_deconv')
 
-            unpool_5 = self.unpool_layer2x2(deconv_fc_6, pool_5_argmax)
+        unpool_5 = self.unpool_layer2x2(deconv_fc_6, pool_5_argmax)
 
-            deconv_5_2 = self.deconv_layer(unpool_5, [3, 3, 512, 512], 512, 'deconv_5_2')
-            deconv_5_1 = self.deconv_layer(deconv_5_2, [3, 3, 256, 512], 256, 'deconv_5_1')
+        deconv_5_2 = self.deconv_layer(unpool_5, [3, 3, 512, 512], 512, 'deconv_5_2')
+        deconv_5_1 = self.deconv_layer(deconv_5_2, [3, 3, 256, 512], 256, 'deconv_5_1')
 
-            unpool_4 = self.unpool_layer2x2(deconv_5_1, pool_4_argmax)
+        unpool_4 = self.unpool_layer2x2(deconv_5_1, pool_4_argmax)
 
-            deconv_4_2 = self.deconv_layer(unpool_4, [3, 3, 256, 256], 256, 'deconv_4_2')
-            deconv_4_1 = self.deconv_layer(deconv_4_2, [3, 3, 128, 256], 128, 'deconv_4_1')
+        deconv_4_2 = self.deconv_layer(unpool_4, [3, 3, 256, 256], 256, 'deconv_4_2')
+        deconv_4_1 = self.deconv_layer(deconv_4_2, [3, 3, 128, 256], 128, 'deconv_4_1')
 
-            unpool_3 = self.unpool_layer2x2(deconv_4_1, pool_3_argmax)
+        unpool_3 = self.unpool_layer2x2(deconv_4_1, pool_3_argmax)
 
-            deconv_3_2 = self.deconv_layer(unpool_3, [3, 3, 128, 128], 128, 'deconv_3_2')
-            deconv_3_1 = self.deconv_layer(deconv_3_2, [3, 3, 64, 128], 64, 'deconv_3_1')
+        deconv_3_2 = self.deconv_layer(unpool_3, [3, 3, 128, 128], 128, 'deconv_3_2')
+        deconv_3_1 = self.deconv_layer(deconv_3_2, [3, 3, 64, 128], 64, 'deconv_3_1')
 
-            unpool_2 = self.unpool_layer2x2(deconv_3_1, pool_2_argmax)
+        unpool_2 = self.unpool_layer2x2(deconv_3_1, pool_2_argmax)
 
-            deconv_2_2 = self.deconv_layer(unpool_2, [3, 3, 64, 64], 64, 'deconv_2_2')
-            deconv_2_1 = self.deconv_layer(deconv_2_2, [3, 3, 32, 64], 32, 'deconv_2_1')
+        deconv_2_2 = self.deconv_layer(unpool_2, [3, 3, 64, 64], 64, 'deconv_2_2')
+        deconv_2_1 = self.deconv_layer(deconv_2_2, [3, 3, 32, 64], 32, 'deconv_2_1')
 
-            unpool_1 = self.unpool_layer2x2(deconv_2_1, pool_1_argmax)
+        unpool_1 = self.unpool_layer2x2(deconv_2_1, pool_1_argmax)
 
-            deconv_1_2 = self.deconv_layer(unpool_1, [3, 3, 32, 32], 32, 'deconv_1_2')
-            deconv_1_1 = self.deconv_layer(deconv_1_2, [3, 3, 32, 32], 32, 'deconv_1_1')
+        deconv_1_2 = self.deconv_layer(unpool_1, [3, 3, 32, 32], 32, 'deconv_1_2')
+        deconv_1_1 = self.deconv_layer(deconv_1_2, [3, 3, 32, 32], 32, 'deconv_1_1')
 
-            score_1 = self.deconv_layer(deconv_1_1, [1, 1, 2, 32], 2, 'score_1')
+        score_1 = self.deconv_layer(deconv_1_1, [1, 1, 2, 32], 2, 'score_1')
 
-            logits = tf.reshape(score_1, (-1, 2))
-            cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits,
-                                                                           labels=tf.reshape(expected, [-1]),
-                                                                           name='x_entropy')
+        logits = tf.reshape(score_1, (-1, 2))
+        cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits,
+                                                                       labels=tf.reshape(expected, [-1]),
+                                                                       name='x_entropy')
 
-            self.loss = tf.reduce_mean(cross_entropy, name='x_entropy_mean')
+        self.loss = tf.reduce_mean(cross_entropy, name='x_entropy_mean')
 
-            self.train_step = tf.train.AdamOptimizer(self.rate).minimize(self.loss)
+        self.train_step = tf.train.AdamOptimizer(self.rate).minimize(self.loss)
 
-            self.prediction = tf.argmax(tf.reshape(tf.nn.softmax(logits), tf.shape(score_1)), dimension=3)
+        self.prediction = tf.argmax(tf.reshape(tf.nn.softmax(logits), tf.shape(score_1)), dimension=3)
 
     def weight_variable(self, shape, stddev):
         initial = tf.truncated_normal(shape, stddev=stddev)
@@ -223,8 +217,8 @@ class LVSegmentation(object):
         return hidden
 
     def pool_layer(self, x):
-        with tf.device('/gpu:0'):
-            return tf.nn.max_pool_with_argmax(x, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
+
+        return tf.nn.max_pool_with_argmax(x, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
 
     def deconv_layer(self, x, W_shape, b_shape, name, padding='SAME'):
         nr_units = functools.reduce(lambda x, y: x * y, W_shape)
