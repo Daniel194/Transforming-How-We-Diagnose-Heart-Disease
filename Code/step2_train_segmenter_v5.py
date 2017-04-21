@@ -104,7 +104,7 @@ class LVSegmentation(object):
                                                      op.get_attr("strides"),
                                                      padding=op.get_attr("padding"))
 
-    def build(self, use_cpu=False):
+    def build(self):
 
         self.x = tf.placeholder(tf.float32, shape=(None, 224, 224, 1))
         self.y = tf.placeholder(tf.int64, shape=(None, 224, 224))
