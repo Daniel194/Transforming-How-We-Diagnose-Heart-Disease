@@ -14,7 +14,7 @@ from tensorflow.python.ops import gen_nn_ops
 
 
 class LVSegmentation(object):
-    def __init__(self, checkpoint_dir='../../result/segmenter/train_result/v5/'):
+    def __init__(self, checkpoint_dir='../../result/segmenter/train_result/v3/'):
         self.build()
         self.saver = tf.train.Saver(max_to_keep=30, keep_checkpoint_every_n_hours=1)
         self.session = tf.Session()
@@ -47,9 +47,9 @@ class LVSegmentation(object):
     def predict(self, images):
         self.restore_session()
 
-        return self.prediction.eval(session=self.session, feed_dict={self.x: images})
+        return self.prediction.eval(session=self.session, feed_dict={self.x: images, self.keep_prob: 1.0})
 
-    def train(self, train_paths, epochs=30, batch_size=2, restore_session=False, learning_rate=1e-6):
+    def train(self, train_paths, epochs=60, batch_size=2, restore_session=False, learning_rate=1e-3):
         if restore_session:
             self.restore_session()
 
@@ -63,9 +63,11 @@ class LVSegmentation(object):
                 _, images, labels = self.read_data(train_path)
 
                 self.train_step.run(session=self.session,
-                                    feed_dict={self.x: images, self.y: labels, self.rate: learning_rate})
+                                    feed_dict={self.x: images, self.y: labels, self.rate: learning_rate,
+                                               self.keep_prob: 0.5})
 
-                loss = self.loss.eval(session=self.session, feed_dict={self.x: images, self.y: labels})
+                loss = self.loss.eval(session=self.session, feed_dict={self.x: images, self.y: labels,
+                                                                       self.keep_prob: 0.5})
 
                 total_loss += loss
 
@@ -75,6 +77,9 @@ class LVSegmentation(object):
 
             self.loss_array.append(total_loss / train_size)
             self.save_loss()
+
+            if (epoch + 1) % 10 == 0:
+                learning_rate *= 0.1
 
     def read_data(self, paths):
         images, labels = sunnybrook.export_all_contours(paths)
@@ -108,6 +113,7 @@ class LVSegmentation(object):
 
         self.x = tf.placeholder(tf.float32, shape=(None, 224, 224, 1))
         self.y = tf.placeholder(tf.int64, shape=(None, 224, 224))
+        self.keep_prob = tf.placeholder(tf.float32)
 
         expected = tf.expand_dims(self.y, -1)
         self.rate = tf.placeholder(tf.float32, shape=[])
@@ -139,7 +145,9 @@ class LVSegmentation(object):
 
         pool_5, pool_5_argmax = self.pool_layer(conv_5_3)
 
-        fc_6 = self.conv_layer(pool_5, [7, 7, 256, 4096], 4096, 'fc_6')
+        drop1 = tf.nn.dropout(pool_5, self.keep_prob)
+
+        fc_6 = self.conv_layer(drop1, [7, 7, 256, 4096], 4096, 'fc_6')
 
         deconv_fc_6 = self.deconv_layer(fc_6, [7, 7, 256, 4096], 256, 'fc6_deconv')
 
@@ -275,7 +283,7 @@ if __name__ == '__main__':
     segmenter = LVSegmentation()
 
     if len(sys.argv) != 2:
-        print('The program must be run as : python3.5 step2_train_segmenter_v5.py [train|predict]')
+        print('The program must be run as : python3.5 step2_train_segmenter_v3.py [train|predict]')
         sys.exit(2)
     else:
         if sys.argv[1] == 'train':
