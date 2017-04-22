@@ -16,7 +16,7 @@ from tensorflow.python.ops import gen_nn_ops
 class LVSegmentation(object):
     def __init__(self, checkpoint_dir='../../result/segmenter/train_result/'):
         self.build()
-        self.saver = tf.train.Saver(max_to_keep=30, keep_checkpoint_every_n_hours=1)
+        self.saver = tf.train.Saver(max_to_keep=40, keep_checkpoint_every_n_hours=1)
         self.session = tf.Session()
         self.session.run(tf.global_variables_initializer())
         self.checkpoint_dir = checkpoint_dir
@@ -49,7 +49,7 @@ class LVSegmentation(object):
 
         return self.prediction.eval(session=self.session, feed_dict={self.x: images})
 
-    def train(self, train_paths, epochs=30, batch_size=2, restore_session=False, learning_rate=1e-6):
+    def train(self, train_paths, epochs=40, batch_size=2, restore_session=False, learning_rate=1e-6):
         if restore_session:
             self.restore_session()
 
