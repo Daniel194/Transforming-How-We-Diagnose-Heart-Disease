@@ -74,4 +74,12 @@ Primul pas pe care trebuie s\u{a} \^{i}l facem \^{i}nainte de a introduce setul 
 
 \subsection{Re\c{t}ele neuronale pentru segmentarea ventricului st\^{a}ng}
 
-TODO
+Arhitectura re\c{t}elei neuronale pe care am aleso, pentru segmentarea ventricului st\^{a}ng de restul radiografiei, a fost inspirat\u{a} din arhitectura re\c{t}elei neuronale pe care cei de la Universatea Oxford au construito pentru a segmenta categorii de obiecte dintr-o imagine, dar din cauza faptului c\u{a} modelul celor de la Oxford, numit Visual Geometry Group ( prescurtat VGG ), dup\u{a} grupul care a venit cu idee acestei arhitecturi, era foarte complex \c{s}i se ajungea u\c{s}or la efectul de overfitting, acesta a trebuit simplificat\u{a,} astfle \^{i}nc\^{a}t s\u{a} se evite pe c\^{a}t posibil efectul de overfitting.
+
+\par
+
+Dup\u{a} \^{i}ncercarea multor varia\c{t}ii a arhitecutrii VGG, prin care am \^{i}ncercat s\u{a} atingem un scor la func\c{t}ia de cost c\^{a}t mai mic \c{s}i prin care s\u{a} avem o precizie la datele de test c\^{a}t mai bun\u{a}, am ajuns la urm\u{a}toarea arhitectur\u{a} pentru segmentorul nostru.
+
+\begin{center}
+\includegraphics[width=500]{arhitectura_segmentor.png}
+\end{center}
