@@ -287,17 +287,19 @@ if __name__ == '__main__':
             print('Run Predict .....')
 
             images, prepoces_images, labels = segmenter.read_data(val)
-            prediction = segmenter.predict(prepoces_images)
+            predictions = segmenter.predict(prepoces_images)
 
             for i in range(len(images)):
-                plt.imshow(images[i], cmap='gray')
+                image = images[i]
+
+                label = labels[i]
+                prediction = predictions[i]
+
+                image[prediction == 0] = 0.0
+
+                plt.imshow(image, cmap='gray')
                 plt.show()
 
-                plt.imshow(labels[i])
-                plt.show()
-
-                plt.imshow(prediction[i])
-                plt.show()
 
         else:
             print('The available options for this script are : train, evaluate and predict')
