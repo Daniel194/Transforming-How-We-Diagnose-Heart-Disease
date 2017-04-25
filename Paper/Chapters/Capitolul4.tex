@@ -83,3 +83,99 @@ Dup\u{a} \^{i}ncercarea multor varia\c{t}ii a arhitecutrii VGG, prin care am \^{
 \begin{center}
 \includegraphics[width=500]{arhitectura_segmentor.png}
 \end{center}
+
+\^{I}n imaginea de mai sus am ilustrat nivelele din re\c{t}eaua neuronal\u{a}, unde am reprezentat prin culoarea verde nivelele convolu\c{t}ionale \c{s}i deconvolu\c{t}ionale, prin galben nivelele de pool \c{s}i de un-pool, iar prin ro\c{s}u nivelul conectat complet.
+
+\par
+
+Nivelele deconvolu\c{t}ionale \c{s}i nevelele de un-pool sunt nivele ce se comport\u{a} invers fa\c{t}\u{a} de nivelul convolu\c{t}ionl, respectiv nivelul de pool. Mai exact, nivelul de un-pool m\u{a}re\c{s}te spa\c{t}iul dimensional pe baza pozi\c{t}iilor care au trecut de nivelul de pool, iar nivelul deconvolu\c{t}ional este de fapt transpusa nivelului convolu\c{t}ional.
+
+\par
+
+\^{I}n arhitectura ilustrat\u{a} mai sus, am pus dup\u{a} fiecare nivel convolu\c{t}ional c\^{a}te o func\c{t}ie de activare ReLU, iar nivelele convolu\c{t}ionale \c{s}i deconvolu\c{t}ionale au ponderi de dimensiune [3x3] cu un pas de glisare a ferestrei egal cu unu \^{i}n toate direc\c{t}iile de deplasere. Am ini\c{t}ializat ponderile de la nivelele convolu\c{t}ionale \c{s}i deconvolu\c{t}ionale cu variabile aleatoare dintr-o distribu\c{t}ie normal\u{a}, unde devia\c{t}ia standard este setat\u{a} la $\frac{1}{\sqrt{n}}$, unde n reprezint\u{a} numarul de variabile, iar bias-ul a fost setat la valoarea zero. Padding-ul a fost setat astfel \^{i}nc\^{a}t dimensiunea datelor de intrare, pe lungime \c{s}i \^{i}n\u{a}l\c{t}ime, s\u{a} se p\u{a}streze la datele rezultate \^{i}n urma aplic\u{a}rii nivelelor convolu\c{t}ionale \c{s}i deconvolu\c{t}ionale.
+
+\par
+
+Nivelul de pool \c{s}i un-pool, le-au fost setate o fereastr\u{a} de dimensiune [2x2] cu un pas de glisare a ferestrei egal cu doi, astfle \^{i}nc\^{a}t cantitatea de date s\u{a} se reduc\u{a} cu un procent de 75\% dup\u{a} aplicarea unui nivel de pool, respectiv s\u{a} se mareasc\u{a} cu un procent de 75\% dup\u{a} aplicarea unui nivel de un-pool.
+
+\begin{center}
+ \begin{longtable}{|p{4cm}|p{3cm}|p{3cm}|p{3cm}|} 
+ \hline
+ Nume & Dimensiune date de intrare & Numar ponderi \c{s}i bias-uri & Dimensiune date de ie\c{s}ire \\ [0.5ex] 
+ \hline\hline
+ Convolutional 1 - 1 &  [224 x 224 x 1] & 32 & [224 x 224 x 32] \\ 
+ \hline
+ Convolutional 1 - 2 & [224 x 224 x 32] & 32 & [224 x 224 x 32] \\
+ \hline
+ Pool 1 & [224 x 224 x 32] & - & [112 x 112 x 32] \\
+ \hline
+ Convolutional 2 - 1 & [112 x 112 x 32] & 64 & [112 x 112 x 64] \\
+ \hline
+ Convolutional 2 - 2 & [112 x 112 x 64] & 64 & [112 x 112 x 64] \\
+ \hline
+ Pool 2 & [112 x 112 x 64] & - & [56 x 56 x 64] \\
+ \hline
+ Convolutional 3 - 1 & [56 x 56 x 64] & 128 & [56 x 56 x 128] \\
+ \hline
+ Convolutional 3 - 2 & [56 x 56 x 128] & 128 & [56 x 56 x 128] \\
+ \hline
+ Pool 3 & [56 x 56 x 128] & - & [28 x 28 x 128] \\
+ \hline
+ Convolutional 4 - 1 & [28 x 28 x 128] & 256 & [28 x 28 x 256] \\
+ \hline
+ Convolutional 4 - 2 & [28 x 28 x 256] & 256 & [28 x 28 x 256] \\
+ \hline
+ Convolutional 4 - 3 & [28 x 28 x 256] & 256 & [28 x 28 x 256] \\
+ \hline
+ Pool 4 & [28 x 28 x 256] & - & [14 x 14 x 256] \\
+ \hline
+ Convolutional 5 - 1 & [14 x 14 x 256] & 256 & [14 x 14 x 256] \\
+ \hline
+ Convolutional 5 - 2 & [14 x 14 x 256] & 256 & [14 x 14 x 256] \\
+ \hline
+ Convolutional 5 - 3 & [14 x 14 x 256] & 256 & [14 x 14 x 256] \\
+ \hline
+ Pool 5 & [7 x 7 x 256] & - & [7 x 7 x 256] \\
+ \hline
+ Conectat complet & [7 x 7 x 256] & 4096 & [1 x 1 x 4096] \\
+ \hline
+ Deconectat complet & [1 x 1 x 4096] & 256 & [7 x 7 x 256] \\
+ \hline
+ Un-pool 5  & [7 x 7 x 256] & - & [14 x 14 x 256] \\
+ \hline
+ Deconvolutional 5 - 3 & [14 x 14 x 256] & 256 & [14 x 14 x 256] \\
+ \hline
+ Deconvolutional 5 - 2 & [14 x 14 x 256] & 256 & [14 x 14 x 256] \\
+ \hline
+ Deconvolutional 5 - 1 & [14 x 14 x 256] & 256 & [14 x 14 x 256] \\
+ \hline
+ Un-pool 4  & [14 x 14 x 256] & - & [28 x 28 x 256] \\
+ \hline
+ Deconvolutional 4 - 3 & [28 x 28 x 256] & 256 & [28 x 28 x 256] \\
+ \hline
+ Deconvolutional 4 - 2 & [28 x 28 x 256] & 256 & [28 x 28 x 256] \\
+ \hline
+ Deconvolutional 4 - 1 & [28 x 28 x 256] & 128 & [28 x 28 x 128] \\
+ \hline
+ Un-pool 3  & [28 x 28 x 128] & - & [56 x 56 x 128] \\
+ \hline
+ Deconvolutional 3 - 2 & [56 x 56 x 128] & 128 & [56 x 56 x 128] \\
+ \hline
+ Deconvolutional 4 - 1 & [56 x 56 x 128] & 64 & [56 x 56 x 64] \\
+ \hline
+ Un-pool 2  & [56 x 56 x 64] & - & [112 x 112 x 64] \\
+ \hline
+ Deconvolutional 2 - 2 & [112 x 112 x 64] & 64 & [112 x 112 x 64] \\
+ \hline
+ Deconvolutional 2 - 1 & [112 x 112 x 64] & 32 & [112 x 112 x 32] \\
+ \hline
+  Un-pool 1  & [112 x 112 x 32] & - & [224 x 224 x 32] \\
+ \hline
+ Deconvolutional 1 - 2 & [224 x 224 x 32] & 32 & [224 x 224 x 32] \\
+ \hline
+ Deconvolutional 1 - 1 & [224 x 224 x 32] & 32 & [224 x 224 x 32] \\
+ \hline
+ Output & [224 x 224 x 32] & 2 & [224 x 224 x 2] \\
+ \hline
+\end{longtable}
+\end{center}
