@@ -177,5 +177,29 @@ Nivelul de pool \c{s}i un-pool, le-au fost setate o fereastr\u{a} de dimensiune 
  \hline
  Output & [224 x 224 x 32] & 2 & [224 x 224 x 2] \\
  \hline
+ Softmax & [224 x 224 x 2] & - & [224 x 224 x 2] \\
+ \hline
+ Argmax & [224 x 224 x 2] & - & [224 x 224 x 1] \\
+ \hline
 \end{longtable}
 \end{center}
+
+Cum am precizat \c{s}i mai sus, nivelele convolu\c{t}ionale \c{s}i deconvolu\c{t}ionale au ponderi de dimensiune [3 x 3], singurile nivele care nu respect\u{a} acest\u{a} dimensiune, sunt nivelele Conectat complet \c{s}i Deconectat complet, unde ponderile au o dimensiune de [7 x 7] pentru a conecta fiecare neuron cu fiecare ponder\u{a}. Alt nivel care nu respect\u{a} aceast\u{a} dimensiune este nivelul de Output, care are o dimensiune a ponderilor de [1 x 1], acest nivel are rolul de a aduce dimensiunea datelor, de la penultimul nivel deconvolu\c{t}ional, de la valoarea 32 la numarul de clase posbile, \^{i}n cazul nostru sunt doua clase posibile, exist\u{a} sau nu la pozi\c{t}ia respectiv\u{a} ventirculul st\^{a}ng a inimii, aceste clase sunt reprezentate prin valoarea 1 pentru posibilitatea c\u{a} exist\u{a} \c{s}i 0 pentru posibilitatea c\u{a} nu exist\u{a}.
+
+\par
+
+Dup\u{a} nivelul de Output se aplic\u{a} func\c{t}ia Softmax, ca func\c{t}ie de cost, pentru calcularea pierderii, iar pentru aflarea rezultatului final se aplic\u{a} o func\c{t}ie numit\u{a} Argmax, care \^{i}ntoarce pozi\c{t}ia unde valoarea este cea mai mare, aceast\u{a} func\c{t}ie este aplicat\u{a} pe ad\^{a}ncimea setului de date. Ceea ce \^{i}ntoarce func\c{t}ia Argmax reprezint\u{a} prezicerile pe care re\c{t}eaua neuronal\u{a} o face \^{i}n urma procesului de antrenare.
+
+\par
+
+\^{I}nainte ca setul de date de la spitalul Sunnybrook s\u{a} fie introduce \^{i}n re\c{t}eaua neuronal\u{a}, \^{i}n procesul de antrenare sau pentru preziceri, acestea trebuiesc mai \^{i}nt\^{a}i decupate astfel \^{i}nc\^{a}t s\u{a} intre \^{i}n re\c{t}eaua neuronal\u{a}. Cum se observ\u{a} \c{s}i \^{i}n tabelul de mai sus, re\c{t}eaua neuronal\u{a} accept\u{a} un set de date de dimensiunea [224 x 224], \^{i}ns\u{a} setul de date de la Sunnybrook are o dimensiune de [254 x 256]. Acest lucur a fost f\u{a}cut pentru a multimplica setul de date, din cauz\u{a} c\u{a} setul de date pus la dispozi\c{t}ie de spitalul Sunnybrook este destul de mic ( doar 805 de exemple ), trebuia s\u{a} gasim o modalitate de al multiplica, iar cea mai bun\u{a} solu\c{t}ie pe care am gasito pentru a face acest lucru a fost s\u{a} punem re\c{t}eaua neuronal\u{a} s\u{a} accepte un volum de date de dimensiune mai mic\u{a}, astfel \^{i}nc\^{a}t s\u{a} putem sa decup\u{a}m la o pozi\c{t}ie aleatoare setul de date. Prin urmare, \^{i}nainte s\u{a} introducem setul de date \^{i}n re\c{t}eaua neuronal\u{a}, alegem dou\u{a} valori aleatorii, una pentru axa Ox, alta pentru axa Oy, \c{s}i incepem s\u{a} decup\u{a}m de la acea pozi\c{t}ie, dup\u{a} aceea setul de date  decupat este centrat la zero \c{s}i normalizat, setul de date rezultat este introdus \^{i}n re\c{t}eaua neuronalu\u{a}.
+
+\par
+
+La procesul de antrenare,  am ales metoda Adam pentru antrenare, rata de \^{i}nv\u{a}\c{t}are a fost setat\u{a} la valoarea de 1e-6, \c{s}i s-au efectuat 40 de itera\c{t}ii peste setul de date, iar la fiecare pas de antrenare s-au luat c\^{a}te doua exemple din setul de date. Din cele 805 de exemple de antrenare, puse la dispozi\c{t}ie de spitalul Sunnybrook, am p\u{a}strat 5 valori pentru a vedea ce preziceri face re\c{t}eaua neuronal\u{a} peste date pe care nu le-a vazut niciodat\u{a} \^{i}n procesul de antrenare, celelate 800 de exemple au fost folosite \^{i}n procesul de antrenare. Cu 800 de exemple de antrenare, din care s-au luat 2 exemple la fiecare pas de antrenare, la fiecare pas de itera\c{t}ie peste setul de date s-au efectuat 400 de pa\c{s}i de antrenare, av\^{a}nd \^{i}n vedere c\u{a} s-au f\u{a}cut 40 de itera\c{t}ii peste setul de dat avem un total de 160.000 de pa\c{s}i de antrenare. L-a fiecare itera\c{t}ie peste setul de date ( numit si epoch ) s-au salvat parametrii re\c{t}elei neuronale \c{s}i s-a calculat func\c{t}ia total\u{a} de cost peste setul de date.
+
+\begin{center}
+\includegraphics[width=400]{loss.png}
+\end{center}
+
+\^{I}n graficul de mai sus s-a ilustrat progresul func\c{t}iei de cost la fiecare epoch, ce-a mai mic\u{a} valoare a fost atins\u{a} la epoch-ul 40, unde func\c{t}ia de cost a ar\u{a}tat o valoare de 0.019257. Procesul de antrenare a durat 5 ore pe un nvidia geforce titan x, iar re\c{t}eaua neuronal\u{a} a fost scris\u{a} in Python 3.5 cu ajutorul libr\u{a}riei TensorFlow.
