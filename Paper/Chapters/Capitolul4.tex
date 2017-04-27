@@ -203,3 +203,100 @@ La procesul de antrenare,  am ales metoda Adam pentru antrenare, rata de \^{i}nv
 \end{center}
 
 \^{I}n graficul de mai sus s-a ilustrat progresul func\c{t}iei de cost la fiecare epoch, ce-a mai mic\u{a} valoare a fost atins\u{a} la epoch-ul 40, unde func\c{t}ia de cost a ar\u{a}tat o valoare de 0.019257. Procesul de antrenare a durat 5 ore pe un nvidia geforce titan x, iar re\c{t}eaua neuronal\u{a} a fost scris\u{a} in Python 3.5 cu ajutorul libr\u{a}riei TensorFlow.
+
+\^{I}n imaginile de mai jos pute\c{t}i vedea prezicerile pe care re\c{t}eaua neuronal\u{a} le-a f\u{a}cut pe seteul de date care nu a fost inclus \^{i}n procesul de antrenare ( cele 5 exemple ). Motivul pentru care se exclud unele date din procesul de antrenare pentru a se face preziceri pe ele este acela de a vedea cum se descurc\u{a} re\c{t}eaua neuronal\u{a} pe un set de date pe care nu l-a vazut niciodat\u{a} \c{s}i pentru a ne asigura c\u{a} re\c{t}eaua neuronal\u{a} nu a \^{i}nv\u{a}\c{t}at pe dinafar\u{a} datele de antrenare ( efectul de overfitting ).
+
+\par
+
+Setul de imagine pe care le vom prezenta, \^{i}n cele ce urmeaz\u{a}, sunt structurate pe dou\u{a} coloane, pe prima coloan\u{a} sunt raspunsurile, pe care re\c{t}eaua neuronal\u{a} ar trebuii s\u{a} le prezic\u{a}, iar pe a do\u{a} coloan\u{a} sunt prezicerile pe care le-a facut re\c{t}eaua neuronal\u{a}. Pe fiecare coloana exist\u{a} trei randuri de imagini, unde pe primul r\^{a}nd este imagine pe care se face prezicerea, pe al doilea r\^{a}nd este prezicerea f\u{a}cut\u{a}, iar pe r\^{a}ndul trei este imaginea decupat\u{a} de pe primul r\^{a}nd pe baza prezicerilor de pe r\^{a}ndul doi.
+
+\begin{center}
+\includegraphics[width=200]{1_image.png}
+\includegraphics[width=200]{1_image.png}
+\end{center}
+
+\begin{center}
+\includegraphics[width=200]{1_labels.png}
+\includegraphics[width=200]{1_labels_predict.png}
+\end{center}
+
+\begin{center}
+\includegraphics[width=200]{1_image_labels.png}
+\includegraphics[width=200]{1_image_predict.png}
+\end{center}
+
+\^{I}n imaginile de mai sus, pe partea dtreapt\u{a}, sunt ilustrate rezultatele ob\c{t}inute la prezicere la primul exemplu, iar pe partea st\^{a}ng\u{a} este adev\u{a}rata valoare. Se poate observa faltul c\u{a}, prezicerea f\u{a}cut\u{a} de re\c{t}eaua neuronal\u{a} este destul de aproape de adev\u{a}r ( r\^{a}ndurile doi \c{s}i trei ), \^{i}ns\u{a} exist\u{a} diferen\c{t}e \^{i}ntre ele, cum ar fi spre exemplu faptul c\u{a} rec\c{t}eaua neuronal\u{a} a prezis ventriculul st\^{a}ng ceva mai la st\^{a}nga \c{s}i pu\c{t}in mai mare dec\^{a} era cu adev\u{a}rat.
+
+\begin{center}
+\includegraphics[width=200]{2_image.png}
+\includegraphics[width=200]{2_image.png}
+\end{center}
+
+\begin{center}
+\includegraphics[width=200]{2_labels.png}
+\includegraphics[width=200]{2_labels_predict.png}
+\end{center}
+
+\begin{center}
+\includegraphics[width=200]{2_image_labels.png}
+\includegraphics[width=200]{2_image_predict.png}
+\end{center}
+
+Prezicerea pe imaginea doi este ilustrat\u{a} mai sus. Se poate vedea c\u{a} rec\c{t}eaua neuronal\u{a} de data asta a prezis un ventricul st\^{a}ng mult mai mare de data asta dec\^{a}t era cu adev\u{a}rat. Acest lucru s-ar putea datora faptului c\u{a}, pe setul de imagini de antrenare, erau mai multe imagini cu ventriculul st\^{a}ng c\^{a}nd era la diastol\u{a} dec\^{a}t cele care erau la sistol\u{a}, iar din aceast\u{a} cauz\u{a} re\c{t}eaua neuronal\u{a} a prezis un ventricul st\^{a}ng a\c{s}a de mare, pentru c\u{a} a \^{i}nv\u{a}\c{t}at s\u{a} caute ventricule aflate la diastol\u{a}.
+
+\begin{center}
+\includegraphics[width=200]{3_image.png}
+\includegraphics[width=200]{3_image.png}
+\end{center}
+
+\begin{center}
+\includegraphics[width=200]{3_labels.png}
+\includegraphics[width=200]{3_labels_predict.png}
+\end{center}
+
+\begin{center}
+\includegraphics[width=200]{3_image_labels.png}
+\includegraphics[width=200]{3_image_predict.png}
+\end{center}
+
+Pe setul de imagini trei, pe care s-a facut prezicerea de c\u{a}tre rec\c{t}eauan neuronal\u{a}, avem aceea\c{s}i problem\u{a}, re\c{t}eaua neuronal\u{a} face preziceri mult mari a ventricului st\^{a}ng dec\^{a}t sunt ele de fapt \^{i}n realitate. De data aceasta \^{i}ns\u{a} se poate trece cu vederea acest fapt, deoarece inima acum se afl\u{a} la diastol\u{a}, iar ventriculul st\^{a}ng este la expansiunea sa maxim\u{a}, iar prezicerea, dup\u{a} cum se poate observa, sunt destul de aproape de adev\u{a}r.
+
+\begin{center}
+\includegraphics[width=200]{4_image.png}
+\includegraphics[width=200]{4_image.png}
+\end{center}
+
+\begin{center}
+\includegraphics[width=200]{4_labels.png}
+\includegraphics[width=200]{4_labels_predict.png}
+\end{center}
+
+\begin{center}
+\includegraphics[width=200]{4_image_labels.png}
+\includegraphics[width=200]{4_image_predict.png}
+\end{center}
+
+Penultimul set de date pe care s-a f\u{a}cut prezicerea este cel mai interesant, deoarece inima se afl\u{a} la sistol\u{a}, iar ventriculul st\^{a}ng este greu de detectat \c{s}i cu ochiul liber, \^{i}ns\u{a} re\c{t}eaua neuronal\u{a} a reu\c{s}it s\u{a} \^{i}l detecteze, ins\u{a} a facut iar aceea\c{s}i gre\c{s}teal\u{a} ca \c{s}i la celelalte cazuri, a dectectat un ventricul st\^{a}ng mult mai mare dec\^{a}t este el de fapt. Dup\u{a} cum se poate observa, ventriculul st\^{a}ng detectat acum de re\c{t}eaua neuronal\u{a} este de vrea cinci ori mai mare dec\^{a}t ar trebuii s\u{a} fie, acest lucru fiind pus pe seama faptului c\u{a}, \^{i}n setul de date de antrenare exist\u{a} pu\c{t}ine exeple cu un ventricul st\^{a}ng a\c{s}a de mic.
+
+\begin{center}
+\includegraphics[width=200]{5_image.png}
+\includegraphics[width=200]{5_image.png}
+\end{center}
+
+\begin{center}
+\includegraphics[width=200]{5_labels.png}
+\includegraphics[width=200]{5_labels_true.png}
+\end{center}
+
+\begin{center}
+\includegraphics[width=200]{5_image_labels.png}
+\includegraphics[width=200]{5_image_predict.png}
+\end{center}
+
+Pe ultimul set de date pe care s-a f\u{a}cut prezicerea se poate observa c\u{a} exist\u{a} aceea\c{s}i problem\u{a}, un ventricul st\^{a}ng mult mai mare detectat.
+
+\par
+
+Din imaginile ilustrate mai sus putem s\u{a} tragem o concluzie, aceea c\u{a}, re\c{t}eaua neuronal\u{a} face detec\c{t}ii a ventricului st\^{a}ng mult prea mari, \^{i}ns\u{a} sunt acceptabile pentru a trece la urm\u{a}torul pas, acela de a prezice volumul de s\^{a}nge care curge prin ventriculul st\^{a}ng. O posibil\u{a} modalitate de a for\c{t}a re\c{t}eaua neuronal\u{a} s\u{a} prezic\u{a} un ventricul st\^{a}ng mai mic ar fi s\u{a} supliment\u{a}m num\u{a}rul de imagine de antrenare cu inimi aflate la sistol\u{a}.
+
+\section{Prezicerea volumului de s\^{a}nge}
