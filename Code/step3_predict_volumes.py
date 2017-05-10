@@ -36,6 +36,12 @@ global_sys_errors = []
 
 
 def prepare_patient_images(patient_id, intermediate_crop=0):
+    """
+    DONE
+    :param patient_id: 
+    :param intermediate_crop: 
+    :return: 
+    """
     file_lst = []
     prefix = str(patient_id).rjust(4, '0')
     src_files = utils.get_files(settings.BASE_PREPROCESSEDIMAGES_DIR, prefix + "*.png")
@@ -60,7 +66,7 @@ def prepare_patient_images(patient_id, intermediate_crop=0):
         cv2.imwrite(patient_img_dir + file_name, cropped_img)
         file_lst.append([file_name, "dummy_overlay.png"])
 
-    with open(patient_img_dir + "pred.lst", "wb") as f:
+    with open(patient_img_dir + "pred.lst", "w") as f:
         writer = csv.writer(f, delimiter='\t')
         writer.writerows(file_lst)
 
