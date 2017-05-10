@@ -3,8 +3,8 @@ import numpy
 import glob
 import os
 import cv2
-import settings
-from utils_dicom import DicomWrapper
+import utils.settings as settings
+from utils.utils_dicom import DicomWrapper
 from scipy.ndimage.interpolation import map_coordinates
 from scipy.ndimage.filters import gaussian_filter
 
@@ -14,25 +14,25 @@ numpy.random.seed(1301)
 
 def get_pred_patient_dir(patient_id):
     prefix = str(patient_id).rjust(4, '0')
-    res = settings.PATIENT_PRED_DIR + prefix + "\\"
+    res = settings.PATIENT_PRED_DIR + prefix + "/"
     create_dir_if_not_exists(res)
     return res
 
 
 def get_pred_patient_img_dir(patient_id):
-    res = get_pred_patient_dir(patient_id) + "all_images\\"
+    res = get_pred_patient_dir(patient_id) + "all_images/"
     create_dir_if_not_exists(res)
     return res
 
 
 def get_pred_patient_overlay_dir(patient_id):
-    res = get_pred_patient_dir(patient_id) + "predicted_overlays\\"
+    res = get_pred_patient_dir(patient_id) + "predicted_overlays/"
     create_dir_if_not_exists(res)
     return res
 
 
 def get_pred_patient_transparent_overlay_dir(patient_id):
-    res = get_pred_patient_dir(patient_id) + "predicted_overlays_transparent\\"
+    res = get_pred_patient_dir(patient_id) + "predicted_overlays_transparent/"
     create_dir_if_not_exists(res)
     return res
 

@@ -8,7 +8,7 @@ import cv2
 import numpy
 import pandas
 import utils.settings as settings
-import utils.utils
+import utils.utils as utils
 
 MODEL_NAME = settings.MODEL_NAME
 CROP_SIZE = settings.CROP_SIZE
@@ -372,7 +372,7 @@ def count_pixels(patient_id, threshold, all_slice_data, model_name, threshold_va
         data_frame["co_" + frame_str] = frame_confidence_series[frame_str]
 
     patient_dir = utils.get_pred_patient_dir(patient_id)
-    data_frame.to_csv(patient_dir + "\\areas_" + model_name + ".csv", sep=";")
+    data_frame.to_csv(patient_dir + "/areas_" + model_name + ".csv", sep=";")
 
     return data_frame
 
@@ -454,7 +454,7 @@ def compute_inconfidence_features(conf_values_serie):
 
 def compute_volumes(patient_id, model_name, debug_info=False):
     patient_dir = utils.get_pred_patient_dir(patient_id)
-    min_areas = pandas.read_csv(patient_dir + "\\areas_" + model_name + ".csv", sep=";")
+    min_areas = pandas.read_csv(patient_dir + "/areas_" + model_name + ".csv", sep=";")
     columns = list(min_areas)
     # diastole_col = ""
     diastole_pixels = 0
@@ -491,7 +491,7 @@ def compute_volumes(patient_id, model_name, debug_info=False):
     min_areas_selection["systole"] = min_areas[systole_col].values
     min_areas_selection["systole_vol"] = (min_areas_selection["systole"] * min_areas_selection[dist_col]).values
     min_areas_selection["systole_conf"] = min_areas[systole_col.replace("fr", "co")].values
-    min_areas_selection.to_csv(patient_dir + "\\areas_dia_sys_" + model_name + ".csv", sep=";")
+    min_areas_selection.to_csv(patient_dir + "/areas_dia_sys_" + model_name + ".csv", sep=";")
 
     dia_frame = diastole_col.replace("fr_", "")
     sys_frame = systole_col.replace("fr_", "")
@@ -512,7 +512,7 @@ def evaluate_volume(patient_id, diastole_vol, systole_vol, pred_model_name, scal
                     dia_frame, sys_frame, dia_max_slice, sys_max_slice, debug_info=False):
     diastole_vol = round(diastole_vol, 1)
     systole_vol = round(systole_vol, 1)
-    pred_data = pandas.read_csv(settings.BASE_DIR + PREDICTION_FILENAME, sep=";")
+    pred_data = pandas.read_csv(settings.RESULT_DIR + PREDICTION_FILENAME, sep=";")
     scale_col = "scale"
     if scale_col not in pred_data.columns:
         pred_data[scale_col] = 1
@@ -558,13 +558,13 @@ def evaluate_volume(patient_id, diastole_vol, systole_vol, pred_model_name, scal
         current_debug_line.append(str(err_dia))
         current_debug_line.append(str(err_sys))
 
-    pred_data.to_csv(settings.BASE_DIR + "prediction_raw_" + MODEL_NAME + ".csv", sep=";", index=False)
+    pred_data.to_csv(settings.RESULT_DIR + "prediction_raw_" + MODEL_NAME + ".csv", sep=";", index=False)
     return err_dia, err_sys
 
 
 def predict_patient(patient_id, all_slice_data, pred_model_name, pred_model_iter, debug_info=False):
-    if not os.path.exists(settings.BASE_DIR + PREDICTION_FILENAME):
-        shutil.copyfile(settings.BASE_DIR + "train_enriched.csv", settings.BASE_DIR + PREDICTION_FILENAME)
+    if not os.path.exists(settings.RESULT_DIR + PREDICTION_FILENAME):
+        shutil.copyfile(settings.RESULT_DIR + "train_enriched.csv", settings.RESULT_DIR + PREDICTION_FILENAME)
 
     global current_debug_line
     current_debug_line = [str(patient_id)]
@@ -628,7 +628,7 @@ def predict_patient(patient_id, all_slice_data, pred_model_name, pred_model_iter
 
 
 if __name__ == "__main__":
-    slice_data = pandas.read_csv(settings.BASE_DIR + "dicom_data_enriched.csv", sep=";")
+    slice_data = pandas.read_csv(settings.RESULT_DIR + "dicom_data_enriched.csv", sep=";")
     current_debug_line = ["patient", "dia_col", "sys_col", "dia_vol", "sys_vol", "dia_err", "sys_err"]
 
     print("\t".join(map(lambda x: str(x).rjust(10), current_debug_line)))
@@ -643,11 +643,10 @@ if __name__ == "__main__":
 
     for model_range in model_ranges:
         model_name = model_range[0]
-        if settings.QUICK_MODE:
-            model_name = MODEL_NAME + "fold5"
         model_iter = model_range[1]
         range_start = model_range[2]
         range_end = model_range[3]
+
         print("Predicting model " + model_name)
 
         for i in range(range_start, range_end):

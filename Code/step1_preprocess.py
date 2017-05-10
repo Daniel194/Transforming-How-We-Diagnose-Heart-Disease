@@ -1,5 +1,3 @@
-import utils
-import settings
 import csv
 import pandas
 import scipy
@@ -7,6 +5,8 @@ import scipy.misc
 import cv2
 import numpy as np
 import utils.sunnybrook as sunnybrook
+import utils.utils as utils
+import utils.settings as settings
 
 
 def create_csv_data():
