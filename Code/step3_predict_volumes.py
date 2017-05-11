@@ -6,33 +6,11 @@ import shutil
 import cv2
 import numpy
 import pandas
-import sys
 import numpy as np
 
 import utils.settings as settings
 import utils.utils as utils
 from step2_train_segmenter import LVSegmentation
-
-MODEL_NAME = settings.MODEL_NAME
-CROP_SIZE = settings.CROP_SIZE
-INPUT_SIZE = settings.TARGET_CROP - CROP_SIZE
-
-USE_FRUSTUM_VOLUME_CALCULATIONS = True
-USE_EMPTY_FIRST_ITEMIN_FRUSTUM = True
-
-PREDICTION_FILENAME = "prediction_raw_" + MODEL_NAME + ".csv"
-LOW_CONFIDENCE_PIXEL_THRESHOLD = 200
-INTERPOLATE_SERIES = False
-SMOOTHEN_FRAMES = True
-
-PROCESS_IMAGES = False
-SEGMENT_IMAGES = False
-COUNT_PIXELS = False
-COMPUTE_VOLUMES = True
-
-current_debug_line = []
-global_dia_errors = []
-global_sys_errors = []
 
 
 def prepare_patient_images(patient_id, intermediate_crop=0):
@@ -490,6 +468,22 @@ def compute_volumes(patient_id, model_name, debug_info=False):
 
 def evaluate_volume(patient_id, diastole_vol, systole_vol, pred_model_name, scale, lowconf_dia_vol, lowconf_sys_vol,
                     dia_frame, sys_frame, dia_max_slice, sys_max_slice, debug_info=False):
+    """
+    DONE
+    :param patient_id: 
+    :param diastole_vol: 
+    :param systole_vol: 
+    :param pred_model_name: 
+    :param scale: 
+    :param lowconf_dia_vol: 
+    :param lowconf_sys_vol: 
+    :param dia_frame: 
+    :param sys_frame: 
+    :param dia_max_slice: 
+    :param sys_max_slice: 
+    :param debug_info: 
+    :return: 
+    """
     diastole_vol = round(diastole_vol, 1)
     systole_vol = round(systole_vol, 1)
     pred_data = pandas.read_csv(settings.RESULT_DIR + PREDICTION_FILENAME, sep=";")
@@ -598,6 +592,28 @@ def predict_patient(patient_id, all_slice_data, pred_model_name, debug_info=Fals
 
 
 if __name__ == "__main__":
+    MODEL_NAME = settings.MODEL_NAME
+    CROP_SIZE = settings.CROP_SIZE
+    INPUT_SIZE = settings.TARGET_CROP - CROP_SIZE
+
+    USE_FRUSTUM_VOLUME_CALCULATIONS = True
+    USE_EMPTY_FIRST_ITEMIN_FRUSTUM = True
+
+    INTERPOLATE_SERIES = False
+    SMOOTHEN_FRAMES = True
+
+    PROCESS_IMAGES = True
+    SEGMENT_IMAGES = True
+    COUNT_PIXELS = True
+    COMPUTE_VOLUMES = True
+
+    PREDICTION_FILENAME = "prediction_raw_" + MODEL_NAME + ".csv"
+    LOW_CONFIDENCE_PIXEL_THRESHOLD = 200
+
+    current_debug_line = []
+    global_dia_errors = []
+    global_sys_errors = []
+
     slice_data = pandas.read_csv(settings.RESULT_DIR + "dicom_data_enriched.csv", sep=";")
     current_debug_line = ["patient", "dia_col", "sys_col", "dia_vol", "sys_vol", "dia_err", "sys_err"]
 
