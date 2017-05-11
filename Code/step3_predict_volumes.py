@@ -6,7 +6,6 @@ import shutil
 import cv2
 import numpy
 import pandas
-import sys
 import numpy as np
 
 import utils.settings as settings
@@ -73,7 +72,14 @@ def prepare_patient_images(patient_id, intermediate_crop=0):
         writer.writerows(file_lst)
 
 
-def predict_overlays_patient(patient_id, save_transparents=False, threshold_value=-1):
+def predict_overlays_patient(patient_id, save_transparents=False):
+    """
+    DONE
+    :param patient_id: 
+    :param save_transparents: 
+    :return: 
+    """
+
     src_image_dir = utils.get_pred_patient_img_dir(patient_id)
     overlay_dir = utils.get_pred_patient_overlay_dir(patient_id)
     utils.delete_files(overlay_dir, "*.png")
@@ -89,20 +95,21 @@ def predict_overlays_patient(patient_id, save_transparents=False, threshold_valu
     segmenter = LVSegmentation()
 
     prefix = str(patient_id).rjust(4, '0')
-    src_files = utils.get_files(settings.BASE_PREPROCESSEDIMAGES_DIR, prefix + "*.png")
+    src_files = utils.get_files(src_image_dir, prefix + "*.png")
 
-    for i in range(0, batch_size, num_lines):
+    for i in range(0, num_lines, batch_size):
         src_files_batch = src_files[i:i + batch_size]
-        original_images = []
+        images = []
 
         for src_file in src_files_batch:
             image = cv2.imread(src_file, cv2.IMREAD_GRAYSCALE)
-            original_images.append(image)
+            images.append(image)
 
-        original_images = np.array(original_images)
-        original_images = np.float32(original_images)
+        images = np.array(images)
+        images = np.float32(images)
 
-        images = original_images
+        original_images = images
+
         images -= np.mean(images, dtype=np.float32)  # zero-centered
         images /= np.std(images, dtype=np.float32)  # normalization
 
@@ -111,15 +118,12 @@ def predict_overlays_patient(patient_id, save_transparents=False, threshold_valu
         predictions = segmenter.predict(images)
 
         for j in range(len(predictions)):
-            prediction = predictions[j]
-            file_name = src_files_batch[i]
-
+            file_name = ntpath.basename(src_files_batch[j])
             image = original_images[j]
-            image[prediction == 0] = 0.0
+            prediction = predictions[j]
 
-            if threshold_value >= 0:
-                image[image <= threshold_value] = 0
-                image[image > threshold_value] = 255
+            image[prediction == 1] = 255
+            image[prediction == 0] = 0
 
             cv2.imwrite(overlay_dir + file_name, image)
 
@@ -133,8 +137,6 @@ def predict_overlays_patient(patient_id, save_transparents=False, threshold_valu
 
                 transparent_overlay = cv2.merge(channels)
                 cv2.imwrite(transparent_overlay_dir + file_name, transparent_overlay)
-
-        sys.exit()
 
 
 def get_filename(file_path):
@@ -558,7 +560,7 @@ def predict_patient(patient_id, all_slice_data, pred_model_name, debug_info=Fals
             prepare_patient_images(patient_id, intermediate_crop=intermediate_crop)
 
         if SEGMENT_IMAGES:
-            predict_overlays_patient(patient_id, save_transparents=True, threshold_value=95)  # 95 was best th
+            predict_overlays_patient(patient_id, save_transparents=True)
 
         if COUNT_PIXELS:
             pixel_frame = count_pixels(patient_id, 0, all_slice_data, pred_model_name, threshold_value=PIXEL_THRESHOLD)
