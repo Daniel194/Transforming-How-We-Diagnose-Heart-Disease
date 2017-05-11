@@ -6,6 +6,7 @@ import shutil
 import cv2
 import numpy
 import pandas
+import sys
 import numpy as np
 
 import utils.settings as settings
@@ -22,13 +23,12 @@ USE_EMPTY_FIRST_ITEMIN_FRUSTUM = True
 
 PREDICTION_FILENAME = "prediction_raw_" + MODEL_NAME + ".csv"
 LOW_CONFIDENCE_PIXEL_THRESHOLD = 200
-PIXEL_THRESHOLD = -1
 INTERPOLATE_SERIES = False
 SMOOTHEN_FRAMES = True
 
 PROCESS_IMAGES = True
-SEGMENT_IMAGES = True or PROCESS_IMAGES
-COUNT_PIXELS = True or SEGMENT_IMAGES
+SEGMENT_IMAGES = True
+COUNT_PIXELS = True
 COMPUTE_VOLUMES = True
 
 current_debug_line = []
@@ -140,6 +140,11 @@ def predict_overlays_patient(patient_id, save_transparents=False):
 
 
 def get_filename(file_path):
+    """
+    DONE
+    :param file_path: 
+    :return: 
+    """
     #  Format of a file is : 0350_00000sax_02_10053_IM-6068-0002.png
     file_name = ntpath.basename(file_path)
     parts = file_name.split('_')
@@ -148,6 +153,11 @@ def get_filename(file_path):
 
 
 def get_frame_no(file_path):
+    """
+    DONE
+    :param file_path: 
+    :return: 
+    """
     #  Format of a file is : 0350_00000sax_02_10053_IM-6068-0002.png
     file_name = ntpath.basename(file_path)
     parts = file_name.split('_')
@@ -156,6 +166,11 @@ def get_frame_no(file_path):
 
 
 def get_location_values(string_value):
+    """
+    DONE
+    :param string_value: 
+    :return: 
+    """
     string_value = string_value.replace("[", "")
     string_value = string_value.replace("]", "")
     parts = string_value.split(' ')
@@ -164,6 +179,12 @@ def get_location_values(string_value):
 
 
 def compute_distance(current_value, previous_value):
+    """
+    DONE
+    :param current_value: 
+    :param previous_value: 
+    :return: 
+    """
     if str(previous_value) == "nan":
         return previous_value
     cur_values = get_location_values(current_value)
@@ -183,6 +204,13 @@ def compute_distance(current_value, previous_value):
 
 
 def interpolate_series(pixel_series, series_name):
+    """
+    DONE
+    :param pixel_series: 
+    :param series_name: 
+    :return: 
+    """
+
     if not INTERPOLATE_SERIES:
         return pixel_series
     max_index = 0
@@ -227,7 +255,15 @@ def interpolate_series(pixel_series, series_name):
     return pixel_series
 
 
-def count_pixels(patient_id, threshold, all_slice_data, model_name, threshold_value=-1):
+def count_pixels(patient_id, all_slice_data, model_name):
+    """
+    DONE
+    :param patient_id: 
+    :param all_slice_data: 
+    :param model_name: 
+    :return: 
+    """
+
     patient_slice_data = all_slice_data[all_slice_data["patient_id"] == patient_id].copy()
     patient_slice_data["slice_noloc"] = patient_slice_data["slice_no"].map(str) + "_" + patient_slice_data[
         "slice_location"].map(str)
@@ -254,7 +290,6 @@ def count_pixels(patient_id, threshold, all_slice_data, model_name, threshold_va
 
     file_name_slices = patient_slice_data.set_index('file_name')['slice_noloc'].to_dict()
     file_name_frames = patient_slice_data.set_index('file_name')['frame_no'].to_dict()
-    # file_name_slice_locations = patient_slice_data.set_index('file_name')['frame_no'].to_dict()
 
     # set up matrix indexed by slice_no and frame_no
     slice_index = {}
@@ -272,17 +307,8 @@ def count_pixels(patient_id, threshold, all_slice_data, model_name, threshold_va
         overlay_img = cv2.imread(overlay_path, cv2.IMREAD_GRAYSCALE)
 
         low_confidence_pixel_count = ((overlay_img < LOW_CONFIDENCE_PIXEL_THRESHOLD) & (overlay_img > 20)).sum()
-        # low_confidence_pixel_count = overlay_img[overlay_img > 10].mean()
 
-        if threshold_value >= 0:
-            overlay_img[overlay_img <= threshold_value] = 0
-            overlay_img[overlay_img > threshold_value] = 255
         pixel_count = overlay_img.sum() / 255
-
-        # if pixel_count < 1:
-        #    low_confidence_pixel_percentage = -1
-
-        # pixel_count = len(overlay_img[overlay_img > 0])
 
         file_name = get_filename(overlay_path)
         if file_name not in file_name_slices:
@@ -563,7 +589,7 @@ def predict_patient(patient_id, all_slice_data, pred_model_name, debug_info=Fals
             predict_overlays_patient(patient_id, save_transparents=True)
 
         if COUNT_PIXELS:
-            pixel_frame = count_pixels(patient_id, 0, all_slice_data, pred_model_name, threshold_value=PIXEL_THRESHOLD)
+            pixel_frame = count_pixels(patient_id, all_slice_data, pred_model_name)
 
         if COMPUTE_VOLUMES:
             diastole_vol, systole_vol, diastole_lowconf_vol, systole_lowconf_vol, diastole_frame, systole_frame, diastole_max, systole_max = compute_volumes(
