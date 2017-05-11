@@ -16,7 +16,6 @@ from step2_train_segmenter import LVSegmentation
 MODEL_NAME = settings.MODEL_NAME
 CROP_SIZE = settings.CROP_SIZE
 INPUT_SIZE = settings.TARGET_CROP - CROP_SIZE
-SCALE_SIZE = None
 
 USE_FRUSTUM_VOLUME_CALCULATIONS = True
 USE_EMPTY_FIRST_ITEMIN_FRUSTUM = True
@@ -26,9 +25,9 @@ LOW_CONFIDENCE_PIXEL_THRESHOLD = 200
 INTERPOLATE_SERIES = False
 SMOOTHEN_FRAMES = True
 
-PROCESS_IMAGES = True
-SEGMENT_IMAGES = True
-COUNT_PIXELS = True
+PROCESS_IMAGES = False
+SEGMENT_IMAGES = False
+COUNT_PIXELS = False
 COMPUTE_VOLUMES = True
 
 current_debug_line = []
@@ -61,8 +60,6 @@ def prepare_patient_images(patient_id, intermediate_crop=0):
         org_img = cv2.imread(src_path, cv2.IMREAD_GRAYSCALE)
         cropped_img = utils.prepare_cropped_sax_image(org_img, clahe=True, intermediate_crop=intermediate_crop,
                                                       rotate=0)
-        if SCALE_SIZE is not None:
-            cropped_img = cv2.resize(cropped_img, (SCALE_SIZE, SCALE_SIZE), interpolation=cv2.INTER_AREA)
 
         cv2.imwrite(patient_img_dir + file_name, cropped_img)
         file_lst.append([file_name, "dummy_overlay.png"])
@@ -203,11 +200,10 @@ def compute_distance(current_value, previous_value):
     return updown
 
 
-def interpolate_series(pixel_series, series_name):
+def interpolate_series(pixel_series):
     """
     DONE
     :param pixel_series: 
-    :param series_name: 
     :return: 
     """
 
@@ -231,7 +227,6 @@ def interpolate_series(pixel_series, series_name):
                     next_value = pixel_series[next_index]
                     break
                 next_index += 1
-            # print series_name + " irregularity start" + str(pixel_series[start_index]) + "\t" + str(max_start) + "\t" + str(next_value)
             pixel_series[start_index] = (max_start + next_value) / 2
         max_start = max(max_start, pixel_series[start_index])
         start_index += 1
@@ -247,7 +242,6 @@ def interpolate_series(pixel_series, series_name):
                     next_value = pixel_series[next_index]
                     break
                 next_index -= 1
-            # print series_name + " irregularity end" + str(pixel_series[end_index]) + "\t" + str(max_end) + "\t" + str(next_value)
             pixel_series[end_index] = (max_end + next_value) / 2
         max_end = max(max_end, pixel_series[end_index])
         end_index -= 1
@@ -355,7 +349,7 @@ def count_pixels(patient_id, all_slice_data, model_name):
     data_frame["time"] = patient_slice_data_frame1["time"].values
     for frame_no in frames:
         frame_str = str(frame_no).rjust(2, '0')
-        interpolated_series = interpolate_series(frame_pixel_series[frame_str], frame_str)
+        interpolated_series = interpolate_series(frame_pixel_series[frame_str])
         data_frame["fr_" + frame_str] = interpolated_series
 
     if SMOOTHEN_FRAMES:
@@ -385,28 +379,18 @@ def count_pixels(patient_id, all_slice_data, model_name):
     return data_frame
 
 
-def copy_diasys_images_and_overlays(patient_id, dia_frame, sys_frame, target_image_dir, target_overlay_dir):
-    overlay_paths = utils.get_patient_transparent_overlays(patient_id)
-    image_paths = utils.get_patient_images(patient_id)
-    for overlay_path in overlay_paths:
-        frame_no = get_frame_no(overlay_path)
-        if frame_no == dia_frame or frame_no == sys_frame:
-            file_name = ntpath.basename(overlay_path)
-            shutil.copyfile(overlay_path, target_overlay_dir + file_name)
-
-    for image_path in image_paths:
-        frame_no = get_frame_no(image_path)
-        if frame_no == dia_frame or frame_no == sys_frame:
-            file_name = ntpath.basename(image_path)
-            shutil.copyfile(image_path, target_image_dir + file_name)
-
-
 def compute_volumne_frustum(pixel_series, distance_series, low_confidence_calc=False):
+    """
+    DONE
+    :param pixel_series: 
+    :param distance_series: 
+    :param low_confidence_calc: 
+    :return: 
+    """
+
     val_list = pixel_series.values.tolist()
     dist_list = distance_series.fillna(10).values.tolist()
     max_val = 0
-    # val_list.reverse()
-    # dist_list.reverse()
 
     val_list.append(0)
     if abs(dist_list[0]) > 25:
@@ -444,31 +428,19 @@ def compute_volumne_frustum(pixel_series, distance_series, low_confidence_calc=F
     return res, max_val
 
 
-def compute_inconfidence_features(conf_values_serie):
-    # make a list of the pixel inconfifence percentages 1st slice, 2nd slice, avg(mid slices), 2nd last slice and last slice
-    res = [-1, -1, -1, -1, -1]
-    val_list = conf_values_serie.values.tolist()
-    if len(val_list) < 5:
-        return res
-    res[0] = val_list[0]
-    res[1] = val_list[1]
-    mid_list = [item for item in val_list[2:-2] if item >= 0]
-    res[2] = sum(mid_list) / len(mid_list)
-    res[3] = val_list[-2]
-    res[4] = val_list[-1]
-
-    return res
-
-
 def compute_volumes(patient_id, model_name, debug_info=False):
+    """
+    DONE
+    :param patient_id: 
+    :param model_name: 
+    :param debug_info: 
+    :return: 
+    """
     patient_dir = utils.get_pred_patient_dir(patient_id)
     min_areas = pandas.read_csv(patient_dir + "/areas_" + model_name + ".csv", sep=";")
     columns = list(min_areas)
-    # diastole_col = ""
     diastole_pixels = 0
     systole_pixels = 999999
-    diastole_max = 0
-    systole_max = 999999
 
     for column in columns:
         if not column.startswith("fr"):
@@ -477,7 +449,7 @@ def compute_volumes(patient_id, model_name, debug_info=False):
         value_list = min_areas[column].values.tolist()
         value_list.sort(reverse=True)
         pixel_sum = sum(value_list[:200])
-        # pixel_sum = min_areas[column].sum()
+
         if pixel_sum > diastole_pixels:
             diastole_pixels = pixel_sum
             diastole_col = column
@@ -492,7 +464,7 @@ def compute_volumes(patient_id, model_name, debug_info=False):
 
     dist_col = "slice_dist"
     min_areas_selection = min_areas[
-        ["slice", "slice_thickness", "slice_location", "time", dist_col]].copy()  # , "diastole_vol", "systole_vol"
+        ["slice", "slice_thickness", "slice_location", "time", dist_col]].copy()
     min_areas_selection["diastole"] = min_areas[diastole_col].values
     min_areas_selection["diastole_vol"] = (min_areas_selection["diastole"] * min_areas_selection[dist_col]).values
     min_areas_selection["diastole_conf"] = min_areas[diastole_col.replace("fr", "co")].values
@@ -537,7 +509,6 @@ def evaluate_volume(patient_id, diastole_vol, systole_vol, pred_model_name, scal
         pred_data["max_dia_slice"] = 0
         pred_data["max_sys_slice"] = 0
 
-    # pred_data.set_value('pat', 'x', 10)
     if SEGMENT_IMAGES:
         pred_data.loc[pred_data["patient_id"] == patient_id, scale_col] = scale
     else:
@@ -594,13 +565,6 @@ def predict_patient(patient_id, all_slice_data, pred_model_name, debug_info=Fals
         if COMPUTE_VOLUMES:
             diastole_vol, systole_vol, diastole_lowconf_vol, systole_lowconf_vol, diastole_frame, systole_frame, diastole_max, systole_max = compute_volumes(
                 patient_id, pred_model_name, debug_info=debug_info)
-            if SCALE_SIZE is not None:
-                ratio = float(settings.TARGET_CROP) / float(settings.SCALE_SIZE)
-                ratio *= ratio
-                diastole_vol *= ratio
-                systole_vol *= ratio
-                diastole_lowconf_vol *= ratio
-                systole_lowconf_vol *= ratio
 
             scale = 1
             if intermediate_crop != 0:
@@ -621,8 +585,6 @@ def predict_patient(patient_id, all_slice_data, pred_model_name, debug_info=Fals
 
         if diastole_vol > 340 and round_no == 0 and SEGMENT_IMAGES:
             intermediate_crop = 220
-            dia_vol_round1 = diastole_vol
-            sys_vol_round1 = systole_vol
             print("Volume > 300, resizing so that everything is a bit smaller")
             current_debug_line = [str(patient_id)]
             round_no = 1
