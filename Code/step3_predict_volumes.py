@@ -3,12 +3,15 @@ import math
 import ntpath
 import os.path
 import shutil
-
 import cv2
 import numpy
 import pandas
+import sys
+import numpy as np
+
 import utils.settings as settings
 import utils.utils as utils
+from step2_train_segmenter import LVSegmentation
 
 MODEL_NAME = settings.MODEL_NAME
 CROP_SIZE = settings.CROP_SIZE
@@ -17,7 +20,6 @@ SCALE_SIZE = None
 
 USE_FRUSTUM_VOLUME_CALCULATIONS = True
 USE_EMPTY_FIRST_ITEMIN_FRUSTUM = True
-MODEL_EPOCH = settings.TRAIN_EPOCHS - 1
 
 PREDICTION_FILENAME = "prediction_raw_" + MODEL_NAME + ".csv"
 LOW_CONFIDENCE_PIXEL_THRESHOLD = 200
@@ -71,7 +73,7 @@ def prepare_patient_images(patient_id, intermediate_crop=0):
         writer.writerows(file_lst)
 
 
-def predict_overlays_patient(patient_id, pred_model_name, pred_model_iter, save_transparents=False, threshold_value=-1):
+def predict_overlays_patient(patient_id, save_transparents=False, threshold_value=-1):
     src_image_dir = utils.get_pred_patient_img_dir(patient_id)
     overlay_dir = utils.get_pred_patient_overlay_dir(patient_id)
     utils.delete_files(overlay_dir, "*.png")
@@ -84,83 +86,55 @@ def predict_overlays_patient(patient_id, pred_model_name, pred_model_iter, save_
         if num_lines % try_size == 0:
             batch_size = try_size
 
-    pred_model = mx.model.FeedForward.load(pred_model_name, pred_model_iter, ctx=mx.gpu(), numpy_batch_size=batch_size)
+    segmenter = LVSegmentation()
 
-    if not settings.QUICK_MODE:
-        # 5 crops
-        predictions_list = []
-        predictions = []
-        for crop_indents in [[1, 1], [1, CROP_SIZE - 1], [CROP_SIZE - 1, 1], [CROP_SIZE - 1, CROP_SIZE - 1],
-                             [CROP_SIZE / 2, CROP_SIZE / 2]]:
-            # for crop_indents in [[CROP_SIZE / 2, CROP_SIZE / 2], [CROP_SIZE / 2, 1], [CROP_SIZE / 2, CROP_SIZE - 1]]:
-            pred_iter = FileIter(root_dir=src_image_dir, flist_name="pred.lst", batch_size=batch_size, augment=False,
-                                 mean_image=None, crop_size=INPUT_SIZE, crop_indent_x=crop_indents[0],
-                                 crop_indent_y=crop_indents[1])
-            tmp_predictions = pred_model.predict(pred_iter)
-            predictions_list.append(tmp_predictions)
+    prefix = str(patient_id).rjust(4, '0')
+    src_files = utils.get_files(settings.BASE_PREPROCESSEDIMAGES_DIR, prefix + "*.png")
 
-        averaged_overlays = []
-        for image_index in range(0, predictions_list[0].shape[0]):
-            min_pixels = 99999999.
-            min_index = - 1
-            max_pixels = -99999999.
-            max_index = - 1
-            for crop_index in range(0, len(predictions_list)):
-                pred_overlay = predictions_list[crop_index][image_index]
-                pixel_sum = pred_overlay.sum()
-                if pixel_sum < min_pixels:
-                    min_pixels = pixel_sum
-                    min_index = crop_index
+    for i in range(0, batch_size, num_lines):
+        src_files_batch = src_files[i:i + batch_size]
+        original_images = []
 
-                if pixel_sum > max_pixels:
-                    max_pixels = pixel_sum
-                    max_index = crop_index
+        for src_file in src_files_batch:
+            image = cv2.imread(src_file, cv2.IMREAD_GRAYSCALE)
+            original_images.append(image)
 
-            sum_overlay = None
-            sum_item_count = 0
-            min_index = -1
-            for crop_index in range(0, len(predictions_list)):
-                if crop_index != max_index:
-                    continue
-                pred_overlay = predictions_list[crop_index][image_index]
-                if sum_overlay is None:
-                    sum_overlay = pred_overlay
-                    sum_item_count += 1
-                else:
-                    sum_overlay += pred_overlay
-                    sum_item_count += 1
-            sum_overlay /= sum_item_count
-            averaged_overlays.append(sum_overlay)
+        original_images = np.array(original_images)
+        original_images = np.float32(original_images)
 
-        predictions = numpy.vstack(averaged_overlays)
-    else:
-        pred_iter = FileIter(root_dir=src_image_dir, flist_name="pred.lst", batch_size=batch_size, augment=False,
-                             mean_image=None, crop_size=INPUT_SIZE)
-        predictions = pred_model.predict(pred_iter)
+        images = original_images
+        images -= np.mean(images, dtype=np.float32)  # zero-centered
+        images /= np.std(images, dtype=np.float32)  # normalization
 
-    for i in range(len(predictions)):
-        y = predictions[i]
-        y = y.reshape(INPUT_SIZE, INPUT_SIZE)
-        border_size = CROP_SIZE / 2
-        y = cv2.copyMakeBorder(y, border_size, border_size, border_size, border_size, cv2.BORDER_CONSTANT, value=0)
-        y *= 255
-        if threshold_value >= 0:
-            y[y <= threshold_value] = 0
-            y[y > threshold_value] = 255
+        images = np.reshape(images, (-1, 224, 224, 1))
 
-        file_name = ntpath.basename(pred_iter.image_files[i])
-        cv2.imwrite(overlay_dir + file_name, y)
+        predictions = segmenter.predict(images)
 
-        if save_transparents:
-            channels = cv2.split(y)
-            # make argb
-            empty = numpy.zeros(channels[0].shape, dtype=numpy.float32)
-            alpha = channels[0].copy()
-            alpha[alpha == 255] = 75
-            channels = (channels[0], channels[0], empty, alpha)
+        for j in range(len(predictions)):
+            prediction = predictions[j]
+            file_name = src_files_batch[i]
 
-            transparent_overlay = cv2.merge(channels)
-            cv2.imwrite(transparent_overlay_dir + file_name, transparent_overlay)
+            image = original_images[j]
+            image[prediction == 0] = 0.0
+
+            if threshold_value >= 0:
+                image[image <= threshold_value] = 0
+                image[image > threshold_value] = 255
+
+            cv2.imwrite(overlay_dir + file_name, image)
+
+            if save_transparents:
+                channels = cv2.split(image)
+                # make argb
+                empty = numpy.zeros(channels[0].shape, dtype=numpy.float32)
+                alpha = channels[0].copy()
+                alpha[alpha == 255] = 75
+                channels = (channels[0], channels[0], empty, alpha)
+
+                transparent_overlay = cv2.merge(channels)
+                cv2.imwrite(transparent_overlay_dir + file_name, transparent_overlay)
+
+        sys.exit()
 
 
 def get_filename(file_path):
@@ -568,7 +542,7 @@ def evaluate_volume(patient_id, diastole_vol, systole_vol, pred_model_name, scal
     return err_dia, err_sys
 
 
-def predict_patient(patient_id, all_slice_data, pred_model_name, pred_model_iter, debug_info=False):
+def predict_patient(patient_id, all_slice_data, pred_model_name, debug_info=False):
     if not os.path.exists(settings.RESULT_DIR + PREDICTION_FILENAME):
         shutil.copyfile(settings.RESULT_DIR + "train_enriched.csv", settings.RESULT_DIR + PREDICTION_FILENAME)
 
@@ -578,13 +552,13 @@ def predict_patient(patient_id, all_slice_data, pred_model_name, pred_model_iter
     done = False
     intermediate_crop = 0
     round_no = 0
+
     while not done:
         if PROCESS_IMAGES:
             prepare_patient_images(patient_id, intermediate_crop=intermediate_crop)
 
         if SEGMENT_IMAGES:
-            predict_overlays_patient(patient_id, pred_model_name, pred_model_iter, save_transparents=True,
-                                     threshold_value=-1)  # 95 was best th
+            predict_overlays_patient(patient_id, save_transparents=True, threshold_value=95)  # 95 was best th
 
         if COUNT_PIXELS:
             pixel_frame = count_pixels(patient_id, 0, all_slice_data, pred_model_name, threshold_value=PIXEL_THRESHOLD)
@@ -638,29 +612,21 @@ if __name__ == "__main__":
     current_debug_line = ["patient", "dia_col", "sys_col", "dia_vol", "sys_vol", "dia_err", "sys_err"]
 
     print("\t".join(map(lambda x: str(x).rjust(10), current_debug_line)))
-    model_ranges = [
-        [MODEL_NAME + "fold0", MODEL_EPOCH, 1, 141],
-        [MODEL_NAME + "fold1", MODEL_EPOCH, 141, 281],
-        [MODEL_NAME + "fold2", MODEL_EPOCH, 281, 421],
-        [MODEL_NAME + "fold3", MODEL_EPOCH, 421, 561],
-        [MODEL_NAME + "fold4", MODEL_EPOCH, 561, 701],
-        [MODEL_NAME + "fold5", MODEL_EPOCH, 701, 1141]
-    ]
 
-    for model_range in model_ranges:
-        model_name = model_range[0]
-        model_iter = model_range[1]
-        range_start = model_range[2]
-        range_end = model_range[3]
+    model_name = MODEL_NAME + "_folder"
+    range_start = 1
+    range_end = 1141
 
-        print("Predicting model " + model_name)
+    print("Predicting model " + model_name)
 
-        for i in range(range_start, range_end):
-            predict_patient(i, slice_data, model_name, model_iter, debug_info=True)
-            if len(global_dia_errors) % 20 == 0:
-                current_debug_line = ["avg", "", "", "", "", round(sum(global_dia_errors) / len(global_dia_errors), 2),
-                                      round(sum(global_sys_errors) / len(global_sys_errors), 2)]
-                print("\t".join(map(lambda x: str(x).rjust(10), current_debug_line)))
+    for i in range(range_start, range_end):
 
-        global_dia_errors = []
-        global_sys_errors = []
+        predict_patient(i, slice_data, model_name, debug_info=True)
+
+        if len(global_dia_errors) % 20 == 0:
+            current_debug_line = ["avg", "", "", "", "", round(sum(global_dia_errors) / len(global_dia_errors), 2),
+                                  round(sum(global_sys_errors) / len(global_sys_errors), 2)]
+            print("\t".join(map(lambda x: str(x).rjust(10), current_debug_line)))
+
+    global_dia_errors = []
+    global_sys_errors = []
