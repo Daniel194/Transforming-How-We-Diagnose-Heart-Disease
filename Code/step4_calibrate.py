@@ -3,10 +3,10 @@ from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.metrics import mean_absolute_error
 from sklearn.metrics import mean_squared_error
 
-import settings
+import utils.settings as settings
 
 MODEL_NAME = settings.MODEL_NAME
-SRC_PATH = settings.BASE_DIR + "prediction_raw_" + MODEL_NAME + ".csv"
+SRC_PATH = settings.RESULT_DIR + "prediction_raw_" + MODEL_NAME + ".csv"
 PREDICT_RATIO = False
 
 pred_data = pandas.read_csv(SRC_PATH, sep=";")
@@ -118,6 +118,6 @@ pred_data = pred_data[
     ["patient_id", "slice_count", "age_years", "sex", "normal_slice_count", "Diastole", "Systole", "cal_pred_dia",
      "cal_error_dia", "cal_abserr_dia", "cal_pred_sys", "cal_error_sys", "cal_abserr_sys", "pred_dia", "error_dia",
      "abserr_dia", "pred_sys", "error_sys", "abserr_sys"]]
-pred_data.to_csv(settings.BASE_DIR + "prediction_calibrated_" + MODEL_NAME + ".csv", sep=";")
+pred_data.to_csv(settings.RESULT_DIR + "prediction_calibrated_" + MODEL_NAME + ".csv", sep=";")
 
 print("Done")
