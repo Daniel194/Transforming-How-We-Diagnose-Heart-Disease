@@ -177,8 +177,8 @@ def make_predictions(predictions_path, from_patient, to_patient, stdevs, evaluat
             agg_crps_dia.append(crps_dia)
             agg_crps_sys.append(crps_sys)
 
-        dia_line = [str(patient_id) + "_Diastole"] + map(str, pred_row_dia)
-        sys_line = [str(patient_id) + "_Systole"] + map(str, pred_row_sys)
+        dia_line = [str(patient_id) + "_Diastole"] + [str(x) for x in pred_row_dia]
+        sys_line = [str(patient_id) + "_Systole"] + [str(x) for x in pred_row_sys]
         pred_lines.append(dia_line)
         pred_lines.append(sys_line)
 
@@ -190,7 +190,7 @@ def make_predictions(predictions_path, from_patient, to_patient, stdevs, evaluat
     print("Crps agg = " + str((crps_dia + crps_sys) / 2))
 
     if submission_file != "":
-        with open(submission_file, "wb") as f:
+        with open(submission_file, "w") as f:
             writer = csv.writer(f)
             writer.writerows(pred_lines)
 
