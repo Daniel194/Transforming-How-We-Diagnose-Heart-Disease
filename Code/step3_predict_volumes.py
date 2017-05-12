@@ -67,8 +67,6 @@ def predict_overlays_patient(patient_id, save_transparents=False):
         if num_lines % try_size == 0:
             batch_size = try_size
 
-    segmenter = LVSegmentation()
-
     prefix = str(patient_id).rjust(4, '0')
     src_files = utils.get_files(src_image_dir, prefix + "*.png")
 
@@ -536,6 +534,15 @@ def evaluate_volume(patient_id, diastole_vol, systole_vol, pred_model_name, scal
 
 
 def predict_patient(patient_id, all_slice_data, pred_model_name, debug_info=False):
+    """
+    DONE
+    :param patient_id: 
+    :param all_slice_data: 
+    :param pred_model_name: 
+    :param debug_info: 
+    :return: 
+    """
+
     if not os.path.exists(settings.RESULT_DIR + PREDICTION_FILENAME):
         shutil.copyfile(settings.RESULT_DIR + "train_enriched.csv", settings.RESULT_DIR + PREDICTION_FILENAME)
 
@@ -622,6 +629,8 @@ if __name__ == "__main__":
     model_name = MODEL_NAME + "_folder"
     range_start = 1
     range_end = 1141
+
+    segmenter = LVSegmentation()
 
     print("Predicting model " + model_name)
 
