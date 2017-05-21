@@ -15,11 +15,13 @@ from step2_train_segmenter import LVSegmentation
 
 def prepare_patient_images(patient_id, intermediate_crop=0):
     """
-    DONE
-    :param patient_id: 
-    :param intermediate_crop: 
-    :return: 
+    Prepare patient images. Create the patient folder. Crop the patient image if it's necessary 
+    and save it in a new directory.
+    :param patient_id: the patient id.
+    :param intermediate_crop: optional parameter
+    :return: nothing
     """
+
     file_lst = []
     prefix = str(patient_id).rjust(4, '0')
     src_files = utils.get_files(settings.BASE_PREPROCESSEDIMAGES_DIR, prefix + "*.png")
@@ -535,7 +537,7 @@ def evaluate_volume(patient_id, diastole_vol, systole_vol, pred_model_name, scal
 
 def predict_patient(patient_id, all_slice_data, pred_model_name, debug_info=False):
     """
-    DONE
+    The main method.
     :param patient_id: 
     :param all_slice_data: 
     :param pred_model_name: 

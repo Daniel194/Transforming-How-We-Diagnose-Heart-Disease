@@ -300,3 +300,13 @@ Pe ultimul set de date pe care s-a f\u{a}cut prezicerea se poate observa c\u{a} 
 Din imaginile ilustrate mai sus putem s\u{a} tragem o concluzie, aceea c\u{a}, re\c{t}eaua neuronal\u{a} face detec\c{t}ii a ventricului st\^{a}ng mult prea mari, \^{i}ns\u{a} sunt acceptabile pentru a trece la urm\u{a}torul pas, acela de a prezice volumul de s\^{a}nge care curge prin ventriculul st\^{a}ng. O posibil\u{a} modalitate de a for\c{t}a re\c{t}eaua neuronal\u{a} s\u{a} prezic\u{a} un ventricul st\^{a}ng mai mic ar fi s\u{a} supliment\u{a}m num\u{a}rul de imagine de antrenare cu inimi aflate la sistol\u{a}.
 
 \section{Prezicerea volumului de s\^{a}nge}
+
+Dup\u{a} antrenarea re\c{t}eleu neuronale pentru a segmenta ventriculul st\^{a}ng a inimii, putem trece la pasul de a prezice volumul de s\^{a}nge care curge prin inim\u{a}.
+
+\par
+
+Primul pas \^{i}n realizarea acestui lucru este de a citi datele salvate din fi\c{s}ierul CSV, date pe care le-am salvat din metadatele de la fi\c{s}ierele DICOM aferent fiecarui pacient. Dup\u{a} citim fiecare imagine PNG care provine de la un pacient, \^{i}ns\u{a} din cauza faptului c\u{a} fiecare imagine are o dimensiune de [256 x 256] iar re\c{t}eaua neuronal\u{a} care face segmentarea ventricului st\^{a}ng accept\u{a} doar imagine de dimensiunea [224 x 224] vom fi nevoi\c{t}i s\u{a} mai t\u{a}iem din fiecare imagine c\^{a}te 32 de pixeli pe orizontal\u{a} \c{s}i vertical\u{a} ca s\u{a} \^{i}i aducem la dimensiunea corespunz\u{a}toare.
+
+\par
+
+Al doilea pas...

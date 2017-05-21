@@ -13,13 +13,26 @@ numpy.random.seed(1301)
 
 
 def get_pred_patient_dir(patient_id):
+    """
+    Return the patient directory based on patient id.
+    :param patient_id: patient id
+    :return: the patient directory 
+    """
+
     prefix = str(patient_id).rjust(4, '0')
     res = settings.PATIENT_PRED_DIR + prefix + "/"
     create_dir_if_not_exists(res)
+
     return res
 
 
 def get_pred_patient_img_dir(patient_id):
+    """
+    Prediction patient dir.
+    :param patient_id: patient id
+    :return: the path to the patient dir
+    """
+
     res = get_pred_patient_dir(patient_id) + "all_images/"
     create_dir_if_not_exists(res)
     return res
@@ -76,6 +89,13 @@ def delete_files(target_dir, search_pattern):
 
 
 def get_files(scan_dir, search_pattern):
+    """
+    Get all files form a specific directory.
+    :param scan_dir: directory path 
+    :param search_pattern: pattern
+    :return: get all files from a given directory.
+    """
+
     file_paths = glob.glob(scan_dir + search_pattern)
     return file_paths
 
@@ -180,6 +200,15 @@ def elastic_transform(image, alpha, sigma, random_state=None):
 
 
 def prepare_cropped_sax_image(sax_image, clahe=True, intermediate_crop=0, rotate=0):
+    """
+    Crop the patient image if it's necessary.
+    :param sax_image: the image
+    :param clahe: boolean value
+    :param intermediate_crop: crop size 
+    :param rotate: the rotation value
+    :return: the new image after apply all the operations
+    """
+
     if rotate != 0:
         rot_mat = cv2.getRotationMatrix2D((sax_image.shape[0] / 2, sax_image.shape[0] / 2), rotate, 1)
         sax_image = cv2.warpAffine(sax_image, rot_mat, (sax_image.shape[0], sax_image.shape[1]))
@@ -197,6 +226,7 @@ def prepare_cropped_sax_image(sax_image, clahe=True, intermediate_crop=0, rotate
     if clahe:
         clahe = cv2.createCLAHE(tileGridSize=(1, 1))
         res = clahe.apply(res)
+
     return res
 
 
@@ -217,5 +247,11 @@ def prepare_overlay_image(src_overlay_path, target_size, antialias=False):
 
 
 def create_dir_if_not_exists(target_dir):
+    """
+    Create a directory if it doesn't exist.
+    :param target_dir: directory
+    :return: nothing
+    """
+
     if not os.path.exists(target_dir):
         os.makedirs(target_dir)
