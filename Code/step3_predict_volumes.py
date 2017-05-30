@@ -51,10 +51,10 @@ def prepare_patient_images(patient_id, intermediate_crop=0):
 
 def predict_overlays_patient(patient_id, save_transparents=False):
     """
-    DONE
-    :param patient_id: 
-    :param save_transparents: 
-    :return: 
+    Predict the left ventricle with neural network.
+    :param patient_id: patient id
+    :param save_transparents: boolean value
+    :return: nothing
     """
 
     src_image_dir = utils.get_pred_patient_img_dir(patient_id)

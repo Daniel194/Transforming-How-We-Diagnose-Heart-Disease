@@ -39,12 +39,25 @@ def get_pred_patient_img_dir(patient_id):
 
 
 def get_pred_patient_overlay_dir(patient_id):
+    """
+    Return the path to overlay directory
+    :param patient_id: patient id
+    :return: the absolute path
+    """
+
     res = get_pred_patient_dir(patient_id) + "predicted_overlays/"
     create_dir_if_not_exists(res)
+
     return res
 
 
 def get_pred_patient_transparent_overlay_dir(patient_id):
+    """
+    Return the path to transparent overlay directory
+    :param patient_id: patient id
+    :return: the absolute path
+    """
+
     res = get_pred_patient_dir(patient_id) + "predicted_overlays_transparent/"
     create_dir_if_not_exists(res)
     return res
