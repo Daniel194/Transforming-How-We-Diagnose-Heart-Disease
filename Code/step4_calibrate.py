@@ -45,12 +45,14 @@ for dia_sys in ["dia" + ext, "sys" + ext]:
         print_values = [fold_range[0]]
         feature_names = ["rows", "columns", "spacing", "slice_thickness", "slice_count", "up_down_agg", "age_years",
                          "small_slice_count", "pred_sys" + ext, "pred_dia" + ext, "angle", real_value_col, mul_col]
+
         if PREDICT_RATIO:
             pred_data["error_" + dia_sys] = pred_data[real_value_col] * 100 / pred_data["pred_" + dia_sys]
+
         tmp_train = pred_data[
             ((pred_data["patient_id"] < fold_range[1]) | (pred_data["patient_id"] > fold_range[2])) & (
                 pred_data["patient_id"] <= 700) & (
-                pred_data["slice_count"] > 7)]  # patient 595 and 599 have invalid recordings
+                pred_data["slice_count"] > 7)]
 
         if len(tmp_train[tmp_train["pred_dia"] == 0]) > 0:
             print("Warning '0' predictions")

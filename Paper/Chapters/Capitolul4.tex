@@ -317,12 +317,24 @@ Al treilea pas \^{i}l presupune num\u{a}rarea pixelilor care fac parte din ventr
 
 \par 
 
-Al patrulea pas, \c{s}i ultimul din aceast\u{a} faz\u{a}, este calcularea efectiva a cantit\u{a}\c{t}ii de s\^{a}nge care curge prin ventriculul st\^{a}ng la momentul respectiv. Prima dat\u{a} se va stabilii care frame apar\c{t}ine sistolei \c{s}i care apar\c{t}ine diastolei, aces lucur se va face cu ajutorul numarului de pixeli detecteta\c{t}i de re\c{t}eaua neuronal\u{a}, astfel \^{i}nc\^{a}t frame-ul cu cei mai pu\c{t}ini pixeli va fi atribuit  sistolei, iar frame-ul cu cei mai mul\c{t}i pixeli va fi atribuit diastolei. Dup\u{a} determinarea frame-urilor care apar\c{t}ine siastolei si diastolei se poate calcula volumul de s\^{a}nge la siastol\u{a} \c{s}i la diastol\u{a}. Se iau toate pozele care apar\c{t}in respectivelor frame-uri iar numarul de pixeli pe care \^{i}l au se \^{i}nmul\c{t}este cu distan\c{t}a dintre ele, iar rezultatul ob\c{t}inut reprezint\u{a} volumul de s\^{a}nge care curge la diastol\u{a}, respectiv siastol\u{a}, \^{i}n fram-ul respectiv.
+Al patrulea pas, \c{s}i ultimul din aceast\u{a} faz\u{a}, este calcularea efectiva a cantit\u{a}\c{t}ii de s\^{a}nge care curge prin ventriculul st\^{a}ng la momentul respectiv. Prima dat\u{a} se va stabilii care frame apar\c{t}ine sistolei \c{s}i care apar\c{t}ine diastolei, aces lucur se va face cu ajutorul numarului de pixeli detecteta\c{t}i de re\c{t}eaua neuronal\u{a}, astfel \^{i}nc\^{a}t frame-ul cu cei mai pu\c{t}ini pixeli va fi atribuit  sistolei, iar frame-ul cu cei mai mul\c{t}i pixeli va fi atribuit diastolei. Dup\u{a} determinarea frame-urilor care apar\c{t}ine siastolei si diastolei se poate calcula volumul de s\^{a}nge la siastol\u{a} \c{s}i la diastol\u{a}. Se iau toate pozele care apar\c{t}in respectivelor frame-uri iar numarul de pixeli pe care \^{i}l au se \^{i}nmul\c{t}este cu distan\c{t}a dintre ele, iar rezultatul ob\c{t}inut reprezint\u{a} volumul de s\^{a}nge care curge la diastol\u{a}, respectiv sistol\u{a}, \^{i}n fram-ul respectiv. Pentru a calcula volumul total care curge \^{i}n toate fram-urile vom proceda \^{i}n felul urm\u{a}tor, vom lua pentru fiecare frame ( \^{i}l vom nota cu $f$ ) fram-ul din fa\c{t}a lui (\^{i}l vom nota cu $f_v$ ) \c{s}i distan\c{t}a dintre ele (\^{i}l vom nota cu $\Delta$ ) \c{s}i vom aplica urm\u{a}toare formul\u{a}:
+
+$$ V = \frac{1}{1000} \sum_i \Delta_i \frac{f_i + \sqrt{f_i * f_{v_i}} + f_{v_i}}{3} $$
+
+Valoarea 1000 care apare \^{i}n fa\c{t}a formulei este un parametru pus din cauz\u{a} c\u{a} de cele mai multe ori calculul volumului de s\^{a}nge ie\c{s}ea de cele mai multe ori mult prea mare de c\^{a}t ar fi trebuit, din aceast\u{a} cauz\u{a} a fost ad\u{a}ugat \^{i}n formul\u{a}.
 
 \par
 
-Rezultatele ob\c{t}inute la pasul patru vor fi salvate intr-un fi\c{s}ier CSV. De precizat faptul c\u{a} acestea nu sunt valorile finale, deoarece fiecare valoare reprezint\u{a} cantitatea de s\^{a}nge care curge la un anumit frame dintr-o anumit\u{a} radiografie la un pacient, nu volumul total la un pacient la sisatol\u{a}, respectiv diastol\u{a}. Nu calcul\u{a}m la acest pas cantitatea total\u{a} de s\^{a}nge care curge deoarece, a\c{s}a cum am vazut \c{s}i \^{i}n capitolul anterior, re\c{t}reaua noastr\u{a} neuronal\u{a} nu face preziceri tocmai perfect \c{s}i din acest\u{a} cauz\u{a} vom mai face o calibrare a datelor calculate, astfel \^{i}nc\^{a}nt acestea s\u{a} fiu c\^{a}t mai aproape de adev\u{a}r.
+Rezultatele ob\c{t}inute la pasul patru vor fi salvate intr-un fi\c{s}ier CSV. De precizat faptul c\u{a} acestea nu sunt valorile finale \c{s}i nu vom calcula la acest pas frac\c{t}ia de ejec\c{t}ie a inimii deoarece, a\c{s}a cum am vazut \c{s}i \^{i}n capitolul anterior, re\c{t}eaua noastr\u{a} neuronal\u{a} nu face preziceri tocmai perfect \c{s}i din acest\u{a} cauz\u{a} vom mai face o calibrare a datelor calculate, astfel \^{i}nc\^{a}t acestea s\u{a} fiu c\^{a}t mai aproape de adev\u{a}r.
 
 \section{Calibrarea datelor}
 
-TODO
+Pentru a face partea de calibrare a datelor prezise de re\c{t}eaua neuronal\u{a} pentru volum de s\^{a}nge care curge la sistol\u{a} \c{s}i diastol\u{a} ne vom folosii de restul datelor pe care le oferea fi\c{s}ierele DICOM (num\u{a}rul de linii, numarul de coloane pe care le are o radiografie, spa\c{t}iul dintre frame-uri, grosimea radiografiei, v\^{a}rsta pacientului, unghiul din care a fost f\u{a}cut\u{a} radiografia) pe l\^{a}ng\u{a} acestea vom mai ad\u{a}uga \c{s}i valorile calculate pe baza prezicerilor f\u{a}cute de re\c{t}eaua neuronal\u{a} pentru sistol\u{a} \c{s}i diastol\u{a}. Cu ajutorul acestor date vom folosii algoritmul \textbf{\textit{Gradient Bootstrap}} pentru a prezice diferen\c{t}a dintre valorile reale la sistol\u{a} \c{s}i diastol\u{a} \c{s}i valorile prezise.
+
+\par
+
+Pentru algoritmul \textbf{\textit{Gradient Bootstrap}} vom folosii ca date de antrenare pacien\c{t}ii pentru care \c{s}tiim valorile adev\u{a}rate la sistol\u{a} \c{s}i diastol\u{a} ( sunt 700 de pacienti din 1140 pentru care s\c{t}iim valorile reale la sistol\u{a} \c{s}i diastol\u{a} ) iar pentru ceilal\c{t}i pacien\c{t}i vom prezice aceste dou\u{a} valori.
+
+\par
+
+\textbf{\textit{Gradient Bootstrap}} este un algoritm de Machine Learning folosit pentru probleme de regresii \c{s}i clasificare. Acesta se folose\c{s}te de un arbore de decizii pe care \^{i}l construie\c{s}te ca s\u{a} minimizeze funnc\c{t}ia de pierdere. 
