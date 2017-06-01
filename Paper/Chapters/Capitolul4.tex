@@ -313,4 +313,16 @@ Al doilea pas \^{i}l presupune trecerea imaginilor, ale unui pacient, prin re\c{
 
 \par
 
-Al treilea pas \^{i}l presupune numararea pixelilor care fac parte din ventriculul st\^{a}ng al inimii. TODO
+Al treilea pas \^{i}l presupune num\u{a}rarea pixelilor care fac parte din ventriculul st\^{a}ng al inimii \c{s}i salvarea acestor valori pentru pa\c{s}ii urm\u{a}tori.
+
+\par 
+
+Al patrulea pas, \c{s}i ultimul din aceast\u{a} faz\u{a}, este calcularea efectiva a cantit\u{a}\c{t}ii de s\^{a}nge care curge prin ventriculul st\^{a}ng la momentul respectiv. Prima dat\u{a} se va stabilii care frame apar\c{t}ine sistolei \c{s}i care apar\c{t}ine diastolei, aces lucur se va face cu ajutorul numarului de pixeli detecteta\c{t}i de re\c{t}eaua neuronal\u{a}, astfel \^{i}nc\^{a}t frame-ul cu cei mai pu\c{t}ini pixeli va fi atribuit  sistolei, iar frame-ul cu cei mai mul\c{t}i pixeli va fi atribuit diastolei. Dup\u{a} determinarea frame-urilor care apar\c{t}ine siastolei si diastolei se poate calcula volumul de s\^{a}nge la siastol\u{a} \c{s}i la diastol\u{a}. Se iau toate pozele care apar\c{t}in respectivelor frame-uri iar numarul de pixeli pe care \^{i}l au se \^{i}nmul\c{t}este cu distan\c{t}a dintre ele, iar rezultatul ob\c{t}inut reprezint\u{a} volumul de s\^{a}nge care curge la diastol\u{a}, respectiv siastol\u{a}, \^{i}n fram-ul respectiv.
+
+\par
+
+Rezultatele ob\c{t}inute la pasul patru vor fi salvate intr-un fi\c{s}ier CSV. De precizat faptul c\u{a} acestea nu sunt valorile finale, deoarece fiecare valoare reprezint\u{a} cantitatea de s\^{a}nge care curge la un anumit frame dintr-o anumit\u{a} radiografie la un pacient, nu volumul total la un pacient la sisatol\u{a}, respectiv diastol\u{a}. Nu calcul\u{a}m la acest pas cantitatea total\u{a} de s\^{a}nge care curge deoarece, a\c{s}a cum am vazut \c{s}i \^{i}n capitolul anterior, re\c{t}reaua noastr\u{a} neuronal\u{a} nu face preziceri tocmai perfect \c{s}i din acest\u{a} cauz\u{a} vom mai face o calibrare a datelor calculate, astfel \^{i}nc\^{a}nt acestea s\u{a} fiu c\^{a}t mai aproape de adev\u{a}r.
+
+\section{Calibrarea datelor}
+
+TODO

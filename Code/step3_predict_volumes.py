@@ -116,58 +116,68 @@ def predict_overlays_patient(patient_id, save_transparents=False):
 
 def get_filename(file_path):
     """
-    DONE
-    :param file_path: 
-    :return: 
+    Get the file name
+    :param file_path: the path to the file
+    :return: return the file name
     """
+
     #  Format of a file is : 0350_00000sax_02_10053_IM-6068-0002.png
     file_name = ntpath.basename(file_path)
     parts = file_name.split('_')
     file_name = parts[4].replace(".png", "")
+
     return file_name
 
 
 def get_frame_no(file_path):
     """
-    DONE
-    :param file_path: 
-    :return: 
+    Get frame number
+    :param file_path: path to the file
+    :return: number of the frame
     """
+
     #  Format of a file is : 0350_00000sax_02_10053_IM-6068-0002.png
     file_name = ntpath.basename(file_path)
     parts = file_name.split('_')
     frame_no = parts[2]
+
     return frame_no
 
 
 def get_location_values(string_value):
     """
-    DONE
-    :param string_value: 
-    :return: 
+    Get location values
+    :param string_value: value in string format
+    :return: rezultat
     """
+
     string_value = string_value.replace("[", "")
     string_value = string_value.replace("]", "")
     parts = string_value.split(' ')
     res = [float(x) for x in parts if x]
+
     return res
 
 
 def compute_distance(current_value, previous_value):
     """
-    DONE
-    :param current_value: 
-    :param previous_value: 
-    :return: 
+    Compute the distance between current value and next value.
+    :param current_value: current value
+    :param previous_value: next value
+    :return: distance
     """
+
     if str(previous_value) == "nan":
         return previous_value
+
     cur_values = get_location_values(current_value)
     prev_values = get_location_values(previous_value)
 
     deltas = []
+
     for c, p in zip(cur_values, prev_values):
         deltas.append((c - p) * (c - p))
+
     delta_sum = sum(deltas)
     delta_sqrt = math.sqrt(delta_sum)
     return delta_sqrt
@@ -175,14 +185,15 @@ def compute_distance(current_value, previous_value):
     delta = current_value - previous_value
     delta = delta.fillna(0)
     updown = pandas.Series(delta.apply(lambda x: 0 if x == 0 else 1 if x > 0 else -1))
+
     return updown
 
 
 def interpolate_series(pixel_series):
     """
-    DONE
-    :param pixel_series: 
-    :return: 
+    Interpolate series
+    :param pixel_series: pixel series
+    :return: new pixel series
     """
 
     if not INTERPOLATE_SERIES:
@@ -229,11 +240,11 @@ def interpolate_series(pixel_series):
 
 def count_pixels(patient_id, all_slice_data, model_name):
     """
-    DONE
-    :param patient_id: 
-    :param all_slice_data: 
-    :param model_name: 
-    :return: 
+    Count the pixels from the left ventricle.
+    :param patient_id: patient id
+    :param all_slice_data: all slice date from CVS file.
+    :param model_name: neural network name.
+    :return: data frame
     """
 
     patient_slice_data = all_slice_data[all_slice_data["patient_id"] == patient_id].copy()
@@ -246,6 +257,7 @@ def count_pixels(patient_id, all_slice_data, model_name):
     # find lowest common set of frames that are present in every slice
     for name, records in patient_slice_data.groupby("slice_noloc"):
         slice_frames = records["frame_no"].unique()
+
         if (len(frames) / 2) >= len(slice_frames):
             # throw away small slices (416)
             print("Patient " + str(patient_id) + ": throw away slice : " + str(name))
@@ -255,6 +267,7 @@ def count_pixels(patient_id, all_slice_data, model_name):
         frames = list(set(frames) & set(slice_frames))
 
     new_frame_count = len(frames)
+
     if new_frame_count != frame_count:
         print(
             "Patient " + str(patient_id) + ": frames not the same for every slice : " + str(frame_count) + " <> " + str(
@@ -265,16 +278,19 @@ def count_pixels(patient_id, all_slice_data, model_name):
 
     # set up matrix indexed by slice_no and frame_no
     slice_index = {}
+
     for slice_no in slices:
         slice_index[str(slice_no).rjust(2, '0')] = len(slice_index)
 
     frame_pixel_series = {}
     frame_confidence_series = {}
+
     for frame_no in frames:
         frame_pixel_series[str(frame_no).rjust(2, '0')] = [-1] * len(slices)
         frame_confidence_series[str(frame_no).rjust(2, '0')] = [-1] * len(slices)
 
     overlay_paths = utils.get_patient_overlays(patient_id)
+
     for overlay_path in overlay_paths:
         overlay_img = cv2.imread(overlay_path, cv2.IMREAD_GRAYSCALE)
 
@@ -283,13 +299,16 @@ def count_pixels(patient_id, all_slice_data, model_name):
         pixel_count = overlay_img.sum() / 255
 
         file_name = get_filename(overlay_path)
+
         if file_name not in file_name_slices:
             continue
+
         slice_no = file_name_slices[file_name]
         frame_no = file_name_frames[file_name]
 
         slice_str = str(slice_no).rjust(2, '0')
         frame_str = str(frame_no).rjust(2, '0')
+
         if slice_str not in slice_index:
             print("Patient " + str(patient_id) + " : slice " + slice_str + " skipped")
             patient_slice_data = patient_slice_data[patient_slice_data["slice_noloc"] != slice_no]
@@ -321,10 +340,12 @@ def count_pixels(patient_id, all_slice_data, model_name):
     data_frame["slice_dist2"].fillna(data_frame["slice_dist2"].mean(), inplace=True)
 
     deltas = abs(abs(data_frame["slice_dist"]) - abs(data_frame["slice_dist2"])).sum()
+
     if deltas > 1:
         print("slice_dist != slice_dist2 (" + str(deltas) + ")")
 
     data_frame["time"] = patient_slice_data_frame1["time"].values
+
     for frame_no in frames:
         frame_str = str(frame_no).rjust(2, '0')
         interpolated_series = interpolate_series(frame_pixel_series[frame_str])
@@ -333,9 +354,12 @@ def count_pixels(patient_id, all_slice_data, model_name):
     if SMOOTHEN_FRAMES:
         for frame_no in frames:
             prev_frame = frame_no - 1
+
             if prev_frame < 1:
                 prev_frame = 30
+
             next_frame = frame_no + 1
+
             if next_frame > 30:
                 next_frame = 1
 
@@ -359,11 +383,11 @@ def count_pixels(patient_id, all_slice_data, model_name):
 
 def compute_volumne_frustum(pixel_series, distance_series, low_confidence_calc=False):
     """
-    DONE
-    :param pixel_series: 
-    :param distance_series: 
-    :param low_confidence_calc: 
-    :return: 
+    Compute volume
+    :param pixel_series: pixels
+    :param distance_series: distances
+    :param low_confidence_calc: optional value
+    :return: result and max value
     """
 
     val_list = pixel_series.values.tolist()
@@ -371,9 +395,9 @@ def compute_volumne_frustum(pixel_series, distance_series, low_confidence_calc=F
     max_val = 0
 
     val_list.append(0)
+
     if abs(dist_list[0]) > 25:
-        print("First element slice location completely out of range.. removing. " + str(
-            dist_list[0]))  # patient 643, 579.. need a better, time based fix
+        print("First element slice location completely out of range.. removing. " + str(dist_list[0]))
 
         dist_list[0] = 0
 
@@ -382,19 +406,20 @@ def compute_volumne_frustum(pixel_series, distance_series, low_confidence_calc=F
         val_list.insert(0, 0)
 
     total_volume = 0
+
     for i in range(len(val_list) - 1):
         val = val_list[i]
         dist = abs(float(dist_list[i]))
+
         if val > max_val:
             max_val = val
 
-        # patient 277 has a dist > 20.. strange..
         if dist > 15:
-            print("Suspicious.. dist > 15. (" + str(dist) + ")")  # dist = 15
+            print("Suspicious.. dist > 15. (" + str(dist) + ")")
 
         next_val = val_list[i + 1]
+
         if (not USE_FRUSTUM_VOLUME_CALCULATIONS) or low_confidence_calc:
-            # same formula only top area same as bottom area.. (so cylinders instead of frustums)
             next_val = val
 
         volume = (dist / 3.)
@@ -403,17 +428,20 @@ def compute_volumne_frustum(pixel_series, distance_series, low_confidence_calc=F
         total_volume += volume
 
     res = total_volume / 1000
+
     return res, max_val
 
 
 def compute_volumes(patient_id, model_name, debug_info=False):
     """
-    DONE
-    :param patient_id: 
-    :param model_name: 
-    :param debug_info: 
-    :return: 
+    Calculate the volume of the patient.
+    :param patient_id: patient id
+    :param model_name: neural network name
+    :param debug_info: optional value
+    :return: diastole volume, systole volume, low confidence diastole volume,
+    low confidence systole volume, diastole frame, systole frame, diastole max slice value, sys max slice value
     """
+
     patient_dir = utils.get_pred_patient_dir(patient_id)
     min_areas = pandas.read_csv(patient_dir + "/areas_" + model_name + ".csv", sep=";")
     columns = list(min_areas)
@@ -469,25 +497,27 @@ def compute_volumes(patient_id, model_name, debug_info=False):
 def evaluate_volume(patient_id, diastole_vol, systole_vol, pred_model_name, scale, lowconf_dia_vol, lowconf_sys_vol,
                     dia_frame, sys_frame, dia_max_slice, sys_max_slice, debug_info=False):
     """
-    DONE
-    :param patient_id: 
-    :param diastole_vol: 
-    :param systole_vol: 
-    :param pred_model_name: 
-    :param scale: 
-    :param lowconf_dia_vol: 
-    :param lowconf_sys_vol: 
-    :param dia_frame: 
-    :param sys_frame: 
-    :param dia_max_slice: 
-    :param sys_max_slice: 
-    :param debug_info: 
-    :return: 
+    Evaluate the volume
+    :param patient_id: patient id
+    :param diastole_vol: diastole volume
+    :param systole_vol: systole volum
+    :param pred_model_name: neural network model name
+    :param scale: scale
+    :param lowconf_dia_vol: low confidence diastole module
+    :param lowconf_sys_vol: low confidence systole module
+    :param dia_frame: diastole frame
+    :param sys_frame: systole frame
+    :param dia_max_slice: diastole max slice
+    :param sys_max_slice: systole max slice
+    :param debug_info: optional parameter
+    :return: error systole, error diastole
     """
+
     diastole_vol = round(diastole_vol, 1)
     systole_vol = round(systole_vol, 1)
     pred_data = pandas.read_csv(settings.RESULT_DIR + PREDICTION_FILENAME, sep=";")
     scale_col = "scale"
+
     if scale_col not in pred_data.columns:
         pred_data[scale_col] = 1
 
@@ -527,22 +557,24 @@ def evaluate_volume(patient_id, diastole_vol, systole_vol, pred_model_name, scal
 
     err_dia = pred_data.loc[pred_data["patient_id"] == patient_id, "error_dia"].values[0]
     err_sys = pred_data.loc[pred_data["patient_id"] == patient_id, "error_sys"].values[0]
+
     if debug_info:
         current_debug_line.append(str(err_dia))
         current_debug_line.append(str(err_sys))
 
     pred_data.to_csv(settings.RESULT_DIR + "prediction_raw_" + MODEL_NAME + ".csv", sep=";", index=False)
+
     return err_dia, err_sys
 
 
 def predict_patient(patient_id, all_slice_data, pred_model_name, debug_info=False):
     """
     The main method.
-    :param patient_id: 
-    :param all_slice_data: 
-    :param pred_model_name: 
-    :param debug_info: 
-    :return: 
+    :param patient_id: patient id
+    :param all_slice_data: all slices data
+    :param pred_model_name: neural network model name
+    :param debug_info: optional parameter for debug information
+    :return: nothing
     """
 
     if not os.path.exists(settings.RESULT_DIR + PREDICTION_FILENAME):
