@@ -337,4 +337,12 @@ Pentru algoritmul \textbf{\textit{Gradient Bootstrap}} vom folosii ca date de an
 
 \par
 
-\textbf{\textit{Gradient Bootstrap}} este un algoritm de Machine Learning folosit pentru probleme de regresii \c{s}i clasificare. Acesta se folose\c{s}te de un arbore de decizii pe care \^{i}l construie\c{s}te ca s\u{a} minimizeze funnc\c{t}ia de pierdere. 
+\textbf{\textit{Gradient Bootstrap}} este un algoritm de Machine Learning folosit pentru probleme de regresii \c{s}i clasificare. Acesta se folose\c{s}te de un arbore de decizii pe care \^{i}l construie\c{s}te ca s\u{a} minimizeze funnc\c{t}ia de pierdere, unde func\c{t}ia de pierdere reprezint\u{a} diferen\c{t}a la p\u{a}trat dintre prezicerea f\u{a}cut\u{a} \c{s}i prezicerea f\u{a}cut\u{a} de c\u{a}tre algoritm.
+
+$$ f = (y - y_p )^2 $$
+
+Fiecare prezicerea nou\u{a} este f\u{a}cut\u{a} pe baza prezicerilor anterioare, astfle \^{i}nc\^{a}t fiecare nou nivel este consturit ca s\u{a} minimizeze func\c{t}ia de cost al nivelului anterior.
+
+\par 
+
+Pentru algoritmul \textbf{\textit{Gradient Bootstrap}} am ales urm\u{a}torii parametrii pentru a se efectua partea de regresie \^{i}n prezicerea diferen\c{t}elor dintre sistol\u{a}, respectiv diastol\u{a}, a valorilor reale cu valorile calculate la pacien\c{t}ii pentru care nu \c{s}tiim valorile reale la sistol\u{a} \c{s}i diastol\u{a}. Ca rat\u{a} de \^{i}nv\u{a}\c{t}are am ajuns \^{i}n urma experimentelor la valoarea 0.001, acesta fiind \c{s}i cel mai greu parametru de setat. Ca num\u{a}r maxim de nivele am l\u{a}sat valorea 3, aceast\u{a} valoarea a fost aleas\u{a} pentru a prevenii efectul de overfitting, iar numarul minim de frunze la un nod a fost lasat la valoarea 2, iar num\u{a}rul maxim de estimatori a fost setat la 2500, tot din motivul de a se prevenii efectul de overfitting.
