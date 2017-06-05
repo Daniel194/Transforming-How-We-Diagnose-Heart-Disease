@@ -346,3 +346,51 @@ Fiecare prezicerea nou\u{a} este f\u{a}cut\u{a} pe baza prezicerilor anterioare,
 \par 
 
 Pentru algoritmul \textbf{\textit{Gradient Bootstrap}} am ales urm\u{a}torii parametrii pentru a se efectua partea de regresie \^{i}n prezicerea diferen\c{t}elor dintre sistol\u{a}, respectiv diastol\u{a}, a valorilor reale cu valorile calculate la pacien\c{t}ii pentru care nu \c{s}tiim valorile reale la sistol\u{a} \c{s}i diastol\u{a}. Ca rat\u{a} de \^{i}nv\u{a}\c{t}are am ajuns \^{i}n urma experimentelor la valoarea 0.001, acesta fiind \c{s}i cel mai greu parametru de setat. Ca num\u{a}r maxim de nivele am l\u{a}sat valorea 3, aceast\u{a} valoarea a fost aleas\u{a} pentru a prevenii efectul de overfitting, iar numarul minim de frunze la un nod a fost lasat la valoarea 2, iar num\u{a}rul maxim de estimatori a fost setat la 2500, tot din motivul de a se prevenii efectul de overfitting.
+
+\par
+
+Dup\u{a} aflarea valorilor prezise de c\u{a}tre algoritm putem calcula noile preziceri pentru sistol\u{a} \c{s}i diastol\u{a}, acestea vor reprezenta diferen\c{t}a dintre valorea calculat\u{a} pe baza prezicerilor f\u{a}cute de c\u{a}tre re\c{t}eaua neuronal\u{a} \c{s}i eroarea dintre valoarea prezis\u{a} \c{s}i valoarea adev\u{a}rat\u{a} pe care algoritmul \^{i}l indic\u{a}. 
+
+\par
+
+Valorile rezultate \^{i}n urma calculelor de mai sus reprezint\u{a} valorile finale pentru cantitatea de s\^{a}nge care curge la sistol\u{a} \c{s}i la diastol\u{a}, prin urmare acum se poate calcula frac\c{t}ia de ejec\c{t}ie, pe care o vom definii \^{i}n felul urm\u{a}tor:
+
+$$ E_j = 100 * \frac{V_D - V_S}{V_D} $$
+
+Unde $V_D$ reprezint\u{a} volumul de s\^{a}nge care curge la diastol\u{a}, iar $V_S$ reprezint\u{a} volumul de s\^{a}nge care curge la sistol\u{a} iar rezultatul final este reprezentat \^{i}n procent cu valori \^{i}ntre 0 \c{s}i 100. \^{I}n urma valorii rezultate se poate determina dac\u{a} un pacient are probleme cu inima \c{s}i c\^{a}t de grav este aceast\u{a} sau dac\u{a} este s\u{a}n\u{a}tos. Astfel c\u{a}, dac\u{a} frac\c{t}ia de ejec\c{t}ie este mai mare de 75\% atunci pacientul este declarat bolnav \c{s}i este hiperdinamic, dac\u{a} este \^{i}ntre 55\% \c{s}i 75\% atunci pacientul este declarat s\u{a}n\u{a}tos, dac\u{a} este 45\% \c{s}i 54\% atunci pacientul este declarat bolnav av\^{a}nd o frac\c{t}ie de ejec\c{t}ie u\c{s}or anormal\u{a}, dac\u{a} este \^{i}ntre 35\% \c{s}i 44\% atunci pacientul este delcarat bolnav cu o frac\c{t}ie de ejec\c{t}ie moderat anormal\u{a}, iar daca este sub 35\% atunci pacientul este bolnav cu o frac\c{t}ie de ejec\c{t}ie sever anormal\u{a}.
+
+\newpage
+
+\section{Rezultate}
+
+\^{I}n tabelul de mai jos sun prezentate c\^{a}teva example de rezultate ob\c{t}inute la pacien\c{t}ii pentru care nu se \c{s}tiau valorile reale a sistolei \c{s}i diastolei de la \^{i}nceput, de asemenea sunt ar\u{a}tate \c{s}i valorile lor reale pentru a putea fi comparate cu rezultatele ob\c{t}inute \c{s}i sunt calculate frac\c{t}iile de ejec\c{t}ie pentru valorile prezise \c{s}i valorile reale.
+
+\begin{center}
+ \begin{longtable}{|p{0.5cm}|p{2cm}|p{2cm}|p{2cm}|p{2cm}|p{2cm}|p{2cm}|} 
+ \hline
+ Nr. & Diastola real\u{a} & Diastola prezis\u{a} & Sistola real\u{a} & Sistola prezis\u{a} & Frac\c{t}ia de ejec\c{t}ie pentru valorile reale & Frac\c{t}ia de ejec\c{t}ie pentru valorile prezise  \\ [0.5ex] 
+ \hline\hline
+ 1 &  158.0 & 158.7 & 76.0 & 63.61 & 51,8\% & 59,9\% \\
+ \hline
+ 2 &  44.2 & 35.69 & 15.6 & 12.94 & 64,7\% & 63,7\% \\ 
+ \hline
+ 3 &  129.7 & 128.44 & 83.2 & 38.6 & 35,8\% & 69,9\% \\
+ \hline
+ 4 &  121.1 & 126.34 & 39.2 & 53.79 & 67,3\% & 57,4\% \\
+ \hline
+ 5 &  127.4 & 145.78 & 57.8 & 57.99 & 54,63\% & 60,2\% \\
+ \hline
+ 6 &  177.7 & 188.18 & 76.4 & 77.49 & 57\% & 58,8\% \\
+ \hline
+ 7 &  277.6 & 186.16 & 133.5 & 74.88 & 51,9\% & 59,7\% \\
+ \hline
+ 8 &  210.1 & 209.73 & 167.5 & 102.7 & 20,2\% & 51\% \\
+ \hline
+ 9 &  230.1 & 193.51 & 91.4 & 91.53 & 60.2\% & 52,7\% \\
+ \hline
+ 10 &  315.8 & 213.66 & 122.3 & 98.24 & 61,2\% & 54\% \\
+ \hline
+\end{longtable}
+\end{center}
+
+Dup\u{a} cum se poate vedea din tabelul de mai sus, metoda pe care am abordato \^{i}n acest\u{a} lucrare face unele preziceri destul de aproape de adev\u{a}r ( exemplele 2 \c{s}i 6) unde valorile diastolei \c{s}i sitolei prezie sunt destul de aproape de adev\u{a} astfel \^{i}nc\^{a}t ca frac\c{t}iile de ejec\c{t}ie s\u{a} ias\u{a} asem\u{a}n\u{a}toare. Mai sunt unele preziceri unde valorile diastolei sunt apropiate, \^{i}ns\u{a} din cauz\u{a} c\u{a} valorile sistolei difere \^{i}ntre ele, valorile frac\c{t}iei de ejec\c{t}ie ies la o diferen\c{t}\u{a} destul de mare \c{s}i din aceast\u{a} cauz\u{a} un pacient poate fi declarat bolnav sau s\u{a}n\u{a}tos din gre\c{s}eal\u{a} (exemplele 1, 3, 4 \c{s}i 8) sau invers, valorile sistoli s\u{a} fiu apropiate iar valorile diastolei s\u{a} au o diferen\c{t}\u{a} destul de mare \^{i}ntre el \c{s}i din aceast\u{a} cauz\u{a} s\u{a} diagnostic\u{a}m un pacient ca find s\u{a}n\u{a}tos sau bolnav ( exemplele 5 \c{s}i 9) sau cazul cel mai neprielnic, c\^{a}nd \c{s}i valorile sitolei \c{s}i diastolei prezise difer\u{a} foarte mult de valorile adev\u{a}rate \c{s}i din aceast\u{a} cauza iesi o diferen\c{t}\u{a} destul de mare \^{i}ntre cele dou\u{a} frac\c{t}ii de ejec\c{t}ie.
