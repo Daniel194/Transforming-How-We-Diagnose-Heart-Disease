@@ -64,27 +64,58 @@ def get_pred_patient_transparent_overlay_dir(patient_id):
 
 
 def get_patient_images(patient_id):
+    """
+    Get Patient images
+    :param patient_id: patient id
+    :return: patient images
+    """
+
     return get_patient_files(patient_id, "images")
 
 
 def get_patient_overlays(patient_id):
+    """
+    Get patient overlay images
+    :param patient_id: patiend id
+    :return: patiend images overlay
+    """
+
     return get_patient_files(patient_id, "overlays")
 
 
 def get_patient_transparent_overlays(patient_id):
+    """
+    Get patient transparent overlay images.
+    :param patient_id: patient id
+    :return: get patient transparetn overlay images
+    """
+
     return get_patient_files(patient_id, "transparent_overlays")
 
 
 def get_patient_files(patient_id, file_type, extension=".png"):
+    """
+    Get patient files.
+    :param patient_id: patiend id
+    :param file_type: file type
+    :param extension: extension of the file
+    :return: return all the file
+    """
+
     src_dir = get_pred_patient_dir(patient_id)
+
     if file_type == "images":
         src_dir = get_pred_patient_img_dir(patient_id)
+
     if file_type == "overlays":
         src_dir = get_pred_patient_overlay_dir(patient_id)
+
     if file_type == "transparent_overlays":
         src_dir = get_pred_patient_transparent_overlay_dir(patient_id)
+
     prefix = str(patient_id).rjust(4, '0')
     file_paths = get_files(src_dir, prefix + "*" + extension)
+
     return file_paths
 
 
@@ -97,6 +128,7 @@ def delete_files(target_dir, search_pattern):
     """
 
     files = glob.glob(target_dir + search_pattern)
+
     for f in files:
         os.remove(f)
 
@@ -110,6 +142,7 @@ def get_files(scan_dir, search_pattern):
     """
 
     file_paths = glob.glob(scan_dir + search_pattern)
+
     return file_paths
 
 
@@ -123,7 +156,6 @@ def enumerate_sax_files(patient_ids=None, filter_slice_type="sax"):
 
     for sub_dir in ["train", "validate", "test"]:
         for root, _, files in os.walk(settings.BASE_DIR + "data/" + sub_dir):
-            # print root
             for file_name in files:
                 if file_name.endswith(".dcm"):
 
@@ -143,6 +175,14 @@ def enumerate_sax_files(patient_ids=None, filter_slice_type="sax"):
 
 
 def compute_mean_image(src_dir, wildcard, img_size):
+    """
+    Comput mean image
+    :param src_dir: direcotry source
+    :param wildcard: wildcard
+    :param img_size: image size
+    :return: return the mean image
+    """
+
     mean_image = numpy.zeros((img_size, img_size), numpy.float32)
     src_files = glob.glob(src_dir + wildcard)
     random.shuffle(src_files)
@@ -160,10 +200,19 @@ def compute_mean_image(src_dir, wildcard, img_size):
             break
 
     res = mean_image / float(img_count)
+
     return res
 
 
 def compute_mean_pixel_values_dir(src_dir, wildcard, channels):
+    """
+    Comput mean pixel values from a directory.
+    :param src_dir: directory source
+    :param wildcard: wildcard
+    :param channels: channels
+    :return: return the specific value
+    """
+
     src_files = glob.glob(src_dir + wildcard)
     random.shuffle(src_files)
     means = []
@@ -183,9 +232,17 @@ def compute_mean_pixel_values_dir(src_dir, wildcard, channels):
 
 
 def replace_color(src_image, from_color, to_color):
-    data = numpy.array(src_image)  # "data" is a height x width x 4 numpy array
-    r1, g1, b1 = from_color  # Original value
-    r2, g2, b2 = to_color  # Value that we want to replace it with
+    """
+    Replace color
+    :param src_image: path to a image
+    :param from_color: initial color
+    :param to_color: new color
+    :return: new image
+    """
+
+    data = numpy.array(src_image)
+    r1, g1, b1 = from_color
+    r2, g2, b2 = to_color
 
     red, green, blue = data[:, :, 0], data[:, :, 1], data[:, :, 2]
     mask = (red == r1) & (green == g1) & (blue == b1)
@@ -194,10 +251,19 @@ def replace_color(src_image, from_color, to_color):
     return data
 
 
-ELASTIC_INDICES = None  # needed to make it faster to fix elastic deformation per epoch.
+ELASTIC_INDICES = None
 
 
 def elastic_transform(image, alpha, sigma, random_state=None):
+    """
+    Elastic transformation
+    :param image: the image
+    :param alpha: alpha
+    :param sigma: sigma
+    :param random_state: random state (optional parameter)
+    :return: new image
+    """
+
     global ELASTIC_INDICES
     shape = image.shape
 
@@ -209,6 +275,7 @@ def elastic_transform(image, alpha, sigma, random_state=None):
         dy = gaussian_filter((random_state.rand(*shape) * 2 - 1), sigma, mode="constant", cval=0) * alpha
         x, y = numpy.meshgrid(numpy.arange(shape[0]), numpy.arange(shape[1]))
         ELASTIC_INDICES = numpy.reshape(y + dy, (-1, 1)), numpy.reshape(x + dx, (-1, 1))
+
     return map_coordinates(image, ELASTIC_INDICES, order=1).reshape(shape)
 
 
@@ -244,6 +311,14 @@ def prepare_cropped_sax_image(sax_image, clahe=True, intermediate_crop=0, rotate
 
 
 def prepare_overlay_image(src_overlay_path, target_size, antialias=False):
+    """
+    Prepare overlay image
+    :param src_overlay_path: source path
+    :param target_size: target size
+    :param antialias: anti alias
+    :return: new overlay image
+    """
+
     if os.path.exists(src_overlay_path):
         overlay = cv2.imread(src_overlay_path)
         overlay = replace_color(overlay, (255, 255, 255), (0, 0, 0))
@@ -256,6 +331,7 @@ def prepare_overlay_image(src_overlay_path, target_size, antialias=False):
         overlay = cv2.resize(overlay, (target_size, target_size), interpolation=interpolation)
     else:
         overlay = numpy.zeros((target_size, target_size), dtype=numpy.uint8)
+
     return overlay
 
 

@@ -15,6 +15,11 @@ from tensorflow.python.ops import gen_nn_ops
 
 class LVSegmentation(object):
     def __init__(self, checkpoint_dir='../../result/segmenter/train_result/'):
+        """
+        First method
+        :param checkpoint_dir: the directory where will be saved all the value
+        """
+
         self.build()
         self.saver = tf.train.Saver(max_to_keep=40, keep_checkpoint_every_n_hours=1)
         self.session = tf.Session()
@@ -24,6 +29,11 @@ class LVSegmentation(object):
         self.loss_array = []
 
     def restore_session(self):
+        """
+        Restore the session
+        :return: nothing
+        """
+
         if not os.path.exists(self.checkpoint_dir):
             raise IOError(self.checkpoint_dir + ' does not exist.')
         else:
@@ -37,6 +47,10 @@ class LVSegmentation(object):
             self.loss_array = pickle.load(f)
 
     def save_loss(self):
+        """
+        Save the loss score function
+        :return: nothing
+        """
 
         if os.path.exists(self.checkpoint_dir + 'loss.pickle'):
             os.remove(self.checkpoint_dir + 'loss.pickle')
@@ -45,11 +59,27 @@ class LVSegmentation(object):
             pickle.dump(self.loss_array, f)
 
     def predict(self, images):
+        """
+        Predict the value for specific images
+        :param images: images
+        :return: return the prediction
+        """
+
         self.restore_session()
 
         return self.prediction.eval(session=self.session, feed_dict={self.x: images})
 
     def train(self, train_paths, epochs=40, batch_size=2, restore_session=False, learning_rate=1e-6):
+        """
+        Train the neural network.
+        :param train_paths: path where will be saved the values
+        :param epochs: number of epochs
+        :param batch_size: batch sieze
+        :param restore_session: optional parameter for session restore
+        :param learning_rate: learning rate for neural netwok
+        :return: nothing
+        """
+
         if restore_session:
             self.restore_session()
 
@@ -77,6 +107,12 @@ class LVSegmentation(object):
             self.save_loss()
 
     def read_data(self, paths):
+        """
+        Read data from a specific path
+        :param paths: paths
+        :return: return read images before normalization, after normalization and true label
+        """
+
         images, labels = sunnybrook.export_all_contours(paths)
 
         crop_x = random.randint(0, 16)
@@ -105,6 +141,10 @@ class LVSegmentation(object):
                                                      padding=op.get_attr("padding"))
 
     def build(self):
+        """
+        Build the neural network architecture
+        :return: nothing
+        """
 
         self.x = tf.placeholder(tf.float32, shape=(None, 224, 224, 1))
         self.y = tf.placeholder(tf.int64, shape=(None, 224, 224))
@@ -184,16 +224,38 @@ class LVSegmentation(object):
         self.prediction = tf.argmax(tf.reshape(tf.nn.softmax(logits), tf.shape(score_1)), dimension=3)
 
     def weight_variable(self, shape, stddev):
+        """
+        Initialize weight variables.
+        :param shape: the shape of the weight
+        :param stddev: standard deviation
+        :return: the weight
+        """
+
         initial = tf.truncated_normal(shape, stddev=stddev)
 
         return tf.Variable(initial)
 
     def bias_variable(self, shape):
+        """
+        Initialize bias variable
+        :param shape: the shape of the bias
+        :return: bias
+        """
+
         initial = tf.constant(0.1, shape=shape)
 
         return tf.Variable(initial)
 
     def conv_layer(self, x, W_shape, b_shape, name, padding='SAME'):
+        """
+        Convolutional layer
+        :param x: the data
+        :param W_shape: shape of weights variable
+        :param b_shape: shape of bias variable
+        :param name: the name of the layer
+        :param padding: optional value
+        :return: the output of the convolutional layer
+        """
 
         nr_units = functools.reduce(lambda x, y: x * y, W_shape)
         stddev = 1.0 / math.sqrt(float(nr_units))
@@ -208,10 +270,25 @@ class LVSegmentation(object):
         return hidden
 
     def pool_layer(self, x):
+        """
+        Pool layer (Max pool layer).
+        :param x: the data
+        :return: the output of the pool layer
+        """
 
         return tf.nn.max_pool_with_argmax(x, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
 
     def deconv_layer(self, x, W_shape, b_shape, name, padding='SAME'):
+        """
+        Deconvolutional layer.
+        :param x: the data
+        :param W_shape: the shape of the weight variables
+        :param b_shape: bias variable
+        :param name: the name of the layer
+        :param padding: optional parameter
+        :return: the output of the deconvolutional layer.
+        """
+
 
         nr_units = functools.reduce(lambda x, y: x * y, W_shape)
         stddev = 1.0 / math.sqrt(float(nr_units))
@@ -228,6 +305,13 @@ class LVSegmentation(object):
         return hidden
 
     def unravel_argmax(self, argmax, shape):
+        """
+        Used for unpool layer
+        :param argmax: argmax of the corespondent pool layer.
+        :param shape: shape of the data.
+        :return: the un ravel data
+        """
+
         output_list = []
         output_list.append(argmax // (shape[2] * shape[3]))
         output_list.append(argmax % (shape[2] * shape[3]) // shape[3])
@@ -235,6 +319,13 @@ class LVSegmentation(object):
         return tf.stack(output_list)
 
     def unpool_layer2x2(self, bottom, argmax):
+        """
+        Unpool layer
+        :param bottom: start of the data
+        :param argmax: argmax of the corespondent pool layer
+        :return: the output of the unpool layer
+        """
+
         bottom_shape = tf.shape(bottom)
         top_shape = [bottom_shape[0], bottom_shape[1] * 2, bottom_shape[2] * 2, bottom_shape[3]]
 
