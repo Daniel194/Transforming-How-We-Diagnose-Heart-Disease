@@ -37,17 +37,17 @@ Cum am precizat mai sus, vom salva intr-un fi\c{s}ier CSV id-ul pacientului, num
 
 Toate valorile salvate mai sus \^{i}n fi\c{s}ierul CSV au fost valori pe care nu am fost nevoi\c{t}i s\u{a} le calcul\u{a}m doarece sunt deja existente \^{i}n fiecare radiografie, \^{i}ns\u{a} pe baza lor putem s\u{a} calcul\u{a}m noi valori care ne vor fi de folos pe parcurs. Una dintre acestea este s\u{a} stabilim timpul dintre dou\u{a} imagini consecutive dintr-o radiografie \c{s}i distan\c{t}a dintre loca\c{t}iile lor, acestea pot fi u\c{s}or calculate prin diferen\c{t}a dintre timpii  celor dou\u{a} imagini \c{s}i a pozi\c{t}iilor pe care le au.
 
-\section{Identificarea inimii}
+\section{Identificarea ventriculului st\^{a}ng}
 
-Cum se poate observa \c{s}i \^{i}n imaginea de mai jos inima este destul de u\c{s}or de identificat cu ochiul liber pentru un om, \^{i}ns\u{a} pentru un calculator aceasta este \^{i}nc\u{a} greu de g\u{a}sit.
-
-\par
-
-Pentru a putea identifica inmia din astfel de imagine vom avea nevoie de o re\c{t}ea neuronal\u{a} care s\u{a} fac\u{a} segmentarea inimii de restul de date, iar dup\u{a} aceea inima va putea fi trecut\u{a} printr-o alt\u{a} re\c{t}ea neuronal\u{a} pentru a se calcula volum de s\^{a}nge care curge.
+Cum se poate observa \c{s}i \^{i}n imaginea de mai jos ventriculul st\^{a}ng este destul de u\c{s}or de identificat cu ochiul liber pentru un om, \^{i}ns\u{a} pentru un calculator aceasta este \^{i}nc\u{a} greu de g\u{a}sit.
 
 \par
 
-Pentru antrenarea re\c{t}elei neuronale care va face segmentarea inimii vom avea nevoie de un alt set de date, deoarece setul de date pe care \^{i}l avem de la Institutul Na\c{t}ional pentru Inim\u{a}, Pl\u{a}m\^{a}ni \c{s}i S\^{a}nge din America nu ne ofer\u{a} date care s\u{a} indice pozi\c{t}ia exact\u{a} a inimii \^{i}n radiografie, \^{i}ns\u{a} spitalul Sunnybrook din Canada, Toronto pune la dispozi\c{t}ie date identice care ne ofer\u{a} pozi\c{t}ia exact\u{a} a inimii \^{i}n radiografie.
+Pentru a putea identifica ventriculul st\^{a}ng din astfel de imagine vom avea nevoie de o re\c{t}ea neuronal\u{a} care s\u{a} fac\u{a} segmentarea ventriculului st\^{a}ng de restul de date, iar dup\u{a} aceea se va putea folosii rezultatul ob\c{t}inut pentru calcularea volumului de s\^{a}nge care curge la sistol\u{a} \c{s}i a volumului de s\^{a}nge care curge la diastol\u{a}.
+
+\par
+
+Pentru antrenarea re\c{t}elei neuronale care va face segmentarea inimii vom avea nevoie de un alt set de date, deoarece setul de date pe care \^{i}l avem de la Institutul Na\c{t}ional pentru Inim\u{a}, Pl\u{a}m\^{a}ni \c{s}i S\^{a}nge din America nu ne ofer\u{a} date care s\u{a} indice pozi\c{t}ia exact\u{a} a ventriculului st\^{a}ng \^{i}n radiografie, \^{i}ns\u{a} spitalul Sunnybrook din Canada, Toronto pune la dispozi\c{t}ie date identice care ne ofer\u{a} pozi\c{t}ia exact\u{a} a ventriculului st\^{a}ng \^{i}n radiografie.
 
 \begin{center}
 \includegraphics[width=200]{after.png}
@@ -74,7 +74,7 @@ Primul pas pe care trebuie s\u{a} \^{i}l facem \^{i}nainte de a introduce setul 
 
 \subsection{Re\c{t}ele neuronale pentru segmentarea ventricului st\^{a}ng}
 
-Arhitectura re\c{t}elei neuronale pe care am aleso, pentru segmentarea ventricului st\^{a}ng de restul radiografiei, a fost inspirat\u{a} din arhitectura re\c{t}elei neuronale pe care cei de la Universatea Oxford au construito pentru a segmenta categorii de obiecte dintr-o imagine, dar din cauza faptului c\u{a} modelul celor de la Oxford, numit Visual Geometry Group ( prescurtat VGG ), dup\u{a} grupul care a venit cu idee acestei arhitecturi, era foarte complex \c{s}i se ajungea u\c{s}or la efectul de overfitting, acesta a trebuit simplificat\u{a,} astfle \^{i}nc\^{a}t s\u{a} se evite pe c\^{a}t posibil efectul de overfitting.
+Arhitectura re\c{t}elei neuronale pe care am aleso, pentru segmentarea ventricului st\^{a}ng de restul radiografiei, a fost inspirat\u{a} din arhitectura re\c{t}elei neuronale pe care cei de la Universatea Oxford au construito pentru a segmenta categorii de obiecte dintr-o imagine, dar din cauza faptului c\u{a} modelul celor de la Oxford, numit Visual Geometry Group ( prescurtat VGG ), dup\u{a} grupul care a venit cu idee acestei arhitecturi, era foarte complex\u{a} \c{s}i se ajungea u\c{s}or la efectul de overfitting, acesta a trebuit simplificat\u{a,} astfle \^{i}nc\^{a}t s\u{a} se evite pe c\^{a}t posibil efectul de overfitting.
 
 \par
 
@@ -276,7 +276,7 @@ Pe setul de imagini trei, pe care s-a facut prezicerea de c\u{a}tre rec\c{t}eaua
 \includegraphics[width=200]{4_image_predict.png}
 \end{center}
 
-Penultimul set de date pe care s-a f\u{a}cut prezicerea este cel mai interesant, deoarece inima se afl\u{a} la sistol\u{a}, iar ventriculul st\^{a}ng este greu de detectat \c{s}i cu ochiul liber, \^{i}ns\u{a} re\c{t}eaua neuronal\u{a} a reu\c{s}it s\u{a} \^{i}l detecteze, ins\u{a} a facut iar aceea\c{s}i gre\c{s}teal\u{a} ca \c{s}i la celelalte cazuri, a dectectat un ventricul st\^{a}ng mult mai mare dec\^{a}t este el de fapt. Dup\u{a} cum se poate observa, ventriculul st\^{a}ng detectat acum de re\c{t}eaua neuronal\u{a} este de vrea cinci ori mai mare dec\^{a}t ar trebuii s\u{a} fie, acest lucru fiind pus pe seama faptului c\u{a}, \^{i}n setul de date de antrenare exist\u{a} pu\c{t}ine exeple cu un ventricul st\^{a}ng a\c{s}a de mic.
+Penultimul set de date pe care s-a f\u{a}cut prezicerea este cel mai interesant, deoarece inima se afl\u{a} la sistol\u{a}, iar ventriculul st\^{a}ng este greu de detectat \c{s}i cu ochiul liber, \^{i}ns\u{a} re\c{t}eaua neuronal\u{a} a reu\c{s}it s\u{a} \^{i}l detecteze, ins\u{a} a facut iar aceea\c{s}i gre\c{s}teal\u{a} ca \c{s}i la celelalte cazuri, a dectectat un ventricul st\^{a}ng mult mai mare dec\^{a}t este el de fapt. Dup\u{a} cum se poate observa, ventriculul st\^{a}ng detectat acum de re\c{t}eaua neuronal\u{a} este de vreo cinci ori mai mare dec\^{a}t ar trebuii s\u{a} fie, acest lucru fiind pus pe seama faptului c\u{a}, \^{i}n setul de date de antrenare exist\u{a} pu\c{t}ine exeple cu un ventricul st\^{a}ng a\c{s}a de mic.
 
 \begin{center}
 \includegraphics[width=200]{5_image.png}
