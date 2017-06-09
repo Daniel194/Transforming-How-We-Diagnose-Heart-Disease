@@ -39,9 +39,9 @@
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{2.0ex plus0.5ex minus0.2ex}
 \usepackage{vmargin}
-\setmarginsrb           { 1.5in}
+\setmarginsrb           { 2.5cm}
                         { 0.6in}
-                        { 1.0in}
+                        { 2.5cm}
                         { 0.8in}
                         {  20pt}
                         {0.25in}

@@ -1,4 +1,4 @@
-\chapter{Identificarea bolilor cardiace cu re\c{t}ea neuronal\u{a}}
+\chapter{Identificarea bolilor cardiace cu re\c{t}ele neuronale}
 
 \^{I}nainte s\u{a} aplic\u{a}m o re\c{t}ea neuronal\u{a} peste setul nostru de date trebuie mai \^{i}nt\^{a}i s\u{a} le preproces\u{a}m pentru a le converti la un format mai adecvat, s\u{a} elimin\u{a}m unele date nedorite din setul de date care pot \^{i}ngreuna procesul de antrenare \c{s}i s\u{a} ad\u{a}ug\u{a}m unele date care ne vor fi folositoare pe parcurs.
 
@@ -343,7 +343,9 @@ $$ f = (y - y_p )^2 $$
 
 Fiecare prezicerea nou\u{a} este f\u{a}cut\u{a} pe baza prezicerilor anterioare, astfle \^{i}nc\^{a}t fiecare nou nivel este consturit ca s\u{a} minimizeze func\c{t}ia de cost al nivelului anterior.
 
-\par 
+\begin{center}
+\includegraphics[width=400]{gradinet_boosting.png}
+\end{center} 
 
 Pentru algoritmul \textbf{\textit{Gradient Bootstrap}} am ales urm\u{a}torii parametrii pentru a se efectua partea de regresie \^{i}n prezicerea diferen\c{t}elor dintre sistol\u{a}, respectiv diastol\u{a}, a valorilor reale cu valorile calculate la pacien\c{t}ii pentru care nu \c{s}tiim valorile reale la sistol\u{a} \c{s}i diastol\u{a}. Ca rat\u{a} de \^{i}nv\u{a}\c{t}are am ajuns \^{i}n urma experimentelor la valoarea 0.001, acesta fiind \c{s}i cel mai greu parametru de setat. Ca num\u{a}r maxim de nivele am l\u{a}sat valorea 3, aceast\u{a} valoarea a fost aleas\u{a} pentru a prevenii efectul de overfitting, iar numarul minim de frunze la un nod a fost lasat la valoarea 2, iar num\u{a}rul maxim de estimatori a fost setat la 2500, tot din motivul de a se prevenii efectul de overfitting.
 
@@ -358,8 +360,6 @@ Valorile rezultate \^{i}n urma calculelor de mai sus reprezint\u{a} valorile fin
 $$ E_j = 100 * \frac{V_D - V_S}{V_D} $$
 
 Unde $V_D$ reprezint\u{a} volumul de s\^{a}nge care curge la diastol\u{a}, iar $V_S$ reprezint\u{a} volumul de s\^{a}nge care curge la sistol\u{a} iar rezultatul final este reprezentat \^{i}n procent cu valori \^{i}ntre 0 \c{s}i 100. \^{I}n urma valorii rezultate se poate determina dac\u{a} un pacient are probleme cu inima \c{s}i c\^{a}t de grav este aceast\u{a} sau dac\u{a} este s\u{a}n\u{a}tos. Astfel c\u{a}, dac\u{a} frac\c{t}ia de ejec\c{t}ie este mai mare de 75\% atunci pacientul este declarat bolnav \c{s}i este hiperdinamic, dac\u{a} este \^{i}ntre 55\% \c{s}i 75\% atunci pacientul este declarat s\u{a}n\u{a}tos, dac\u{a} este 45\% \c{s}i 54\% atunci pacientul este declarat bolnav av\^{a}nd o frac\c{t}ie de ejec\c{t}ie u\c{s}or anormal\u{a}, dac\u{a} este \^{i}ntre 35\% \c{s}i 44\% atunci pacientul este delcarat bolnav cu o frac\c{t}ie de ejec\c{t}ie moderat anormal\u{a}, iar daca este sub 35\% atunci pacientul este bolnav cu o frac\c{t}ie de ejec\c{t}ie sever anormal\u{a}.
-
-\newpage
 
 \section{Rezultate}
 
