@@ -141,29 +141,29 @@
 \degree      {}
 \authors     {}
 \university  {\texorpdfstring{\href{http://fmi.unibuc.ro/ro/}
-                {Universitatea din Bucure\c{s}ti}}
-                {Universitatea din Bucure\c{s}ti}}
-\UNIVERSITY  {\texorpdfstring{\href{http://fmi.unibuc.ro/ro/}
-                {Universitatea din Bucure\c{s}ti}}
-                {Universitatea din Bucure\c{s}ti}}
-\department  {\texorpdfstring{\href{http://fmi.unibuc.ro/ro/}
-                {Calculatoare \c{s}i Tehnologia Informa\c{t}iei}}
-                {Calculatoare \c{s}i Tehnologia Informa\c{t}iei}}
-\DEPARTMENT  {\texorpdfstring{\href{http://fmi.unibuc.ro/ro/}
-                {Calculatoare \c{s}i Tehnologia Informa\c{t}iei}}
-                {Calculatoare \c{s}i Tehnologia Informa\c{t}iei}}
-\group       {\texorpdfstring{\href{http://fmi.unibuc.ro/ro/}
-                {Calculatoare \c{s}i Tehnologia Informa\c{t}iei}}
-                {Calculatoare \c{s}i Tehnologia Informa\c{t}iei}}
-\GROUP       {\texorpdfstring{\href{http://fmi.unibuc.ro/ro/}
-                {Calculatoare \c{s}i Tehnologia Informa\c{t}iei}}
-                {Calculatoare \c{s}i Tehnologia Informa\c{t}iei}}
-\faculty     {\texorpdfstring{\href{http://fmi.unibuc.ro/ro/}
-                {Facultatea de Matematic\u{a} \c{s}i Informatic\u{a}}}
-                {Facultatea de Matematic\u{a} \c{s}i Informatic\u{a}}}
-\FACULTY     {\texorpdfstring{\href{http://fmi.unibuc.ro/ro/}
-                {Facultatea de Matematic\u{a} \c{s}i Informatic\u{a}}}
-                {Facultatea de Matematic\u{a} \c{s}i Informatic\u{a}}}
+                {UNIVERSITATEA BUCURE\c{S}TI}}
+                {UNIVERSITATEA BUCURE\c{S}TI}}
+\UNIVERSITY  {\texorpdfstring{
+                {UNIVERSITATEA BUCURE\c{S}TI}}
+                {UNIVERSITATEA BUCURE\c{S}TI}}
+\department  {\texorpdfstring{
+                {SPECIALIZAREA CALCULATOARE \c{S}I TEHNOLOGIA INFORMA\c{T}IEI}}
+                {SPECIALIZAREA CALCULATOARE \c{S}I TEHNOLOGIA INFORMA\c{T}IEI}}
+\DEPARTMENT  {\texorpdfstring{
+                {SPECIALIZAREA CALCULATOARE \c{S}I TEHNOLOGIA INFORMA\c{T}IEI}}
+                {SPECIALIZAREA CALCULATOARE \c{S}I TEHNOLOGIA INFORMA\c{T}IEI}}
+\group       {\texorpdfstring{
+                {SPECIALIZAREA CALCULATOARE \c{S}I TEHNOLOGIA INFORMA\c{T}IEI}}
+                {SPECIALIZAREA CALCULATOARE \c{S}I TEHNOLOGIA INFORMA\c{T}IEI}}
+\GROUP       {\texorpdfstring{
+                {SPECIALIZAREA CALCULATOARE \c{S}I TEHNOLOGIA INFORMA\c{T}IEI}}
+                {SPECIALIZAREA CALCULATOARE \c{S}I TEHNOLOGIA INFORMA\c{T}IEI}}
+\faculty     {\texorpdfstring{
+                {FACULTATEA DE MATEMATIC\u{A} \c{S}I INFORMATIC\u{A}}}
+                {FACULTATEA DE MATEMATIC\u{A} \c{S}I INFORMATIC\u{A}}}
+\FACULTY     {\texorpdfstring{
+                {FACULTATEA DE MATEMATIC\u{A} \c{S}I INFORMATIC\u{A}}}
+                {FACULTATEA DE MATEMATIC\u{A} \c{S}I INFORMATIC\u{A}}}
 \addresses   {}
 \subject     {}
 \keywords    {}
@@ -189,7 +189,7 @@
       \vfill
       {\huge \bf \@title \par}
       \vfill
-      {\LARGE de \par}
+      {\LARGE  \par}
       \smallskip
       {\LARGE \authornames \par}
       \vfill
@@ -198,7 +198,7 @@
       \bigskip
       \bigskip
       \bigskip
-      {\Large \@date \par}
+      {\Large Bucure\c{s}ti, \@date \par}
       \bigskip
     \end{center}
     \par
