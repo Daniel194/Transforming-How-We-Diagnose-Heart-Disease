@@ -32,11 +32,11 @@ Trebuie precizat faptul c\u{a} modelul matematic al neuronului prezentat mai sus
 
 \section{Func\c{t}ia de activare}
 
-A\c{s}a cum am specificat \c{s}i mai sus, o re\c{t}ea neuronal\u{a} are nevoie de o fun\c{t}ie de activare care s\u{a} decid\u{a} dac\u{a} datele pot trece mai departe la urmatorii neuroni sau nu. De-a lungu istoriei s-au folosit mai multe tipuri de fun\c{t}ii de activare la re\c{t}elele neuronale, \^{i}nsa cea care d\u{a} cel mai bun randament at\^{a}t la timpul de antrenare c\^{a}t \c{s}i la acurate\c{t}ea final\u{a} este func\c{t}ia de activare ReLU (Rectified Linear Unit).
+A\c{s}a cum am specificat \c{s}i mai sus, o re\c{t}ea neuronal\u{a} are nevoie de o func\c{t}ie de activare care s\u{a} decid\u{a} dac\u{a} datele pot trece mai departe la urmatorii neuroni sau nu. De-a lungu istoriei s-au folosit mai multe tipuri de fun\c{t}ii de activare la re\c{t}elele neuronale, \^{i}nsa cea care d\u{a} cel mai bun randament at\^{a}t la timpul de antrenare c\^{a}t \c{s}i la acurate\c{t}ea final\u{a} este func\c{t}ia de activare ReLU (Rectified Linear Unit).
 
 \subsection{Rectified Linear Unit}
 
-Rectified Linear Unit, sau mai pe scurt ReLU, este la ora actual\u{a} cea mai folosit\u{a} fun\c{t}ie de activare, ea av\^{a}nd urm\u{a}toarea formul\u{a}
+Rectified Linear Unit, sau mai pe scurt ReLU, este la ora actual\u{a} cea mai folosit\u{a} func\c{t}ie de activare, ea av\^{a}nd urm\u{a}toarea formul\u{a}
 
 \[ f(x) =
   \begin{cases}
@@ -57,7 +57,7 @@ Acum c\u{a} am aflat ce este un neuron \c{s}i cum este simulat acesta din punct 
 
 Re\c{t}elele neuronale sunt modelate ca o cole\c{t}ie de neuroni pe nivele, unde datele calculate de un nivel devin datele de intrare pentru urmatorul nivel de neuroni. Dupa cum se vede \c{s}i in imaginea de mai sus, neuronii afla\c{t}i pe acela\c{s}i nivel nu comunic\u{a} direct unii cu ceilal\c{t}i, comunicarea realiz\^{a}ndu-se doar cu nivelul inferior de neuroni \c{s}i cu nivelul superior de neuroni.
 \par
-Primul nivel al unei re\c{t}ele neuronale se nume\c{s}te nivelu input, deoarece acesta reprezint\u{a} doar date de intrare, iar ultimul nivel al unei re\c{t}ele neuronale se nume\c{s}te nivelul output, doarece acesta intoarce valoarea final\u{a}, nivelele dintre primul \c{s}i ultimul nivel se numesc nivelele ascunse ( hidden layers ).
+Primul nivel al unei re\c{t}ele neuronale se nume\c{s}te nivelul input, deoarece acesta reprezint\u{a} doar date de intrare, iar ultimul nivel al unei re\c{t}ele neuronale se nume\c{s}te nivelul output, doarece acesta intoarce valoarea final\u{a}, nivelele dintre primul \c{s}i ultimul nivel se numesc nivelele ascunse ( hidden layers ).
 \par
 Re\c{t}elele neuronale, ca cea de mai sus, se numesc re\c{t}ele feedforward, deoarece outputul unui nivel merge tot timpul la urm\u{a}torul nivel, nu se intoarce niciodat\u{a} la un nivel anterior.
 \par 
@@ -79,11 +79,11 @@ unde $h_1$ este de dimensiune [5x10], $h_2$ de dimensiune [3x10], iar out de dim
 
 \section{Initializarea parametrilor}
 
-Am v\u{a}zut mai sus cum s\u{a} construim o re\c{t}ea neuronal\u{a}, \^{i}ns\u{a}, \^{i}nainte ca s\u{a} vedem \^{i}n ce const\u{a} procestul de antrenare  a unei re\c{t}ele neuronale trebuie mai \^{i}nt\^{a}i s\u{a} discumt\u{a} cum ini\c{t}ializ\u{a}m cei doi tipi de parametrii pe care un nivel dintr-o re\c{t}ea nuronal\u{a} \^{i}i are (ponderile \c{s}i bias - urile). 
+Am v\u{a}zut mai sus cum s\u{a} construim o re\c{t}ea neuronal\u{a}, \^{i}ns\u{a}, \^{i}nainte s\u{a} vedem \^{i}n ce const\u{a} procestul de antrenare  a unei re\c{t}ele neuronale trebuie mai \^{i}nt\^{a}i s\u{a} discut\u{a}m cum ini\c{t}ializ\u{a}m cei doi tipi de parametrii pe care un nivel dintr-o re\c{t}ea nuronal\u{a} \^{i}i are (ponderile \c{s}i bias - urile). 
 
 \subsection{Ini\c{t}ializarea ponderilor}
 
-Av\^{a}nd in vedere c\u{a} nu \c{s}tim valorile finale pe care o s\u{a} le aibe ponderile, la finalul procesului de antrenare a re\c{t}elei neuronale, deoarece aceste valori se actualizeaz\u{a} la fiecare pas de antrenare, va trebuii s\u{a} ini\c{t}ializ\u{a}m ponderile astfle \^{i}nc\^{a}t o jum\u{a}tate din valori s\u{a} aibe valori negative iar cealalt\u{a} jum\u{a}tate valori pozitive, vom dorii valori unice pentru fiecare pondere, pentru a acoperii o gam\u{a} c\^{a}t mai larg\u{a} de valori posibile pentru ponderi, iar acestea s\u{a} fiu c\^{a}t mai aproape de valorea zero dar diferite de zero astfle \^{i}nc\^{a}t s\u{a} fiu mai u\c{s}or de actualizat.
+Av\^{a}nd in vedere c\u{a} nu \c{s}tim valorile finale pe care o s\u{a} le aibe ponderile, la finalul procesului de antrenare a re\c{t}elei neuronale, deoarece aceste valori se actualizeaz\u{a} la fiecare pas de antrenare, va trebuii s\u{a} ini\c{t}ializ\u{a}m ponderile astfel \^{i}nc\^{a}t o jum\u{a}tate din valori s\u{a} aibe valori negative iar cealalt\u{a} jum\u{a}tate valori pozitive, vom dorii valori unice pentru fiecare pondere, pentru a acoperii o gam\u{a} c\^{a}t mai larg\u{a} de valori posibile pentru ponderi, iar acestea s\u{a} fiu c\^{a}t mai aproape de valorea zero dar diferite de zero astfle \^{i}nc\^{a}t s\u{a} fiu mai u\c{s}or de actualizat.
 
 \par
 
@@ -95,7 +95,7 @@ Dup\u{a} cum \c{s}tiim, varian\c{t}a reprezint\u{a} media p\u{a}tratic\u{a} a ab
 
 $$Var = \frac{1}{n} \sum_{i=1}^{n} (x_i - m )^2 $$
 
-\^{I}n formula de mai sus m reprezint\u{a} media aritmetic\u{a} iar $x_i$ valaorile date. \^{I}n cazul nostru dorim ca varian\c{t}a datelor de intrare s\u{a} nu se schimbe dup\u{a} ce iese din neuron \c{s}i se duce spre func\c{t}ia de activare pentru a nu altera datele foarte tare de la un nivel la altul. \^{I}n acest caz
+\^{I}n formula de mai sus m reprezint\u{a} media aritmetic\u{a} iar $x_i$ valorile date. \^{I}n cazul nostru dorim ca varian\c{t}a datelor de intrare s\u{a} nu se schimbe dup\u{a} ce iese din neuron \c{s}i se duce spre func\c{t}ia de activare pentru a nu altera datele foarte tare de la un nivel la altul. \^{I}n acest caz
 
 $$Var(\sum_{i=1}^{n} W_i x_i) = \sum_{i=1}^{n} Var(W_i x_i) = $$
 $$ = \sum_{i=1}^{n} [E(W_i)]^2 Var(x_i) + [E(x_i)]^2 Var(W_i) + Var(x_i) Var(W_i)$$
@@ -112,11 +112,11 @@ $$n Var(W) = 1 \implies Var(W) =  \frac{1}{n} $$
 
 \subsection{Initializarea bias}
 
-Pentru bias-uri este comun de a le ini\c{t}ializa cu valorea zero sau cu o valoare foarte mic\u{a} apropiat\u{a} de zero, de exemplu 0.01. Din cauza faptului c\u{a} bias-ul nu joac\u{a} un rol a\c{s}a de important ca ponderile \^{i}n re\c{t}eaua neuronal\u{a}, nu este de o importan\c{t}\u{a} foarte mare \^{i}n procesul de \^{i}nv\u{a}\c{t}are valoarea pe care o folosim la ini\c{t}ializarea lor, din acest motiv vom ini\c{t}ializa bias-ul cu valoarea zero.
+Pentru bias-uri este comun\u{a} ini\c{t}ializarea cu valorea zero sau cu o valoare foarte mic\u{a} apropiat\u{a} de zero, de exemplu 0.01. Din cauza faptului c\u{a} bias-ul nu joac\u{a} un rol a\c{s}a de important ca ponderile \^{i}n re\c{t}eaua neuronal\u{a}, nu este de o importan\c{t}\u{a} foarte mare \^{i}n procesul de \^{i}nv\u{a}\c{t}are valoarea pe care o folosim la ini\c{t}ializarea lor, din acest motiv vom ini\c{t}ializa bias-ul cu valoarea zero.
 
 \section{Procesul de antrenare}
 
-Procesul de antrenare sau \^{i}nv\u{a}\c{t}are a unei re\c{t}ele neuronale const\u{a} din mai multe componente, prima component\u{a} se numeste func\c{t}ia de pierdere ( loss function \^{i}n englez\u{a} ) care penalizeaz\u{a} corectitudinea predic\c{t}iilor f\u{a}cute de c\u{a}tre re\c{t}eaua neuronal\u{a} fa\c{t}\u{a} de predic\c{t}iile corecte, a doua component\u{a} const\u{a} \^{i}n metode de prevenire a efectului de overfitting \^{i}n re\c{t}eaua neuronal\u{a}, a treia \c{s}i ultima component\u{a} este procesul de optimizare care actualizeaz\u{a} \^{i}nt\u{a}ririle si bias-urile din re\c{t}eaua neuronal\u{a} astfel \^{i}nc\^{a}t urmatoarele predic\c{t}ii ale re\c{t}elei neuronale s\u{a} fiu mai aproape de adev\u{a}r. \^{I}n continuare vom definii mai detaliat cele trei componente.
+Procesul de antrenare sau \^{i}nv\u{a}\c{t}are a unei re\c{t}ele neuronale const\u{a} din mai multe componente, prima component\u{a} se numeste func\c{t}ia de pierdere ( loss function \^{i}n englez\u{a} ) care penalizeaz\u{a} corectitudinea predic\c{t}iilor f\u{a}cute de c\u{a}tre re\c{t}eaua neuronal\u{a} fa\c{t}\u{a} de predic\c{t}iile corecte, a doua component\u{a} const\u{a} \^{i}n metode de prevenire a efectului de overfitting \^{i}n re\c{t}eaua neuronal\u{a}, a treia \c{s}i ultima component\u{a} este procesul de optimizare care actualizeaz\u{a} \^{i}nt\u{a}ririle si bias-urile din re\c{t}eaua neuronal\u{a} astfel \^{i}nc\^{a}t urmatoarele predic\c{t}ii ale re\c{t}elei neuronale s\u{a} fie mai aproape de adev\u{a}r. \^{I}n continuare vom definii mai detaliat cele trei componente.
 
 \subsection{Func\c{t}ia de pierdere}
 
@@ -128,7 +128,7 @@ Exist\u{a} mai multe variante de func\c{t}ii de cost \^{i}ns\u{a} cea mai folosi
 
 $$ L_i = - log \bigg(\frac{e^{f_y_i}}{\sum_j e^{f_j}}\bigg)$$
 
-Unde $f_j$ reprezint\u{a} valoarea preconizat\u{a} de re\c{t}eaua neuronal\u{a} pentru clasa j, iar $f_y_i$ reprzint\u{a} valorea preconizat\u{a} pentru clasa corect\u{a}.
+Unde $f_j$ reprezint\u{a} valoarea preconizat\u{a} de re\c{t}eaua neuronal\u{a} pentru clasa j, iar $f_y_i$ reprezint\u{a} valorea preconizat\u{a} pentru clasa corect\u{a}.
 
 \par
 
@@ -149,7 +149,7 @@ O bun\u{a} analogie cu efectul de overfitting este atunci c\^{a}nd un copil inva
 
 \par
 
-O bun\u{a} metod\u{a} de a prevenii efectul de overfitting este de a aplica o fun\c{t}ie de regularizare la func\c{t}ia de pierdere astfel \^{i}nc\^{a}t s\u{a} penaliz\u{a}m \^{i}nt\u{a}ririle care au valori mari, deoarece \^{i}nt\u{a}ririle cu valori mari pot influen\c{t}a  foarte mult predic\c{t}iile \c{s}i pot memora datele pe care ar trebuii s\u{a} le \^{i}nve\c{t}e, de asemenea func\c{t}ia de regularizare trebuie s\u{a} favorizeze \^{i}nt\u{a}ririle cu date c\^{a}t mai dispersate posibil astfel \^{i}nc\^{a}t s\u{a} se generalizeze ceea ce \^{i}nva\c{t}\u{a} re\c{t}eaua neuronal\u{a} din setul de date de antrenare. O func\c{t}ie de regularizare care \^{i}ndepline\c{s}te aceste condi\c{t}ii este func\c{t}ia urm\u{a}toare:
+O bun\u{a} metod\u{a} de a prevenii efectul de overfitting este de a aplica o func\c{t}ie de regularizare la func\c{t}ia de pierdere astfel \^{i}nc\^{a}t s\u{a} penaliz\u{a}m \^{i}nt\u{a}ririle care au valori mari, deoarece \^{i}nt\u{a}ririle cu valori mari pot influen\c{t}a  foarte mult predic\c{t}iile \c{s}i pot memora datele pe care ar trebuii s\u{a} le \^{i}nve\c{t}e, de asemenea func\c{t}ia de regularizare trebuie s\u{a} favorizeze \^{i}nt\u{a}ririle cu date c\^{a}t mai dispersate posibil astfel \^{i}nc\^{a}t s\u{a} se generalizeze ceea ce \^{i}nva\c{t}\u{a} re\c{t}eaua neuronal\u{a} din setul de date de antrenare. O func\c{t}ie de regularizare care \^{i}ndepline\c{s}te aceste condi\c{t}ii este func\c{t}ia urm\u{a}toare:
 
 $$ R(W) = \sum_i \sum_j W_{i,j}^2 $$
 
@@ -161,7 +161,7 @@ $\lambda$ este un hiperparametru care poate fi reglat astfel \^{i}nc\^{a}t s\u{a
 
 \subsection{Procesul de optimizare}
 
-Scopul procesului de optimizare este acela de a g\u{a}si  ponderi \c{s}i bias-uri care minimizeaz\u{a} func\c{t}ia de pierdere, acest proces este cel mai complicat dintre toate pentru c\u{a} trebuie calculat gradientul func\c{t}iei de pierdere care ne va spune in ce direc\c{t}ie trebuie actualizat \^{i}nt\u{a}ririle astfel \^{i}nc\^{a}t s\u{a} minimiz\u{a}m func\c{t}ia de pierdere.
+Scopul procesului de optimizare este acela de a g\u{a}si  ponderi \c{s}i bias-uri care minimizeaz\u{a} func\c{t}ia de pierdere, acest proces este cel mai complicat dintre toate pentru c\u{a} trebuie calculat gradientul func\c{t}iei de pierdere care ne va spune in ce direc\c{t}ie trebuie actualizate ponderile astfel \^{i}nc\^{a}t s\u{a} minimiz\u{a}m func\c{t}ia de pierdere.
 
 \par 
 
@@ -169,11 +169,11 @@ Prin defini\c{t}ie, gradientul este un c\^{a}mp vectorial ale c\u{a}rui componen
 
 $$\nabla f = \bigg( \frac{\delta f}{\delta x_1}, \frac{\delta f}{\delta x_2}, ... , \frac{\delta f}{\delta x_n}  \bigg)$$
 
-Av\^{a}nd \^{i}n vedere faptul c\u{a} gradientul ne arat\u{a} direc\c{t}ia \^{i}n care func\c{t}ia are valorile cele mai mari vom dorii s\u{a} mergem \^{i}n direc\c{t}ia invers\u{a} ar\u{a}tat\u{a} de gardient deoarece scopul nostru este ca func\c{t}ia de pierdere s\u{a} aibe vloarea minim\u{a}. \^{I}ns\u{a} avem o problem\u{a} pentru c\u{a} gradientul ne zice direc\c{t}ia \^{i}n care s\u{a} mergem, dar nu ne zice \c{s}i c\^{a}t s\u{a} mergem in aceea direc\c{t}ie, din acest motiv ne putem trezii la un moment dat c\u{a} func\c{t}ia de pierdere \^{i}ncepe s\u{a} creasc\u{a} chiar dac\u{a} noi megem in direc\c{t}ia invers\u{a} spus\u{a} de gradient. O solu\c{t}ie la aceast\u{a} problem\u{a} este s\u{a} facem pa\c{s}i mici \^{i}n direc\c{t}ia invers\u{a} spus\u{a} de gradient, ace\c{s}ti pa\c{s}i se numesc rata de \^{i}nv\u{a}\c{t}are a re\c{t}elei neuronale, reprezent\^{a}nd cel mai important hiperparametru care trebuie setat manual dintr-o re\c{t}ea neuronal\u{a} deoarece dac\u{a} \^{i}l set\u{a}m prea mare nu vom ajunge niciodat\u{a} la punctul unde func\c{t}ia de pierdere are valoare minim\u{a}, iar dac\u{a} \^{i}l set\u{a}m prea mic o s\u{a} ajungem foarte greu la punctul de minim.
+Av\^{a}nd \^{i}n vedere faptul c\u{a} gradientul ne arat\u{a} direc\c{t}ia \^{i}n care func\c{t}ia are valorile cele mai mari vom dorii s\u{a} mergem \^{i}n direc\c{t}ia invers\u{a} ar\u{a}tat\u{a} de gardient deoarece scopul nostru este ca func\c{t}ia de pierdere s\u{a} aibe valoarea minim\u{a}. \^{I}ns\u{a} avem o problem\u{a} pentru c\u{a} gradientul ne zice direc\c{t}ia \^{i}n care s\u{a} mergem, dar nu ne zice \c{s}i c\^{a}t s\u{a} mergem in aceea direc\c{t}ie, din acest motiv ne putem trezii la un moment dat c\u{a} func\c{t}ia de pierdere \^{i}ncepe s\u{a} creasc\u{a} chiar dac\u{a} noi megem in direc\c{t}ia invers\u{a} spus\u{a} de gradient. O solu\c{t}ie la aceast\u{a} problem\u{a} este s\u{a} facem pa\c{s}i mici \^{i}n direc\c{t}ia invers\u{a} spus\u{a} de gradient, ace\c{s}ti pa\c{s}i se numesc rata de \^{i}nv\u{a}\c{t}are a re\c{t}elei neuronale, reprezent\^{a}nd cel mai important hiperparametru care trebuie setat manual dintr-o re\c{t}ea neuronal\u{a} deoarece dac\u{a} \^{i}l set\u{a}m prea mare nu vom ajunge niciodat\u{a} la punctul unde func\c{t}ia de pierdere are valoare minim\u{a}, iar dac\u{a} \^{i}l set\u{a}m prea mic o s\u{a} ajungem foarte greu la punctul de minim.
 
 \par
 
-\^{I}nainte s\u{a} calcul\u{a}m gradinetul func\c{t}iei noastre de pierdere vom introduce o variabil\u{a} intermediabil\u{a} p pentru a simplifica calculul
+\^{I}nainte s\u{a} calcul\u{a}m gradientul func\c{t}iei noastre de pierdere vom introduce o variabil\u{a} intermediabil\u{a} p pentru a simplifica calculul
 
 $$p_k = \frac{e^{f_k}}{\sum_j e^{f_j}}$$
 
@@ -219,7 +219,7 @@ $$b_k = b_k + \zeta \frac{\delta L_i}{\delta b_k} $$
   \end{cases}
 \]
 
-Calculul derivatei pentru func\c{t}ia de activare este necesar pentru c\u{a} aceasta ac\c{t}ioneaz\u{a} \^{i}ntre dou\u{a} nivele dintr-o re\c{t}ea neuronal\u{a}, astfel c\u{a} dac\u{a} dorim s\u{a} actualiz\u{a}m parametrii unei re\c{t}ele neuronale de pe un nivel pe baza gradientului calculat de pe nivelul superior ei trebuie mai int\^{a}i s\u{a} \^{i}l trecem prin derivata func\c{t}iei de activare, acest proces invers procesului normal pe care \^{i}l face o rec\c{t}ea neuronal\u{a} se mai nume\c{s}te \c{s}i backpropagation care are ca scop propagarea \^{i}napoi a gradientului calculat la un pas superior.
+Calculul derivatei pentru func\c{t}ia de activare este necesar pentru c\u{a} aceasta ac\c{t}ioneaz\u{a} \^{i}ntre dou\u{a} nivele dintr-o re\c{t}ea neuronal\u{a}, astfel c\u{a} dac\u{a} dorim s\u{a} actualiz\u{a}m parametrii unei re\c{t}ele neuronale de pe un nivel pe baza gradientului calculat de pe nivelul superior ei trebuie mai int\^{a}i s\u{a} \^{i}l trecem prin derivata func\c{t}iei de activare, acest proces invers procesului normal pe care \^{i}l face o re\c{t}ea neuronal\u{a} se mai nume\c{s}te \c{s}i backpropagation care are ca scop propagarea \^{i}napoi a gradientului calculat la un pas superior.
 
 \[ \frac{\delta f(x)}{\delta x}  =
   \begin{cases}
