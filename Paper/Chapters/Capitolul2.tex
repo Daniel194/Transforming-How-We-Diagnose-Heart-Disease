@@ -14,15 +14,15 @@ Fiecare neuron prime\c{s}te impulsuri prin dendridele sale de la al\c{t}i neuron
 
 \par
 
-Acest model biologic a incercat sa fie imitat de c\u{a}tre Warren McCulloch \c{s}i Walter Pitts \^{i}n anul 1943, astfel \^{i}ncat ace\c{s}tia au creat un model matematic care s\u{a} semene c\^{a}t mai mult cu varianta biologic\u{a}. \^{I}n modelul matematic propus de ace\c{s}tia datele de intrare primite prin dendrive ( s\u{a} le not\u{a}m cu \textbf{\textit{x}} ) sunt multiplicate cu ni\c{s}te ponderi ( s\u{a} le not\u{a}m cu \textbf{\textit{W}} ) pentru a se imita transferul facut prin sinapse \^{i}ntre axonul neuronului care transmite datle \c{s}i dendrivele neuronului care prime\c{s}te datele. Corpul neuronului a devenit un sumator care \^{i}nsumeaz\u{a} produsul primit de la dendrive, astfel c\u{a} acesta se poate definii prin urm\u{a}toarea formul\u{a}  
+Acest model biologic a incercat sa fie imitat de c\u{a}tre Warren McCulloch \c{s}i Walter Pitts \^{i}n anul 1943, astfel \^{i}ncat ace\c{s}tia au creat un model matematic care s\u{a} semene c\^{a}t mai mult cu varianta biologic\u{a}. \^{I}n modelul matematic propus de ace\c{s}tia datele de intrare primite prin dendrive ( s\u{a} le not\u{a}m cu \textbf{\textit{x}} ) sunt multiplicate cu ni\c{s}te ponderi ( s\u{a} le not\u{a}m cu \textbf{\textit{W}} ) pentru a se imita transferul facut prin sinapse \^{i}ntre axonul neuronului care transmite datle \c{s}i dendrivele neuronului care prime\c{s}te datele. Corpul neuronului a devenit un sumator care \^{i}nsumeaz\u{a} produsul primit de la dendrive, astfel c\u{a} acesta se poate definii prin urm\u{a}toarea formul\u{a}:
 
 $$ \sum_{i=1}^{n} W_i x_i $$ 
 
-unde \textbf{\textit{n}} reprezint\u{a} num\u{a}rul de dendrive. La aceast\u{a} formul\u{a} se mai insumeaz\u{a} un \textit{biases} ( s\u{a} \^{i}l not\u{a}m cu \textbf{\textit{b}} ) pentru a reprezenta caracteristicile neliniare ale neuronului. Cu aceast\u{a} nou\u{a} \^{i}nsumare formula va devenii 
+Unde \textbf{\textit{n}} reprezint\u{a} num\u{a}rul de dendrive. La aceast\u{a} formul\u{a} se mai insumeaz\u{a} un \textit{biases} ( s\u{a} \^{i}l not\u{a}m cu \textbf{\textit{b}} ) pentru a reprezenta caracteristicile neliniare ale neuronului. Cu aceast\u{a} nou\u{a} \^{i}nsumare formula va devenii:
 
 $$ \sum_{i=1}^{n} W_i x_i + b $$
 
-Dac\u{a} rezultatul ob\c{t}inut este mai mare dec\^{a}t un prag acesta va trece mai departe prin axon spre al\c{t}i neuroni. S\u{a} definim acest efect printr-o func\c{t}ie \textbf{\textit{f}} pe care o vom numii \textit{func\c{t}ie de activare} care stabile\c{s}te dac\u{a} un semnal trece mai departe sau nu, vom descrie mai pe larg aceast\u{a} func\c{t}ie in capitolele de mai jos, astfel c\u{a} modelul matematic a neuronului se poate rezuma la urm\u{a}toarea formul\u{a} 
+Dac\u{a} rezultatul ob\c{t}inut este mai mare dec\^{a}t un prag acesta va trece mai departe prin axon spre al\c{t}i neuroni. S\u{a} definim acest efect printr-o func\c{t}ie \textbf{\textit{f}} pe care o vom numii \textit{func\c{t}ie de activare} care stabile\c{s}te dac\u{a} un semnal trece mai departe sau nu, vom descrie mai pe larg aceast\u{a} func\c{t}ie in capitolele de mai jos, astfel c\u{a} modelul matematic a neuronului se poate rezuma la urm\u{a}toarea formul\u{a}:
 $$f( \sum_{i=1}^{n} W_i x_i + b ) $$
 
 \par
@@ -36,7 +36,7 @@ A\c{s}a cum am specificat \c{s}i mai sus, o re\c{t}ea neuronal\u{a} are nevoie d
 
 \subsection{Rectified Linear Unit}
 
-Rectified Linear Unit, sau mai pe scurt ReLU, este la ora actual\u{a} cea mai folosit\u{a} func\c{t}ie de activare, ea av\^{a}nd urm\u{a}toarea formul\u{a}
+Rectified Linear Unit, sau mai pe scurt ReLU, este la ora actual\u{a} cea mai folosit\u{a} func\c{t}ie de activare, ea av\^{a}nd urm\u{a}toarea formul\u{a}:
 
 \[ f(x) =
   \begin{cases}
@@ -95,20 +95,20 @@ Dup\u{a} cum \c{s}tiim, varian\c{t}a reprezint\u{a} media p\u{a}tratic\u{a} a ab
 
 $$Var = \frac{1}{n} \sum_{i=1}^{n} (x_i - m )^2 $$
 
-\^{I}n formula de mai sus m reprezint\u{a} media aritmetic\u{a} iar $x_i$ valorile date. \^{I}n cazul nostru dorim ca varian\c{t}a datelor de intrare s\u{a} nu se schimbe dup\u{a} ce iese din neuron \c{s}i se duce spre func\c{t}ia de activare pentru a nu altera datele foarte tare de la un nivel la altul. \^{I}n acest caz
+\^{I}n formula de mai sus m reprezint\u{a} media aritmetic\u{a} iar $x_i$ valorile date. \^{I}n cazul nostru dorim ca varian\c{t}a datelor de intrare s\u{a} nu se schimbe dup\u{a} ce iese din neuron \c{s}i se duce spre func\c{t}ia de activare pentru a nu altera datele foarte tare de la un nivel la altul. \^{I}n acest caz,
 
 $$Var(\sum_{i=1}^{n} W_i x_i) = \sum_{i=1}^{n} Var(W_i x_i) = $$
 $$ = \sum_{i=1}^{n} [E(W_i)]^2 Var(x_i) + [E(x_i)]^2 Var(W_i) + Var(x_i) Var(W_i)$$
 
-Presupunem c\u{a} setul de date \c{s}i ponderile au media zero \c{s}i sunt distribuite identic, astfel c\u{a} formula de mai sus se transform\u{a} \^{i}n
+Presupunem c\u{a} setul de date \c{s}i ponderile au media zero \c{s}i sunt distribuite identic, astfel c\u{a} formula de mai sus se transform\u{a} \^{i}n:
 
 $$\sum_{i=1}^{n} Var(x_i) Var(W_i) = (n Var(W)) Var(x)$$
 
-care trebuie sa fie egal\u{a} cu varian\c{t}a datelor de intrare, asta \^{i}nseamn\u{a} c\u{a} 
+Aceasta trebuie s\u{a} fie egal\u{a} cu varian\c{t}a datelor de intrare, asta \^{i}nseamn\u{a} c\u{a} aceasta devine: 
 
 $$n Var(W) = 1 \implies Var(W) =  \frac{1}{n} $$
 
-\c{s}i \c{t}in\^{a}nd cont c\u{a} varian\c{t}a unei distribu\c{t}ii normale este p\u{a}tratul devia\c{t}iei standard, atunci rezult\u{a} c\u{a} devia\c{t}ia standard are valoarea $\frac{1}{\sqrt{n}}$ pentru distribu\c{t}ia normal\u{a} pe care o vom folosii pentru a alege valorile \^{i}nt\u{a}ririlor la ini\c{t}ializare.
+\c{T}in\^{a}nd cont c\u{a} varian\c{t}a unei distribu\c{t}ii normale este p\u{a}tratul devia\c{t}iei standard, atunci rezult\u{a} c\u{a} devia\c{t}ia standard are valoarea $\frac{1}{\sqrt{n}}$ pentru distribu\c{t}ia normal\u{a} pe care o vom folosii pentru a alege valorile \^{i}nt\u{a}ririlor la ini\c{t}ializare.
 
 \subsection{Initializarea bias}
 
@@ -132,7 +132,7 @@ Unde $f_j$ reprezint\u{a} valoarea preconizat\u{a} de re\c{t}eaua neuronal\u{a} 
 
 \par
 
-Pentru a se \^{i}n\c{t}elege mai bine cum func\c{t}ioneaz\u{a} func\c{t}ia Softmax o s\u{a} d\u{a}m un mic exemplu. S\u{a} presupunem c\u{a} re\c{t}eaua neuronal\u{a} \^{i}ntoarce urm\u{a}torul set de date [5,−2,3] unde prima pozi\c{t}ie este valoarea pentru clasa corect\u{a}, astfel c\u{a} $f_y_i = 5$, atunci 
+Pentru a se \^{i}n\c{t}elege mai bine cum func\c{t}ioneaz\u{a} func\c{t}ia Softmax o s\u{a} d\u{a}m un mic exemplu. S\u{a} presupunem c\u{a} re\c{t}eaua neuronal\u{a} \^{i}ntoarce urm\u{a}torul set de date [5,−2,3] unde prima pozi\c{t}ie este valoarea pentru clasa corect\u{a}, astfel c\u{a} $f_y_i = 5$, atunci:
 
 $$L_0 = - log \bigg(\frac{e^{5}}{e^{5} + e^{-2} + e^{3}} \bigg) = - log \bigg(\frac{148,413}{148,413 + 0,135 + 20,085}\bigg) =  $$
 $$ = - log\bigg( \frac{148,413}{168,633} \bigg) = -log(0,88) = 0,055 $$
@@ -153,7 +153,7 @@ O bun\u{a} metod\u{a} de a prevenii efectul de overfitting este de a aplica o fu
 
 $$ R(W) = \sum_i \sum_j W_{i,j}^2 $$
 
-Pentru a dovedi faptul c\u{a} func\c{t}ia de mai sus \^{i}ndepline\c{s}te condi\c{t}iile dorite o s\u{a} d\u{a}m un mic exemplu, s\u{a} presupunem c\u{a} avem urm\u{a}torul set de date x = [1,1,1,1] \c{s}i \^{i}nt\u{a}ririle urm\u{a}toare $W_1 = [1,0,0,0], W_2 = [0.25, 0.25, 0.25, 0.25]$, ambele \^{i}nt\u{a}riri au acela\c{s}i produs matricial cu setul de date, $W^T_1 x = W^T_2 x = 1$, \^{i}ns\u{a} $R(W_1) = 1 $ \^{i}n timp ce $R(W_2) = 0.25$, dup\u{a} cum am zis deja scopul re\c{t}elei neuronale este acela de a minimiza func\c{t}ia de pierdere, din aceast\u{a} cauz\u{a} re\c{t}eaua neuronal\u{a} va prefera \^{i}nt\u{a}rirea $W_2$ \^{i}n locul \^{i}ntaririi $W_1$. Prin urmare func\c{t}ia de pierdere va avea forma urm\u{a}toare cu tot cu func\c{t}ia de regularizare :
+Pentru a dovedi faptul c\u{a} func\c{t}ia de mai sus \^{i}ndepline\c{s}te condi\c{t}iile dorite o s\u{a} d\u{a}m un mic exemplu, s\u{a} presupunem c\u{a} avem urm\u{a}torul set de date x = [1,1,1,1] \c{s}i \^{i}nt\u{a}ririle urm\u{a}toare $W_1 = [1,0,0,0], W_2 = [0.25, 0.25, 0.25, 0.25]$, ambele \^{i}nt\u{a}riri au acela\c{s}i produs matricial cu setul de date, $W^T_1 x = W^T_2 x = 1$, \^{i}ns\u{a} $R(W_1) = 1 $ \^{i}n timp ce $R(W_2) = 0.25$, dup\u{a} cum am zis deja scopul re\c{t}elei neuronale este acela de a minimiza func\c{t}ia de pierdere, din aceast\u{a} cauz\u{a} re\c{t}eaua neuronal\u{a} va prefera \^{i}nt\u{a}rirea $W_2$ \^{i}n locul \^{i}ntaririi $W_1$. Prin urmare func\c{t}ia de pierdere va avea forma urm\u{a}toare cu tot cu func\c{t}ia de regularizare:
 
 $$L = \frac{1}{N} \sum_i - log \bigg(\frac{e^{W_y_i x_y_i}}{\sum_j e^{W_j x_j}}\bigg) + \lambda \sum_i \sum_j W_{i,j}^2 $$
 
@@ -165,7 +165,7 @@ Scopul procesului de optimizare este acela de a g\u{a}si  ponderi \c{s}i bias-ur
 
 \par 
 
-Prin defini\c{t}ie, gradientul este un c\^{a}mp vectorial ale c\u{a}rui componente sunt derivatele par\c{t}iale ale func\c{t}iei f \^{i}n raport cu o variabil\u{a} vecorial\u{a} $x = (x_1, x_2, ...., x_n)$, adic\u{a} :
+Prin defini\c{t}ie, gradientul este un c\^{a}mp vectorial ale c\u{a}rui componente sunt derivatele par\c{t}iale ale func\c{t}iei f \^{i}n raport cu o variabil\u{a} vecorial\u{a} $x = (x_1, x_2, ...., x_n)$, adic\u{a}:
 
 $$\nabla f = \bigg( \frac{\delta f}{\delta x_1}, \frac{\delta f}{\delta x_2}, ... , \frac{\delta f}{\delta x_n}  \bigg)$$
 
@@ -173,15 +173,15 @@ Av\^{a}nd \^{i}n vedere faptul c\u{a} gradientul ne arat\u{a} direc\c{t}ia \^{i}
 
 \par
 
-\^{I}nainte s\u{a} calcul\u{a}m gradientul func\c{t}iei noastre de pierdere vom introduce o variabil\u{a} intermediabil\u{a} p pentru a simplifica calculul
+\^{I}nainte s\u{a} calcul\u{a}m gradientul func\c{t}iei noastre de pierdere vom introduce o variabil\u{a} intermediabil\u{a} p pentru a simplifica calculul.
 
 $$p_k = \frac{e^{f_k}}{\sum_j e^{f_j}}$$
 
-Astfel c\u{a} func\c{t}ia Softmax devine
+Astfel c\u{a} func\c{t}ia Softmax devine:
 
 $$L_i = - log \big( p_{y_i} \big)$$
 
-Iar derivata pentru aceasta este
+Iar derivata pentru aceasta este:
 
 $$\frac{\delta L_i}{\delta f_k } = p_k \quad c\^{a}nd \quad y_i \neq k$$
 
@@ -191,17 +191,17 @@ O s\u{a} dam un mic exemplu pentru a se \^{i}n\c{t}elege mai bine cum se calcule
 
 \par
 
-Dup\u{a} calcularea gradientului func\c{t}iei de pierdere trebuie s\u{a} calcul\u{a}m gradientul pentru ponderi \c{s}i bias pentru a \c{s}tii \^{i}n ce direc\c{t}ie trebuie s\u{a} \^{i}i actualiz\u{a}m ca s\u{a} minimiz\u{a}m rezultatul func\c{t}iei de pieredere. Deja \c{s}tim gradientul func\c{t}iei de pierdere a\c{s}a c\u{a} este destul de u\c{s}or s\u{a} calcul\u{a}m gradientul pentru ponderi \c{s}i bias av\^{a}nd \^{i}n vedere faptul c\u{a} $f_k = W_k x_k + b_k$, prin urmare
+Dup\u{a} calcularea gradientului func\c{t}iei de pierdere trebuie s\u{a} calcul\u{a}m gradientul pentru ponderi \c{s}i bias pentru a \c{s}tii \^{i}n ce direc\c{t}ie trebuie s\u{a} \^{i}i actualiz\u{a}m ca s\u{a} minimiz\u{a}m rezultatul func\c{t}iei de pieredere. Deja \c{s}tim gradientul func\c{t}iei de pierdere a\c{s}a c\u{a} este destul de u\c{s}or s\u{a} calcul\u{a}m gradientul pentru ponderi \c{s}i bias av\^{a}nd \^{i}n vedere faptul c\u{a} $f_k = W_k x_k + b_k$, prin urmare:
 
 $$\frac{\delta L_i}{\delta W_k} = \frac{\delta L_i}{\delta f_k} \frac{\delta f_k}{\delta W_k} = \frac{\delta L_i}{\delta f_k} x_k$$
 
 $$\frac{\delta L_i}{\delta b_k} = \frac{\delta L_i}{\delta f_k} \frac{\delta f_k}{\delta b_k} = \frac{\delta L_i}{\delta f_k}$$
 
-S\u{a} nu uitam faptul c\u{a} trebuie derivat\u{a} \c{s}i func\c{t}ia de regularizare care penalizeaz\u{a} \^{i}nt\u{a}ririle cu valori mari \c{s}i concentrate \^{i}ntr-un singur punct, astfel c\u{a} gradientul pentru ponderi devine 
+S\u{a} nu uitam faptul c\u{a} trebuie derivat\u{a} \c{s}i func\c{t}ia de regularizare care penalizeaz\u{a} \^{i}nt\u{a}ririle cu valori mari \c{s}i concentrate \^{i}ntr-un singur punct, astfel c\u{a} gradientul pentru ponderi devine: 
 
 $$\frac{\delta L_i}{\delta W_k} = \frac{\delta L_i}{\delta f_k} x_k + \frac{\delta R(W_k)}{\delt W_k} = \frac{\delta L_i}{\delta f_k} x_k + 2 \lambda W_k$$
 
-Odat\u{a} calcula\c{t}i cei doi gradien\c{t}i putem trece la pasul de actualizare a ponderilor \c{s}i bias - urilor 
+Odat\u{a} calcula\c{t}i cei doi gradien\c{t}i putem trece la pasul de actualizare a ponderilor \c{s}i bias - urilor.
 
 $$ W_k = W_k + \zeta \frac{\delta L_i}{\delta W_k} $$
 $$b_k = b_k + \zeta \frac{\delta L_i}{\delta b_k} $$
@@ -210,7 +210,7 @@ $$b_k = b_k + \zeta \frac{\delta L_i}{\delta b_k} $$
 
 \par
 
-\^{I}n momentul de fa\c{t}\u{a} am actualizat doar ultimul nivel dintr-o re\c{t}ea neuronal\u{a}, \^{i}ns\u{a} ce facem dac\u{a} vrem s\u{a} actualiz\u{a}m parametrii de la nivelul inferior ei ? Cum putem calcula gradientul pentru ace\c{s}tia ? \^{I}nainte s\u{a} calculam gradentul pentru \^{i}nt\u{a}ririle si bias-urile de pe nivelul inferior trebuie s\u{a} calcul\u{a}m derivata func\c{t}iei de activare, reamintim faptul c\u{a} func\c{t}ia de activare are urmatoarea formul\u{a} 
+\^{I}n momentul de fa\c{t}\u{a} am actualizat doar ultimul nivel dintr-o re\c{t}ea neuronal\u{a}, \^{i}ns\u{a} ce facem dac\u{a} vrem s\u{a} actualiz\u{a}m parametrii de la nivelul inferior ei ? Cum putem calcula gradientul pentru ace\c{s}tia ? \^{I}nainte s\u{a} calculam gradentul pentru \^{i}nt\u{a}ririle si bias-urile de pe nivelul inferior trebuie s\u{a} calcul\u{a}m derivata func\c{t}iei de activare, reamintim faptul c\u{a} func\c{t}ia de activare are urmatoarea formul\u{a}:
 
 \[ f(x) =
   \begin{cases}

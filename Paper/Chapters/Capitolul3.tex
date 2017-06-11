@@ -56,11 +56,11 @@ $$ \frac{W - F + 2P }{S} + 1 $$
 
 \par
 
-La o mic\u{a} analiz\u{a} se poate observa faptul c\u{a} pasul glis\u{a}rii ferestrei are anumite constr\^{a}ngeri, spre exemplu dac\u{a} volumul de date are o dimesniune de [10x10], padding-ul este 0 iar m\u{a}rimea ferestrei este de [3x3], atunci ar fi imposibil s\u{a} folosim un pas de 2, deoarece
+La o mic\u{a} analiz\u{a} se poate observa faptul c\u{a} pasul glis\u{a}rii ferestrei are anumite constr\^{a}ngeri, spre exemplu dac\u{a} volumul de date are o dimesniune de [10x10], padding-ul este 0 iar m\u{a}rimea ferestrei este de [3x3], atunci ar fi imposibil s\u{a} folosim un pas de 2, deoarece:
 
 $$ \frac{W - F + 2P }{S} + 1 = \frac{10 - 3 + 0 }{2} + 1 = 4.5 $$
 
-\c{s}i av\^{a}nd \^{i}n vedere faptul c\u{a} dimensiunea datelor de ie\c{s}ire trebuie s\u{a} fie un num\u{a}r \^{i}ntreg atunci ar fi imposibil s\u{a} folosim un pas de 2 \^{i}ntr-un astfel de caz. \^{I}n astfel de cazuri, dac\u{a} nu vrem s\u{a} schimb\u{a}m pasul, va trebuii s\u{a} adaug\u{a}m un padding \^{i}n jurul datelor de intrare astfel \^{i}nc\^{a}t s\u{a} ob\c{t}inem la final un num\u{a}r \^{i}ntreg ca dimensiune pentru volumul de date rezultat de c\u{a}tre nivelul convolu\c{t}ional, \^{i}n cazul nostru de mai sus dac\u{a} ad\u{a}ug\u{a}m un padding de 1, atunci vom avea  o dimensiune de [5x5] pentru volumul de date rezultat de c\u{a}tre nivelul convoli\c{t}ional.
+Av\^{a}nd \^{i}n vedere faptul c\u{a} dimensiunea datelor de ie\c{s}ire trebuie s\u{a} fie un num\u{a}r \^{i}ntreg atunci ar fi imposibil s\u{a} folosim un pas de 2 \^{i}ntr-un astfel de caz. \^{I}n astfel de cazuri, dac\u{a} nu vrem s\u{a} schimb\u{a}m pasul, va trebuii s\u{a} adaug\u{a}m un padding \^{i}n jurul datelor de intrare astfel \^{i}nc\^{a}t s\u{a} ob\c{t}inem la final un num\u{a}r \^{i}ntreg ca dimensiune pentru volumul de date rezultat de c\u{a}tre nivelul convolu\c{t}ional, \^{i}n cazul nostru de mai sus dac\u{a} ad\u{a}ug\u{a}m un padding de 1, atunci vom avea  o dimensiune de [5x5] pentru volumul de date rezultat de c\u{a}tre nivelul convoli\c{t}ional.
 
 \subsection{Niveulul de pool}
 
@@ -92,7 +92,7 @@ Am v\u{a}zut p\^{a}n\u{a} acum c\u{a} re\c{t}elele neuronale convolu\c{t}ionale 
 
 \par
 
-De cele mai multe ori o re\c{t}ea neuronal\u{a} convolu\c{t}ional\u{a} este alc\u{a}tuit\u{a} din mai multe nivele convolu\c{t}ionale, unde dup\u{a} fiecare nivel convolu\c{t}ional poate urma un nivel de pool, iar la final sunt ad\u{a}ugate unul sau mai multe nivele conectate complet unde ultimul nivel conectat complet va \^{i}ntoarce datele de ie\c{s}ire din re\c{t}eaua neuronal\u{a}. Cu alte cuvinte, de cele mai multe ori o re\c{t}ea neuronal\u{a} convolu\c{t}ional\u{a} respect\u{a} urm\u{a}torul tip de \c{s}ablon c\^{a}nd vine vorba de a\c{s}ezarea nivelelor :
+De cele mai multe ori o re\c{t}ea neuronal\u{a} convolu\c{t}ional\u{a} este alc\u{a}tuit\u{a} din mai multe nivele convolu\c{t}ionale, unde dup\u{a} fiecare nivel convolu\c{t}ional poate urma un nivel de pool, iar la final sunt ad\u{a}ugate unul sau mai multe nivele conectate complet unde ultimul nivel conectat complet va \^{i}ntoarce datele de ie\c{s}ire din re\c{t}eaua neuronal\u{a}. Cu alte cuvinte, de cele mai multe ori o re\c{t}ea neuronal\u{a} convolu\c{t}ional\u{a} respect\u{a} urm\u{a}torul tip de \c{s}ablon c\^{a}nd vine vorba de a\c{s}ezarea nivelelor:
 
 \par
 
