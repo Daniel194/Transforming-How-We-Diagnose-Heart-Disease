@@ -16,7 +16,7 @@ Fiecare neuron prime\c{s}te impulsuri prin dendridele sale de la al\c{t}i neuron
 
 \par
 
-Acest model biologic a incercat sa fie imitat de c\u{a}tre Warren McCulloch \c{s}i Walter Pitts \^{i}n anul 1943, astfel \^{i}ncat ace\c{s}tia au creat un model matematic care s\u{a} semene c\^{a}t mai mult cu varianta biologic\u{a}. \^{I}n modelul matematic propus de ace\c{s}tia datele de intrare primite prin dendrive ( s\u{a} le not\u{a}m cu \textbf{\textit{x}} ) sunt multiplicate cu ni\c{s}te ponderi ( s\u{a} le not\u{a}m cu \textbf{\textit{W}} ) pentru a se imita transferul facut prin sinapse \^{i}ntre axonul neuronului care transmite datle \c{s}i dendrivele neuronului care prime\c{s}te datele. Corpul neuronului a devenit un sumator care \^{i}nsumeaz\u{a} produsul primit de la dendrive, astfel c\u{a} acesta se poate definii prin urm\u{a}toarea formul\u{a}:
+Acest model biologic a incercat sa fie imitat de c\u{a}tre Warren McCulloch \c{s}i Walter Pitts \^{i}n anul 1943, astfel \^{i}ncat ace\c{s}tia au creat un model matematic care s\u{a} semene c\^{a}t mai mult cu varianta biologic\u{a}. \^{I}n modelul matematic propus de ace\c{s}tia datele de intrare primite prin dendrive ( s\u{a} le not\u{a}m cu \textbf{\textit{x}} ) sunt multiplicate cu ni\c{s}te ponderi ( s\u{a} le not\u{a}m cu \textbf{\textit{W}} ) pentru a se imita transferul facut prin sinapse \^{i}ntre axonul neuronului care transmite datele \c{s}i dendrivele neuronului care prime\c{s}te datele. Corpul neuronului a devenit un sumator care \^{i}nsumeaz\u{a} produsul primit de la dendrive, astfel c\u{a} acesta se poate definii prin urm\u{a}toarea formul\u{a}:
 
 $$ \sum_{i=1}^{n} W_i x_i, $$ 
 
@@ -34,7 +34,7 @@ Trebuie precizat faptul c\u{a} modelul matematic al neuronului prezentat mai sus
 
 \section{Func\c{t}ia de activare}
 
-A\c{s}a cum am specificat \c{s}i mai sus, o re\c{t}ea neuronal\u{a} are nevoie de o func\c{t}ie de activare care s\u{a} decid\u{a} dac\u{a} datele pot trece mai departe la urmatorii neuroni sau nu. De-a lungu istoriei s-au folosit mai multe tipuri de fun\c{t}ii de activare la re\c{t}elele neuronale, \^{i}nsa cea care d\u{a} cel mai bun randament at\^{a}t la timpul de antrenare c\^{a}t \c{s}i la acurate\c{t}ea final\u{a} este func\c{t}ia de activare ReLU (Rectified Linear Unit).
+A\c{s}a cum am specificat \c{s}i mai sus, o re\c{t}ea neuronal\u{a} are nevoie de o func\c{t}ie de activare care s\u{a} decid\u{a} dac\u{a} datele pot trece mai departe la urmatorii neuroni sau nu. De-a lungu istoriei s-au folosit mai multe tipuri de fun\c{t}ii de activare la re\c{t}elele neuronale, \^{i}ns\u{a} cea care d\u{a} cel mai bun randament at\^{a}t la timpul de antrenare c\^{a}t \c{s}i la acurate\c{t}ea final\u{a} este func\c{t}ia de activare ReLU (Rectified Linear Unit).
 
 \subsection{Rectified Linear Unit}
 
@@ -53,11 +53,11 @@ Rectified Linear Unit, sau mai pe scurt ReLU, este la ora actual\u{a} cea mai fo
   \captionsource{Graficul fun\c{t}iei de activare ReLU}{\cite{Convolutional}}
 \end{figure}
 
-Cu alte cuvinte func\c{t}ia pur \c{s}i simplu nu las\u{a} s\u{a} treac\u{a} mai departe rezultatele negative in urma efectu\u{a}rii opera\c{t}iilor din corpul neuronului.
+Cu alte cuvinte func\c{t}ia pur \c{s}i simplu nu las\u{a} s\u{a} treac\u{a} mai departe rezultatele negative \^{i}n urma efectu\u{a}rii opera\c{t}iilor din corpul neuronului.
 
 \section{Arhitectura unei re\c{t}ele neuronale}
 
-Acum c\u{a} am aflat ce este un neuron \c{s}i cum este simulat acesta din punct de vedere matematic trebuie s\u{a} discut\u{a}m cum sunt structura\c{t}i ace\c{s}tia \^{i}ntr-o re\c{t}ea neuronal\u{a}, pentru c\u{a} o re\c{t}ea nuronal\u{a} este compus\u{a} din milioane sau chiar sute de milioane de neuroni iar structurarea acestora este foarte important\u{a}.
+Acum c\u{a} am aflat ce este un neuron \c{s}i cum este simulat acesta din punct de vedere matematic trebuie s\u{a} discut\u{a}m cum sunt structura\c{t}i ace\c{s}tia \^{i}ntr-o re\c{t}ea neuronal\u{a}, pentru c\u{a} o re\c{t}ea neuronal\u{a} este compus\u{a} din milioane sau chiar sute de milioane de neuroni iar structurarea acestora este foarte important\u{a}.
 
 \begin{figure}[h!]
   \centering
@@ -65,11 +65,11 @@ Acum c\u{a} am aflat ce este un neuron \c{s}i cum este simulat acesta din punct 
   \captionsource{Arhitectura unei re\c{t}ele neuronale}{\cite{Michael_Nielsen}}
 \end{figure}
 
-Re\c{t}elele neuronale sunt modelate ca o cole\c{t}ie de neuroni pe nivele, unde datele calculate de un nivel devin datele de intrare pentru urmatorul nivel de neuroni. Dupa cum se vede \c{s}i in imaginea de mai sus, neuronii afla\c{t}i pe acela\c{s}i nivel nu comunic\u{a} direct unii cu ceilal\c{t}i, comunicarea realiz\^{a}ndu-se doar cu nivelul inferior de neuroni \c{s}i cu nivelul superior de neuroni.
+Re\c{t}elele neuronale sunt modelate ca o cole\c{t}ie de neuroni pe nivele, unde datele calculate de un nivel devin datele de intrare pentru urmatorul nivel de neuroni. Dupa cum se vede \c{s}i \^{i}n figura 2.3 de mai jos, neuronii afla\c{t}i pe acela\c{s}i nivel nu comunic\u{a} direct unii cu ceilal\c{t}i, comunicarea realiz\^{a}ndu-se doar cu nivelul inferior de neuroni \c{s}i cu nivelul superior de neuroni.
 \par
-Primul nivel al unei re\c{t}ele neuronale se nume\c{s}te nivelul input, deoarece acesta reprezint\u{a} doar date de intrare, iar ultimul nivel al unei re\c{t}ele neuronale se nume\c{s}te nivelul output, doarece acesta intoarce valoarea final\u{a}, nivelele dintre primul \c{s}i ultimul nivel se numesc nivelele ascunse ( hidden layers ).
+Primul nivel al unei re\c{t}ele neuronale se nume\c{s}te nivelul input, deoarece acesta reprezint\u{a} doar date de intrare, iar ultimul nivel al unei re\c{t}ele neuronale se nume\c{s}te nivelul output, doarece acesta \^{i}ntoarce valoarea final\u{a}, nivelele dintre primul \c{s}i ultimul nivel se numesc nivelele ascunse ( hidden layers ).
 \par
-Re\c{t}elele neuronale, ca cea de mai sus, se numesc re\c{t}ele feedforward, deoarece outputul unui nivel merge tot timpul la urm\u{a}torul nivel, nu se intoarce niciodat\u{a} la un nivel anterior.
+Re\c{t}elele neuronale, ca cea de mai sus, se numesc re\c{t}ele feedforward, deoarece outputul unui nivel merge tot timpul la urm\u{a}torul nivel, nu se \^{i}ntoarce niciodat\u{a} la un nivel anterior.
 \par 
 Pentru a se in\c{t}elege mai bine cum lucreaz\u{a} o re\c{t}ea neuronal\u{a} vom nota cu \textbf{\textit{x}} datele de intrare de la nivelul input, cu \textbf{\textit{h}} fiecare hidden layer, cu \textbf{\textit{W}} ponderile, cu \textbf{\textit{b}} bias-ul \c{s}i cu \textbf{\textit{f}} func\c{t}ia de activare, astfel c\u{a} modelul de mai sus cu dou\u{a} niveluri hidden se poate exprima prin urm\u{a}torul algoritm:
 
@@ -79,13 +79,13 @@ $$out = f( \sum_{i=1}^{n} W_3_i h_2_i + b_3 ) $$
 
 \par
 
-Unul dintre motivele pentru care re\c{t}elele neuronale sunt organizate pe nivele este acela c\u{a} pe acest tip de structur\u{a} este mai u\c{s}or s\u{a} se efectueze opera\c{t}ii pe matrici, astfel inc\^{a}t s\u{a} nu mai fim nevoi\c{t}i s\u{a} facem multiplic\u{a}ri individuale. Spre exemplu, s\u{a} lu\u{a}m un \textbf{\textit{x}} de dimeniusne [10x10], $W_1, W_2 $ \c{s}i $W_3$ de dimensiune [5x10], [3x5], respectiv [1x3], iar $b_1, b_2 $ \c{s}i $b_3$ de dimensiune [5x1], [3x1] \c{s}i [1x1], atunci algoritmul de mai sus se poate rescrie in felul urmator: 
+Unul dintre motivele pentru care re\c{t}elele neuronale sunt organizate pe nivele este acela c\u{a} pe acest tip de structur\u{a} este mai u\c{s}or s\u{a} se efectueze opera\c{t}ii pe matrici, astfel \^{i}nc\^{a}t s\u{a} nu mai fim nevoi\c{t}i s\u{a} facem multiplic\u{a}ri individuale. Spre exemplu, s\u{a} lu\u{a}m un \textbf{\textit{x}} de dimeniusne [10 x 10], $W_1, W_2 $ \c{s}i $W_3$ de dimensiune [5 x 10], [3 x 5], respectiv [1 x 3], iar $b_1, b_2 $ \c{s}i $b_3$ de dimensiune [5 x 1], [3 x 1] \c{s}i [1 x 1], atunci algoritmul de mai sus se poate rescrie in felul urm\u{a}tor: 
 
 $$h_1 = f( W_1 x + b_1 ) $$
 $$h_2 = f( W_2 h_1 + b_2 ) $$
 $$out = f( W_3 h_2 + b_3 ), $$
 
-unde $h_1$ este de dimensiune [5x10], $h_2$ de dimensiune [3x10], iar out de dimensiune [1x10]. Parametrii $W_1, W_2, W_3, b_1, b_2, b_3$ sunt paramterii pe care re\c{t}eaua neuronal\u{a} \^{i}i inva\c{t}\u{a} pentru a atinge o acurate\c{t}e c\^{a}t mai mare. Despre procesul de inv\u{a}\c{t}are a parametrilor \c{s}i despre cum trebuie s\u{a} \^{i}i set\u{a}m la \^{i}nceput vom discuta \^{i}n capitolele ce urmeaz\u{a}.
+unde $h_1$ este de dimensiune [5 x 10], $h_2$ de dimensiune [3x10], iar out de dimensiune [1 x 10]. Parametrii $W_1, W_2, W_3, b_1, b_2, b_3$ sunt paramterii pe care re\c{t}eaua neuronal\u{a} \^{i}i inva\c{t}\u{a} pentru a atinge o acurate\c{t}e c\^{a}t mai mare. Despre procesul de inv\u{a}\c{t}are a parametrilor \c{s}i despre cum trebuie s\u{a} \^{i}i set\u{a}m la \^{i}nceput vom discuta \^{i}n capitolele ce urmeaz\u{a}.
 
 \section{Initializarea parametrilor}
 
@@ -93,7 +93,7 @@ Am v\u{a}zut mai sus cum s\u{a} construim o re\c{t}ea neuronal\u{a}, \^{i}ns\u{a
 
 \subsection{Ini\c{t}ializarea ponderilor}
 
-Av\^{a}nd in vedere c\u{a} nu \c{s}tim valorile finale pe care o s\u{a} le aibe ponderile, la finalul procesului de antrenare a re\c{t}elei neuronale, deoarece aceste valori se actualizeaz\u{a} la fiecare pas de antrenare, va trebuii s\u{a} ini\c{t}ializ\u{a}m ponderile astfel \^{i}nc\^{a}t o jum\u{a}tate din valori s\u{a} aibe valori negative iar cealalt\u{a} jum\u{a}tate valori pozitive, vom dorii valori unice pentru fiecare pondere, pentru a acoperii o gam\u{a} c\^{a}t mai larg\u{a} de valori posibile pentru ponderi, iar acestea s\u{a} fiu c\^{a}t mai aproape de valorea zero dar diferite de zero astfle \^{i}nc\^{a}t s\u{a} fiu mai u\c{s}or de actualizat.
+Av\^{a}nd in vedere c\u{a} nu \c{s}tim valorile finale pe care o s\u{a} le aibe ponderile, la finalul procesului de antrenare a re\c{t}elei neuronale, deoarece aceste valori se actualizeaz\u{a} la fiecare pas de antrenare, va trebui s\u{a} ini\c{t}ializ\u{a}m ponderile astfel \^{i}nc\^{a}t o jum\u{a}tate din valori s\u{a} aibe valori negative iar cealalt\u{a} jum\u{a}tate valori pozitive, vom dorii valori unice pentru fiecare pondere, pentru a acoperii o gam\u{a} c\^{a}t mai larg\u{a} de valori posibile pentru ponderi, iar acestea s\u{a} fiu c\^{a}t mai aproape de valorea zero dar diferite de zero astfel \^{i}nc\^{a}t s\u{a} fiu mai u\c{s}or de actualizat.
 
 \par
 
@@ -101,7 +101,7 @@ Pentru a \^{i}ndeplinii condi\c{t}iile de mai sus vom folosii o distribu\c{t}ie 
 
 \par 
 
-Dup\u{a} cum \c{s}tiim, varian\c{t}a reprezint\u{a} media p\u{a}tratic\u{a} a abaterilor in m\u{a}rime absolut\u{a} a valorilor \^{i}nregistrate fa\c{t}\u{a} de media aritmetic\u{a} care ne spune c\^{a}t de mare este r\u{a}sp\^{a}ndirea  acestui set. Mai precis, varian\c{t}a m\u{a}soar\u{a} c\^{a}t de apropiate sunt valorile setului de date de valoarea medie a acestuia.
+Dup\u{a} cum \c{s}tim, varian\c{t}a reprezint\u{a} media p\u{a}tratic\u{a} a abaterilor \^{i}n m\u{a}rime absolut\u{a} a valorilor \^{i}nregistrate fa\c{t}\u{a} de media aritmetic\u{a} care ne spune c\^{a}t de mare este r\u{a}sp\^{a}ndirea  acestui set. Mai precis, varian\c{t}a m\u{a}soar\u{a} c\^{a}t de apropiate sunt valorile setului de date de valoarea medie a acestuia.
 
 $$Var = \frac{1}{n} \sum_{i=1}^{n} (x_i - m )^2 $$
 
@@ -171,7 +171,7 @@ $\lambda$ este un hiperparametru care poate fi reglat astfel \^{i}nc\^{a}t s\u{a
 
 \subsection{Procesul de optimizare}
 
-Scopul procesului de optimizare este acela de a g\u{a}si  ponderi \c{s}i bias-uri care minimizeaz\u{a} func\c{t}ia de pierdere, acest proces este cel mai complicat dintre toate pentru c\u{a} trebuie calculat gradientul func\c{t}iei de pierdere care ne va spune in ce direc\c{t}ie trebuie actualizate ponderile astfel \^{i}nc\^{a}t s\u{a} minimiz\u{a}m func\c{t}ia de pierdere.
+Scopul procesului de optimizare este acela de a g\u{a}si  ponderi \c{s}i bias-uri care minimizeaz\u{a} func\c{t}ia de pierdere, acest proces este cel mai complicat dintre toate pentru c\u{a} trebuie calculat gradientul func\c{t}iei de pierdere care ne va spune \^{i}n ce direc\c{t}ie trebuie actualizate ponderile astfel \^{i}nc\^{a}t s\u{a} minimiz\u{a}m func\c{t}ia de pierdere.
 
 \par 
 
@@ -197,7 +197,7 @@ $$\frac{\delta L_i}{\delta f_k } = p_k \quad c\^{a}nd \quad y_i \neq k$$
 
 $$\frac{\delta L_i}{\delta f_k } = p_k - 1 \quad c\^{a}nd \quad y_i = k$$
 
-O s\u{a} dam un mic exemplu pentru a se \^{i}n\c{t}elege mai bine cum se calculeaz\u{a} gradientul pe baza formulelor de mai sus, s\u{a} presupunem c\u{a} p a calculat urm\u{a}toarele valori p = [0.2, 0.3, 0.5] iar clasa corect\u{a} este cea din mijloc cu probabilitatea atribuit\u{a} de 0.3, cu ajutorul formulelor de mai sus gradientul va avea urm\u{a}toarele valori [0.2, -0.7, 0.5]. Av\^{a}nd \^{i}n vedere ce ne spune un gradient este destul de u\c{s}or de interpretat rezultatul ob\c{t}inut, acela c\u{a} trebuie s\u{a} cre\c{s}tem clasele incorecte cu 0.2 \c{s}i 0.5 pentru a avea un rezultat mai mare la func\c{t}ia de pierdere \c{s}i s\u{a} scadem clasa corect\u{a} cu -0.7, \^{i}ns\u{a} pentru ca noi dorim ca func\c{t}ia de pierdere s\u{a} calculeze un rezultat mai mic vom sc\u{a}dea cele do\u{a} clase incorecte cu -0.2 \c{s}i -0.5 \c{s}i vom cre\c{s}te clasa corect\u{a} cu 0.7.
+O s\u{a} dam un mic exemplu pentru a se \^{i}n\c{t}elege mai bine cum se calculeaz\u{a} gradientul pe baza formulelor de mai sus, s\u{a} presupunem c\u{a} p a calculat urm\u{a}toarele valori p = [0.2, 0.3, 0.5] iar clasa corect\u{a} este cea din mijloc cu probabilitatea atribuit\u{a} de 0.3, cu ajutorul formulelor de mai sus gradientul va avea urm\u{a}toarele valori [0.2, -0.7, 0.5]. Av\^{a}nd \^{i}n vedere ce ne spune un gradient este destul de u\c{s}or de interpretat rezultatul ob\c{t}inut, acela c\u{a} trebuie s\u{a} cre\c{s}tem clasele incorecte cu 0.2 \c{s}i 0.5 pentru a avea un rezultat mai mare la func\c{t}ia de pierdere \c{s}i s\u{a} sc\u{a}dem clasa corect\u{a} cu -0.7, \^{i}ns\u{a} pentru ca noi dorim ca func\c{t}ia de pierdere s\u{a} calculeze un rezultat mai mic vom sc\u{a}dea cele do\u{a} clase incorecte cu -0.2 \c{s}i -0.5 \c{s}i vom cre\c{s}te clasa corect\u{a} cu 0.7.
 
 \par
 
