@@ -18,9 +18,9 @@ Fiecare neuron prime\c{s}te impulsuri prin dendridele sale de la al\c{t}i neuron
 
 Acest model biologic a incercat sa fie imitat de c\u{a}tre Warren McCulloch \c{s}i Walter Pitts \^{i}n anul 1943, astfel \^{i}ncat ace\c{s}tia au creat un model matematic care s\u{a} semene c\^{a}t mai mult cu varianta biologic\u{a}. \^{I}n modelul matematic propus de ace\c{s}tia datele de intrare primite prin dendrive ( s\u{a} le not\u{a}m cu \textbf{\textit{x}} ) sunt multiplicate cu ni\c{s}te ponderi ( s\u{a} le not\u{a}m cu \textbf{\textit{W}} ) pentru a se imita transferul facut prin sinapse \^{i}ntre axonul neuronului care transmite datle \c{s}i dendrivele neuronului care prime\c{s}te datele. Corpul neuronului a devenit un sumator care \^{i}nsumeaz\u{a} produsul primit de la dendrive, astfel c\u{a} acesta se poate definii prin urm\u{a}toarea formul\u{a}:
 
-$$ \sum_{i=1}^{n} W_i x_i $$ 
+$$ \sum_{i=1}^{n} W_i x_i, $$ 
 
-Unde \textbf{\textit{n}} reprezint\u{a} num\u{a}rul de dendrive. La aceast\u{a} formul\u{a} se mai insumeaz\u{a} un \textit{biases} ( s\u{a} \^{i}l not\u{a}m cu \textbf{\textit{b}} ) pentru a reprezenta caracteristicile neliniare ale neuronului. Cu aceast\u{a} nou\u{a} \^{i}nsumare formula va devenii:
+unde \textbf{\textit{n}} reprezint\u{a} num\u{a}rul de dendrive. La aceast\u{a} formul\u{a} se mai insumeaz\u{a} un \textit{biases} ( s\u{a} \^{i}l not\u{a}m cu \textbf{\textit{b}} ) pentru a reprezenta caracteristicile neliniare ale neuronului. Cu aceast\u{a} nou\u{a} \^{i}nsumare formula va devenii:
 
 $$ \sum_{i=1}^{n} W_i x_i + b $$
 
@@ -83,7 +83,7 @@ Unul dintre motivele pentru care re\c{t}elele neuronale sunt organizate pe nivel
 
 $$h_1 = f( W_1 x + b_1 ) $$
 $$h_2 = f( W_2 h_1 + b_2 ) $$
-$$out = f( W_3 h_2 + b_3 ) $$
+$$out = f( W_3 h_2 + b_3 ), $$
 
 unde $h_1$ este de dimensiune [5x10], $h_2$ de dimensiune [3x10], iar out de dimensiune [1x10]. Parametrii $W_1, W_2, W_3, b_1, b_2, b_3$ sunt paramterii pe care re\c{t}eaua neuronal\u{a} \^{i}i inva\c{t}\u{a} pentru a atinge o acurate\c{t}e c\^{a}t mai mare. Despre procesul de inv\u{a}\c{t}are a parametrilor \c{s}i despre cum trebuie s\u{a} \^{i}i set\u{a}m la \^{i}nceput vom discuta \^{i}n capitolele ce urmeaz\u{a}.
 
@@ -136,9 +136,9 @@ $$L = \frac{1}{N} \sum_i L_i $$
 
 Exist\u{a} mai multe variante de func\c{t}ii de cost \^{i}ns\u{a} cea mai folosit\u{a} \c{s}i cea mai eficient\u{a} la ora actual\u{a} este func\c{t}ia Softmax, care are urm\u{a}toarea formul\u{a}.
 
-$$ L_i = - log \bigg(\frac{e^{f_y_i}}{\sum_j e^{f_j}}\bigg)$$
+$$ L_i = - log \bigg(\frac{e^{f_y_i}}{\sum_j e^{f_j}}\bigg),$$
 
-Unde $f_j$ reprezint\u{a} valoarea preconizat\u{a} de re\c{t}eaua neuronal\u{a} pentru clasa j, iar $f_y_i$ reprezint\u{a} valorea preconizat\u{a} pentru clasa corect\u{a}.
+unde $f_j$ reprezint\u{a} valoarea preconizat\u{a} de re\c{t}eaua neuronal\u{a} pentru clasa j, iar $f_y_i$ reprezint\u{a} valorea preconizat\u{a} pentru clasa corect\u{a}.
 
 \par
 
