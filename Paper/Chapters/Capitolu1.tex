@@ -14,9 +14,11 @@ Rezonan\c{t}a Magnetic\u{a} Nuclear\u{a} se folose\c{s}te de un c\^{a}mp magneti
 \par
 Imaginea de mai jos reprezint\u{a} un exemplu de vizualizare pe care RMN-ul \^{i}l face asupra cutiei toratice. Se poate observa foarte clar inima in aceast\u{a} poz\u{a}.
 
-\begin{center}
-\includegraphics[width=300]{exemple.png}
-\end{center}
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=300]{exemple.png}
+  \captionsource{Un exemplu de radiografie RMN}{\cite{Kaggle}}
+\end{figure}
 
 Cu asemenea tipuri de imagini vom lucra \^{i}n lucrarea de fa\c{t}\u{a} pentru a determina volumul de s\^{a}nge care curge prin ventriculul st\^{a}ng al inimii la dou\u{a} timpuri, dup\u{a} sistol\u{a} c\^{a}nd inima este contractat\u{a} iar prin ventricul curge o cantitate de s\^{a}nge foarte mic\u{a} \c{s}i dup\u{a} diastol\u{a} c\^{a}nd inima este expandat\u{a} iar prin ventricul curge cantitatea cea mai mare de s\^{a}nge.
 \par
@@ -40,7 +42,7 @@ Varietatea de pozi\c{t}ii prin care un pacient poate sta \^{i}ntr-un RMN, multit
 
 \section{Imaginea digital\u{a}}
 
-O imagine digital\u{a} este \^{i}mp\u{a}r\c{t}it\u{a} \^{i}n mai multe blocuri infime ca suprafa\c{t}\u{a} numite pixeli. Fiecare pixel are dou\u{a} coordonate care \^{i}i definesc pozi\c{t}ia in imagine \c{s}i o caracteristic\u{a} de luminozitate \c{s}i culoare care este codificat\u{a} conform unui anumit sistem ales. \^{I}n lucrarea de fa\c{t}\u{a} vom folosii sistemul RGB.
+O imagine digital\u{a} este \^{i}mp\u{a}r\c{t}it\u{a} \^{i}n mai multe blocuri infime ca suprafa\c{t}\u{a} numite pixeli. Fiecare pixel are dou\u{a} coordonate care \^{i}i definesc pozi\c{t}ia in imagine \c{s}i o caracteristic\u{a} de luminozitate \c{s}i culoare care este codificat\u{a} conform unui anumit sistem ales. \^{I}n lucrarea de fa\c{t}\u{a} vom folosi sistemul RGB.
 
 \subsection{RGB}
 
@@ -52,7 +54,7 @@ O imagine digital\u{a} este \^{i}mp\u{a}r\c{t}it\u{a} \^{i}n mai multe blocuri i
 
 \par
 
-Av\^{a}nd \^{i}n vedere cele scrise mai sus, pentru a reprezenta o culoare \^{i}n sistemul RGB, s\u{a} lu\u{a}m spre exemplu culoarea galben\u{a}, fiecare canal va primii c\^{a}te o valoare din intervalul \^{i}nchis 0 \c{s}i 255, \^{i}n cazul nostru canalul ro\c{s}u va primii valoare 255, canalul verde va primii valoarea 255 iar canalul albastru va primii valoarea 0.
+Av\^{a}nd \^{i}n vedere cele scrise mai sus, pentru a reprezenta o culoare \^{i}n sistemul RGB, s\u{a} lu\u{a}m spre exemplu culoarea galben\u{a}, fiecare canal va primi c\^{a}te o valoare din intervalul \^{i}nchis 0 \c{s}i 255, \^{i}n cazul nostru canalul ro\c{s}u va primi valoare 255, canalul verde va primi valoarea 255 iar canalul albastru va primi valoarea 0.
 
 \subsection{Cum vede calculatorul o imagine ?}
 
@@ -65,3 +67,7 @@ Pentru rezolvarea problemei descrise, aceea de a calcula frac\c{t}ia de ejec\c{t
 \par
 
 \^{I}nainte de a trece la partea de implementarea a solu\c{t}iei descrise mai sus, vom face o scurt\u{a} descriere a ceea ce \^{i}nseamn\u{a} o re\c{t}ea neuronalu\u{a}, apoi vom descrie ce este o re\c{t}ea neuronal\u{a} convolu\c{t}ional\u{a}.
+
+\section{Structura lucr\u{a}rii}
+
+Lucrarea de fa\c{t}\u{a} este structurat\u{a} pe trei capitole. \^{I}n primul capitol sunt prezentate re\c{t}elele neuronale, unde se va vorbii despre structura general\u{a} a unei re\c{t}ele neuronale, ini\c{t}ializarea paremetrilor dintr-o re\c{t}ea neuronal\u{a} \c{s}i despre procesul de antrenare a unei re\c{t}ele neuronale. \^{I}n capitolul doi sunt prezentate re\c{t}elele neuronale convolu\c{t}ionale, se va face o compara\c{t}ie \^{i}ntre re\c{t}elele neuronale \c{s}i re\c{t}elele neuronale convolu\c{t}ionale pentru a se identifica beneficiile pe care le aduce o re\c{t}ea neuronal\u{a} convolu\c{t}ional\u{a} \^{i}n problemele de clasificare \c{s}i predic\c{t}ie. \^{I}n capitolul trei este prezentat modul de implementare a unei re\c{t}ele neuronale convolu\c{t}ionale \^{i}n rezolvarea problemei din lucrarea de fa\c{t}\u{a}.

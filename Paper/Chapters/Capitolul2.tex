@@ -2,13 +2,15 @@
 
 \section{Neuronul}
 
-Re\c{t}elele Neuronale au pornit de la ideea de a crea un model matematic care s\u{a} imite structura \c{s}i comportamentul unui creier uman.
+Re\c{t}elele neuronale au pornit de la ideea de a crea un model matematic care s\u{a} imite structura \c{s}i comportamentul unui creier uman.
 \par
 Creierul este compus din mai multe unit\u{a}\c{t}i, numite neuroni, care comunic\u{a} \^{i}ntre ele prin sinapse, se aproximeaz\u{a} faptul c\u{a} creierul uman are aproximativ 86 de miliarde de neuroni \c{s}i $10^{14}$ - $10^{15}$  sinapse.
 
-\begin{center}
-\includegraphics[width=300]{neuron_small.png}
-\end{center}
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=300]{neuron_small.png}
+  \captionsource{Neuronul uman}{\url{https://materie.ro/lectii/detalii/tesuturi-vegetale-si-animale/}}
+\end{figure}
 
 Fiecare neuron prime\c{s}te impulsuri prin dendridele sale de la al\c{t}i neuroni \c{s}i produce impulsuri prin axon pe care \^{i}l transmite mai departe la al\c{t}i neuroni prin sinapse.
 
@@ -45,15 +47,23 @@ Rectified Linear Unit, sau mai pe scurt ReLU, este la ora actual\u{a} cea mai fo
   \end{cases}
 \]
 
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=300]{relu.jpeg}
+  \captionsource{Graficul fun\c{t}iei de activare ReLU}{\cite{Convolutional}}
+\end{figure}
+
 Cu alte cuvinte func\c{t}ia pur \c{s}i simplu nu las\u{a} s\u{a} treac\u{a} mai departe rezultatele negative in urma efectu\u{a}rii opera\c{t}iilor din corpul neuronului.
 
 \section{Arhitectura unei re\c{t}ele neuronale}
 
 Acum c\u{a} am aflat ce este un neuron \c{s}i cum este simulat acesta din punct de vedere matematic trebuie s\u{a} discut\u{a}m cum sunt structura\c{t}i ace\c{s}tia \^{i}ntr-o re\c{t}ea neuronal\u{a}, pentru c\u{a} o re\c{t}ea nuronal\u{a} este compus\u{a} din milioane sau chiar sute de milioane de neuroni iar structurarea acestora este foarte important\u{a}.
 
-\begin{center}
-\includegraphics[width=300]{image10.png}
-\end{center}
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=300]{image10.png}
+  \captionsource{Arhitectura unei re\c{t}ele neuronale}{\cite{Michael_Nielsen}}
+\end{figure}
 
 Re\c{t}elele neuronale sunt modelate ca o cole\c{t}ie de neuroni pe nivele, unde datele calculate de un nivel devin datele de intrare pentru urmatorul nivel de neuroni. Dupa cum se vede \c{s}i in imaginea de mai sus, neuronii afla\c{t}i pe acela\c{s}i nivel nu comunic\u{a} direct unii cu ceilal\c{t}i, comunicarea realiz\^{a}ndu-se doar cu nivelul inferior de neuroni \c{s}i cu nivelul superior de neuroni.
 \par

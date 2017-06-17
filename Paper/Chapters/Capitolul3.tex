@@ -2,7 +2,7 @@
 
 Re\c{t}elele neuronale convolu\c{t}ionale  sunt foarte similare cu re\c{t}elele neuronale obi\c{s}nuite din capitolul anterior, ele sunt formate din neuroni care \^{i}nva\c{t}\u{a} ponderi \c{s}i bias-uri care s\u{a} \^{i}ndeplineasc\u{a} o anumit\u{a} sarcin\u{a}. Fiecare neuron prime\c{s}te date de intrare de la neuronii de pe nivelul inferior lor, efectuaz\u{a} o opera\c{t}ie de multiplicare \^{i}ntre ponderi \c{s}i datele de intrare, adun\u{a} bias-ul la rezultatul ob\c{t}inut \^{i}n urma multiplic\u{a}rii, iar dup\u{a}, de cele mai multe ori aplic\u{a} o func\c{t}ie de activare. La final dup\u{a} ultimul nivel aplic\u{a} o func\c{t}ie de cost care s\u{a} determine c\^{a}t de aproape este re\c{t}eaua neuronal\u{a} de adev\u{a}r \c{s}i dup\u{a} se aplic\u{a} propagarea \^{i}napoi pentru a actualiza ponderile \c{s}i bias-ruile de pe fiecare nivel astfel \^{i}nc\^{a}t la urmatorul pas de \^{i}nv\u{a}\c{t}are a re\c{t}elei neuroanle aceasta s\u{a} ob\c{t}in\u{a} un rezultat mai mic de la func\c{t}ia de cost.
 
-La prima vedere re\c{t}elele neuronale convolu\c{t}ionale seaman\u{a} foarte mult cu re\c{t}elele neuronale obi\c{s}nuite, un lucru adev\u{a}rat, \^{i}ns\u{a} exista unele diferen\c{t}e \^{i}ntre ele. Re\c{t}elele neuronale convolu\c{t}ionale pleac\u{a} de la prezum\c{t}ia c\u{a} datele de intrare de pe primul nivel sunt imagini, fa\c{t}\u{a} de re\c{t}elele neuronale obi\c{s}nuite, unde datele de intrare de pe primul nivel sunt ni\c{s}te vectori. Din aceast\u{a} cauz\u{a} re\c{t}elele neuronale convolu\c{t}ionale se pot folosii de unele propiet\u{a}\c{t}i ale imaginilor, asfel \^{i}nc\^{a}t acestea s\u{a} fiu mai eficiente in sarcini ce implic\u{a} imaginile \c{s}i mai u\c{s}or de antrenat deoarece au nevoie de mai pu\c{t}ini parametrii dec\^{a}t ar avea nevoie o re\c{t}ea nuronal\u{a} obi\c{s}nuit\u{a} \^{i}n \^{i}ndeplinirea aceleia\c{s}i sarcini.
+La prima vedere re\c{t}elele neuronale convolu\c{t}ionale seaman\u{a} foarte mult cu re\c{t}elele neuronale obi\c{s}nuite, un lucru adev\u{a}rat, \^{i}ns\u{a} exista unele diferen\c{t}e \^{i}ntre ele. Re\c{t}elele neuronale convolu\c{t}io-nale pleac\u{a} de la prezum\c{t}ia c\u{a} datele de intrare de pe primul nivel sunt imagini, fa\c{t}\u{a} de re\c{t}elele neuronale obi\c{s}nuite, unde datele de intrare de pe primul nivel sunt ni\c{s}te vectori. Din aceast\u{a} cauz\u{a} re\c{t}elele neuronale convolu\c{t}ionale se pot folosii de unele propiet\u{a}\c{t}i ale imaginilor, asfel \^{i}nc\^{a}t acestea s\u{a} fiu mai eficiente in sarcini ce implic\u{a} imaginile \c{s}i mai u\c{s}or de antrenat deoarece au nevoie de mai pu\c{t}ini parametrii dec\^{a}t ar avea nevoie o re\c{t}ea nuronal\u{a} obi\c{s}nuit\u{a} \^{i}n \^{i}ndeplinirea aceleia\c{s}i sarcini.
 
 \section{Arhitectura unei re\c{t}ele neuronale convolu\c{t}ionale}
 
@@ -14,9 +14,11 @@ Faptul c\u{a} re\c{t}elele neuronale convolu\c{t}ionale sunt concepute special p
 
 \par 
 
-\begin{center}
-\includegraphics[width=450]{nn_cnn.png}
-\end{center}
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=450]{nn_cnn.png}
+  \captionsource{Compara\c{t}ie \^{i}ntre nivelele din re\c{t}elele neuronale \c{s}i nivelele din re\c{t}elele neuronale convolu\c{t}ionale}{\cite{Convolutional}}
+\end{figure}
 
 Imaginea de mai sus se arat\u{a} diferen\c{t}a \^{i}ntre modul de aranjare a neuronilor pe o re\c{t}ea neuronal\u{a} obi\c{s}nuit\u{a} \c{s}i o re\c{t}ea neuronal\u{a} convolu\c{t}ional\u{a}.
 
@@ -38,9 +40,11 @@ Nivelul convolu\c{t}ional gliseaz\u{a} o fereastr\u{a} de dimensiunea ponderilor
 
 Pentru a se \^{i}n\c{t}elege mai bine cum func\c{t}ioneaz\u{a} nivelul convolu\c{t}ional s\u{a} presupunem c\u{a} avem o imagine de dimesniune [28x28x3] iar o pondere are dimensiunea [5x5x3], a se observa faptul c\u{a} at\^{a}t  ponderea c\^{a}t \c{s}i imaginea au aceea\c{s}i ad\^{a}ncime, respectiv 3, tot timpul ad\^{a}ncimea ponderilor trebuie s\u{a} fie identic\u{a} cu cea a datelor de intrare pentru c\u{a} \^{i}n caz contrar nu s-ar putea face \^{i}nmul\c{t}irea \^{i}ntre datele de intrare \c{s}i ponderi, \^{i}ns\u{a} \^{i}n\u{a}l\c{t}imea \c{s}i l\u{a}\c{t}imea ponderilor trebuie s\u{a} fie neap\u{a}rat mai mici dec\^{a}t a datelor de intrare astfel, nu s-ar putea face glisarea. Dimensiunea ponderilor \^{i}n \^{i}n\u{a}l\c{t}ime \c{s}i l\u{a}\c{t}ime este setat\u{a} manual, fiind un parametru important de setat \^{i}ntr-o re\c{t}ea neuronal\u{a} convolu\c{t}ional\u{a}. 
 
-\begin{center}
-\includegraphics[width=300]{conv.png}
-\end{center}
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=300]{conv.png}
+  \captionsource{Nivelul convolu\c{t}ional}{\cite{Michael_Nielsen}}
+\end{figure}
 
 Cum se observ\u{a} \c{s}i \^{i}n imaginea de mai sus \^{i}n loc s\u{a} mai lu\u{a}m fiecare valoare a unui pixel separat \c{s}i s\u{a} o introducem \^{i}ntr-un neuron de pe un nivel intermediar ( hidden layer ) ca dat\u{a} de intrare putem s\u{a} grup\u{a}m pixelii in blocuri de pixeli \c{s}i s\u{a} \^{i}i trimitem grupa\c{t}i la un neuron de pe nivelul intermediar. \^{I}n cazul nostru vom face glisarea pe un grup de pixeli de dimensiunea [5x5x3] care va fi \^{i}nmul\c{t}it cu ponderile noastre de dimensiune [5x5x3], \^{i}n urma rezultatului vom ob\c{t}ine o singur\u{a} valoare la care vom aduna bias-ul. Dac\u{a} se repet\u{a} procedeul  \c{s}i ne mi\c{s}c\u{a}m cu un pixel la dreapta, sau in jos pentru fiecare bloc de pixeli pe care vrem s\u{a} \^{i}l extragem, atunci ca rezultat vom avea [24x24x1] de valori. Acum s\u{a} presupunem c\u{a} avem 32 de astfel de ponderi pe acest nivel \c{s}i reptet\u{a}m procedeul pentru fiecare, atunci, ca rezultat final vom avea [24x24x32] de valori, valori care vor fi trimise mai departe c\u{a}tre urm\u{a}torul nivel. Un mare beneficiu al acestui mod de a grupa valorile \^{i}n blocuri de date mai mici, peste care s\u{a} efectu\u{a}m opera\c{t}ia de \^{i}nmul\c{t}ire \c{s}i de adunare este c\u{a} se reduce semnificativ num\u{a}rul de valori la o  ponder\u{a} de care am fi avut nevoie dac\u{a} am fi f\u{a}cut acela\c{s} lucru pentru toate datele dintr-o dat\u{a}, cum se face \^{i}ntr-o re\c{t}ea neuronal\u{a} obi\c{s}nuit\u{a}, spre exemplu \^{i}n cazul exemplificat mai sus avem nevoie doar de 5 x 5 x 3 = 75 de valori pentru o ponder\u{a}, \^{i}n cazul unei re\c{t}ele neuronale obi\c{s}nuite am fi avut nevoie de 28 x 28 x 3 = 2352 de valori pentru o ponder\u{a}. Prin reducerea numarului de valori de care avem nevoie pentru o ponder\u{a} vom cre\c{s}te viteza de \^{i}nv\u{a}\c{t}are a re\c{t}elei neuronale \c{s}i vom putea cre\c{s}te complexitatea acesteia.
 
@@ -70,9 +74,11 @@ Nivelul de pooling se pune \^{i}ntre dou\u{a} nivele convolu\c{t}ionale pentru a
 
 De cele mai multe ori nivelul max-pooling ia o fereastr\u{a} de dimensiune [2x2] \c{s}i o gliseaz\u{a} peste datele de intrare cu un pas de cu valoarea 2. La fiecare pas acest nivel ia valorile cuprinse \^{i}n fereastr\u{a} \c{s}i las\u{a} doar valoarea cea mai mare s\u{a} treac\u{a} mai departe, celelalte fiind eliminate. \^{I}n urma acestor opera\c{t}ii va fi redus\u{a} o catitate de 75\% din datele de intrare, spre exemplu dac\u{a} avem un volum de date de dimensiunea [32x32x32] \c{s}i aplic\u{a}m peste el un max-pool cu o fereastr\u{a} de dimensiunea [2x2] \c{s}i un pas de 2 atunci vom avea ca rezultat un volum de date de dimensiunea [16x16x32], de precizat faptul c\u{a} nivelul max-pool nu afecteaz\u{a} ad\^{a}ncimea datelor de intrare.
 
-\begin{center}
-\includegraphics[width=300]{pool.png}
-\end{center}
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=300]{pool.png}
+  \captionsource{Nivelul de pool}{\cite{Michael_Nielsen}}
+\end{figure}
 
 Cum se observ\u{a} \c{s}i \^{i}n imaginea de mai sus, nivelul de max-pooling prime\c{s}te patru valori de pe nivelul precedent \c{s}i las\u{a} o singur\u{a} valoarea s\u{a} treac\u{a} mai departe.
 
@@ -134,24 +140,30 @@ $$ x = x - \zeta \cdot \frac{m}{\sqrt{v} + \epsilon } $$
 
 Pentru a exemplifica cum functioneaz\u{a} cele doua metode, vom presupune c\u{a} avem un set de date bidimensional ce are graficul urmator.
 
-\begin{center}
-\includegraphics[width=200]{original.png}
-\end{center}
-
 Centrarea la origine a datelor, presupune c\u{a} pentru fiecare valorea s\u{a} sc\u{a}dem media valorilor din respectivul set de date.
 
             $$ X = X - \frac{1}{N}\sum_i^N X_i$$
             
 Aceast\u{a} opera\c{t}ie va aduce centrul datelor la origine. \^{I}n cazul nostru de mai sus, dup\u{a} aplicarea opera\c{t}iei, graficul datelor va ar\u{a}ta \^{i}n felul urm\u{a}tor.
 
-\begin{center}
-\includegraphics[width=200]{zero-centered.png}
-\end{center}
-
 Se observ\u{a} faptul c\u{a}, centrul datelor s-a mutat la origine.
 
 Normalizarea datelor, presupune c\u{a} fiecare valoare din setul de date s\u{a} aibe aceea\c{s}i scal\u{a}, modul de a efectua acest lucru este de a \^{i}mp\u{a}r\c{t}i fiecare valoare din setul de date cu devia\c{t}ia standard pe care o are setul de date. Dac\u{a} vom aplica aceast\u{a} opera\c{t}ie pe setul de date vom ob\c{t}ine urmatorul grafic.
 
-\begin{center}
-\includegraphics[width=200]{normalization.png}
-\end{center}
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=180]{original.png}
+  \captionsource{Datele ini\c{t}iale}{\cite{Convolutional}}
+\end{figure}
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=180]{zero-centered.png}
+  \captionsource{Centrarea la zero a datelor}{\cite{Convolutional}}
+\end{figure}
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=180]{normalization.png}
+  \captionsource{Normalizarea datelor}{\cite{Convolutional}}
+\end{figure}

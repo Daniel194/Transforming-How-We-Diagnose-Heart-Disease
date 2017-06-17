@@ -19,6 +19,14 @@
 \LoadClass{\baseclass}
 \newcommand\bhrule{\typeout{------------------------------------------------------------------------------}}
 
+\newcommand*{\captionsource}[2]{%
+  \caption[{#1}]{%
+    #1%
+    \\
+    SURS\u{A}: #2%
+  }%
+}
+
 \newcommand\Declaration[1]{
 \btypeout{Declara\c{t}ii ale autorului}
 \addtotoc{Declara\c{t}ii ale autorului}
@@ -81,7 +89,7 @@
 \newtheorem{remark}[theorem]{Remark}
 \usepackage[centerlast,small,sc]{caption}
 \setlength{\captionmargin}{20pt}
-\newcommand{\fref}[1]{Figure~\ref{#1}}
+\newcommand{\fref}[1]{Figura~\ref{#1}}
 \newcommand{\tref}[1]{Table~\ref{#1}}
 \newcommand{\eref}[1]{Equation~\ref{#1}}
 \newcommand{\cref}[1]{Capitolul~\ref{#1}}
@@ -268,8 +276,8 @@
 }\end{spacing}
 }
 \renewcommand\listoffigures{
-\btypeout{List of Figures}
-\addtotoc{List of Figures}
+\btypeout{List\u{a} de Figuri}
+\addtotoc{List\u{a} de Figuri}
 \begin{spacing}{1}{
     \setlength{\parskip}{1pt}
     \if@twocolumn
