@@ -66,7 +66,7 @@ $$ \frac{W - F + 2P }{S} + 1 = \frac{10 - 3 + 0 }{2} + 1 = 4.5 $$
 
 Av\^{a}nd \^{i}n vedere faptul c\u{a} dimensiunea datelor de ie\c{s}ire trebuie s\u{a} fie un num\u{a}r \^{i}ntreg atunci ar fi imposibil s\u{a} folosim un pas de 2 \^{i}ntr-un astfel de caz. \^{I}n astfel de cazuri, dac\u{a} nu vrem s\u{a} schimb\u{a}m pasul, va trebuii s\u{a} adaug\u{a}m un padding \^{i}n jurul datelor de intrare astfel \^{i}nc\^{a}t s\u{a} ob\c{t}inem la final un num\u{a}r \^{i}ntreg ca dimensiune pentru volumul de date rezultat de c\u{a}tre nivelul convolu\c{t}ional, \^{i}n cazul nostru de mai sus dac\u{a} ad\u{a}ug\u{a}m un padding de 1, atunci vom avea  o dimensiune de [5 x 5] pentru volumul de date rezultat de c\u{a}tre nivelul convoli\c{t}ional.
 
-\subsection{Niveulul de pool}
+\subsection{Nivelul de pool}
 
 Nivelul de pool se pune \^{i}ntre dou\u{a} nivele convolu\c{t}ionale pentru a se reduce cantitatea de informa\c{t}ie care se duce c\u{a}tre urm\u{a}torul nivel convolu\c{t}ional. Cel mai folosit tip de pooling este max-pooling care prime\c{s}te ca date de intrare valorile rezultate de la precedentul nivel convolu\c{t}ional \c{s}i le las\u{a} s\u{a} treac\u{a} doar pe cel cu valoarea cea mai mare c\u{a}tre urm\u{a}torul nivel convolu\c{t}ional ( vede\c{t}i imaginea de mai jos ), astfel c\u{a} acest nivel ne ajut\u{a} s\u{a} reducem cantitatea de date \c{s}i s\u{a} sc\u{a}p\u{a}m de datele nerelevante dintr-o re\c{t}ea convolu\c{t}ional\u{a}. 
 
