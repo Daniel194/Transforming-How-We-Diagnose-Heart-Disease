@@ -240,11 +240,8 @@ def convert_sax_images(rescale=True, base_size=256, crop_size=256):
     """
 
     target_dir = settings.BASE_PREPROCESSEDIMAGES_DIR
-    print("Deleting old files..")
 
     utils.delete_files(target_dir, "*.png")
-
-    print("patient\trows\tcols\tspacing\tfile_name")
 
     file_count = 0
     for dicom_data in utils.enumerate_sax_files():

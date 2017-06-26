@@ -154,24 +154,23 @@ def enumerate_sax_files(patient_ids=None, filter_slice_type="sax"):
     :return: return enumerate dicom data
     """
 
-    for sub_dir in ["train", "validate", "test"]:
-        for root, _, files in os.walk(settings.BASE_DIR + "data/" + sub_dir):
-            for file_name in files:
-                if file_name.endswith(".dcm"):
+    for root, _, files in os.walk(settings.BASE_DIR + "data"):
+        for file_name in files:
+            if file_name.endswith(".dcm"):
 
-                    parts = root.split('/')
-                    patient_id = parts[len(parts) - 3]
-                    slice_type = parts[len(parts) - 1]
-                    if filter_slice_type not in slice_type:
+                parts = root.split('/')
+                patient_id = parts[len(parts) - 3]
+                slice_type = parts[len(parts) - 1]
+                if filter_slice_type not in slice_type:
+                    continue
+
+                if patient_ids is not None:
+                    if patient_id not in patient_ids:
                         continue
 
-                    if patient_ids is not None:
-                        if patient_id not in patient_ids:
-                            continue
+                dicom_data = DicomWrapper(root + "/", file_name)
 
-                    dicom_data = DicomWrapper(root + "/", file_name)
-
-                    yield dicom_data
+                yield dicom_data
 
 
 def compute_mean_image(src_dir, wildcard, img_size):

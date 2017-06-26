@@ -1,9 +1,9 @@
-BASE_DIR = "../../"
+BASE_DIR = ""
 RESULT_DIR = BASE_DIR + "result/"
 DATA_DIR = BASE_DIR + "data/"
-BASE_PREPROCESSEDIMAGES_DIR = RESULT_DIR + "data_preprocessed_images/"
-BASE_TRAIN_SEGMENT_DIR = RESULT_DIR + "data_segmenter_trainset/"
-PATIENT_PRED_DIR = RESULT_DIR + "data_patient_predictions/"
+BASE_PREPROCESSEDIMAGES_DIR = RESULT_DIR + "preprocessed_images/"
+BASE_TRAIN_SEGMENT_DIR = RESULT_DIR + "segmenter_trainset/"
+PATIENT_PRED_DIR = RESULT_DIR + "patient_predictions/"
 
 MODEL_NAME = "vgg"
 TRAIN_EPOCHS = 40
