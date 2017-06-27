@@ -14,7 +14,7 @@ from tensorflow.python.ops import gen_nn_ops
 
 
 class LVSegmentation(object):
-    def __init__(self, checkpoint_dir='../../result/segmenter/train_result/'):
+    def __init__(self, checkpoint_dir='data/segmenter/'):
         """
         First method
         :param checkpoint_dir: the directory where will be saved all the value

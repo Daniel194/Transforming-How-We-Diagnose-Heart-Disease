@@ -12,6 +12,37 @@ import utils.settings as settings
 import utils.utils as utils
 from step2_train_segmenter import LVSegmentation
 
+MODEL_NAME = settings.MODEL_NAME
+CROP_SIZE = settings.CROP_SIZE
+INPUT_SIZE = settings.TARGET_CROP - CROP_SIZE
+
+USE_FRUSTUM_VOLUME_CALCULATIONS = True
+USE_EMPTY_FIRST_ITEMIN_FRUSTUM = True
+
+INTERPOLATE_SERIES = False
+SMOOTHEN_FRAMES = True
+
+PROCESS_IMAGES = True
+SEGMENT_IMAGES = True
+COUNT_PIXELS = True
+COMPUTE_VOLUMES = True
+
+PREDICTION_FILENAME = "prediction_raw_" + MODEL_NAME + ".csv"
+LOW_CONFIDENCE_PIXEL_THRESHOLD = 200
+
+current_debug_line = []
+global_dia_errors = []
+global_sys_errors = []
+
+slice_data = pandas.read_csv(settings.RESULT_DIR + "dicom_data_enriched.csv", sep=";")
+current_debug_line = ["patient", "dia_col", "sys_col", "dia_vol", "sys_vol", "dia_err", "sys_err"]
+
+model_name = MODEL_NAME + "_folder"
+range_start = 1
+range_end = 1141
+
+segmenter = LVSegmentation()
+
 
 def prepare_patient_images(patient_id, intermediate_crop=0):
     """
@@ -633,38 +664,7 @@ def predict_patient(patient_id, all_slice_data, pred_model_name, debug_info=Fals
 
 
 if __name__ == "__main__":
-    MODEL_NAME = settings.MODEL_NAME
-    CROP_SIZE = settings.CROP_SIZE
-    INPUT_SIZE = settings.TARGET_CROP - CROP_SIZE
-
-    USE_FRUSTUM_VOLUME_CALCULATIONS = True
-    USE_EMPTY_FIRST_ITEMIN_FRUSTUM = True
-
-    INTERPOLATE_SERIES = False
-    SMOOTHEN_FRAMES = True
-
-    PROCESS_IMAGES = True
-    SEGMENT_IMAGES = True
-    COUNT_PIXELS = True
-    COMPUTE_VOLUMES = True
-
-    PREDICTION_FILENAME = "prediction_raw_" + MODEL_NAME + ".csv"
-    LOW_CONFIDENCE_PIXEL_THRESHOLD = 200
-
-    current_debug_line = []
-    global_dia_errors = []
-    global_sys_errors = []
-
-    slice_data = pandas.read_csv(settings.RESULT_DIR + "dicom_data_enriched.csv", sep=";")
-    current_debug_line = ["patient", "dia_col", "sys_col", "dia_vol", "sys_vol", "dia_err", "sys_err"]
-
     print("\t".join(map(lambda x: str(x).rjust(10), current_debug_line)))
-
-    model_name = MODEL_NAME + "_folder"
-    range_start = 1
-    range_end = 1141
-
-    segmenter = LVSegmentation()
 
     print("Predicting model " + model_name)
 

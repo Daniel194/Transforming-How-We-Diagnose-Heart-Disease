@@ -1,4 +1,8 @@
 import step1_preprocess as preprocess
+import step3_predict_volumes as predict
+import utils.settings as settings
+
+import pandas
 
 ########## STEP 1 - Preprocess ##########
 
@@ -9,4 +13,9 @@ preprocess.enrich_traindata()
 
 print("Done - Step 1")
 
-########## STEP 2 - Segmentation ##########
+########## STEP 2 & 3 - Segmentation & predict volum ##########
+
+slice_data = pandas.read_csv(settings.RESULT_DIR + "dicom_data_enriched.csv", sep=";")
+predict.predict_patient(148, slice_data, '')
+
+print("Done - Step 2")
