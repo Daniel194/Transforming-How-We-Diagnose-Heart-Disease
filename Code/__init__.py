@@ -1,5 +1,6 @@
 import step1_preprocess as preprocess
 import step3_predict_volumes as predict
+import step4_calibrate as calibrate
 import utils.settings as settings
 
 import pandas
@@ -18,4 +19,10 @@ print("Done - Step 1")
 slice_data = pandas.read_csv(settings.RESULT_DIR + "dicom_data_enriched.csv", sep=";")
 predict.predict_patient(148, slice_data, '')
 
-print("Done - Step 2")
+print("Done - Step 2 & 3")
+
+########## STEP 4 - Calibrate ##########
+
+calibrate.calibrate_volume()
+
+print("Done - Step 4")
