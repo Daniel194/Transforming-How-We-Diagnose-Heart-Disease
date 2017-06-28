@@ -5,6 +5,7 @@ import utils.settings as settings
 
 import pandas
 
+
 ########## STEP 1 - Preprocess ##########
 
 preprocess.convert_sax_images(rescale=True, base_size=256, crop_size=256)
@@ -26,3 +27,28 @@ print("Done - Step 2 & 3")
 calibrate.calibrate_volume()
 
 print("Done - Step 4")
+
+######### STEP 5 - Calculate ejection fraction ##########
+
+PREDICT_FILE_PATH = "result/prediction_calibrated_vgg.csv"
+data = pandas.read_csv(PREDICT_FILE_PATH, sep=";")
+
+vd = data['cal_pred_dia'][0]
+vs = data['cal_pred_sys'][0]
+
+ej = 100 * ((vd - vs) / vd)
+
+print('Diastola prezisa: ', vd)
+print('Systola prezisa: ', vs)
+print('Fractia de ejectie prezisa: ', ej)
+
+print('---------------------------------------------------------------------------------------------------')
+
+vd = data['Diastole'][0]
+vs = data['Systole'][0]
+
+ej = 100 * ((vd - vs) / vd)
+
+print('Diastola reala: ', vd)
+print('Systola reala: ', vs)
+print('Fractia de ejectie reala: ', ej)
