@@ -16,7 +16,7 @@ def create_csv_data():
     :return: nothing
     """
 
-    print("   > Creating csv file from DICOM data")
+    print("   > Salvarea datelor DICOM intr-un fisier CSV")
 
     row_no = 0
 
@@ -107,7 +107,7 @@ def enrich_dicom_csvdata():
     :return: nothing
     """
 
-    print("   > Enriching dicom csv data with extra columns and stats")
+    print("   > Adaugarea de noi coloane la fisierul CSV")
 
     dicom_data = pandas.read_csv(settings.BASE_DIR + settings.RESULT_DIR + "dicom_data.csv", sep=";")
     dicom_data["age_years"] = dicom_data["age"].apply(lambda x: get_age_years(x))
@@ -144,7 +144,7 @@ def enrich_traindata():
     :return: nothing
     """
 
-    print("   > Enriching train data with extra columns and stats")
+    print("   > Adaugarea de noi coloane la datele de antrenare")
 
     train_data = pandas.read_csv(settings.BASE_DIR + settings.DATA_DIR + "train_validate.csv", sep=",")
     dicom_data = pandas.read_csv(settings.BASE_DIR + settings.RESULT_DIR + "dicom_data_enriched_frame1.csv", sep=";")
@@ -241,7 +241,7 @@ def convert_sax_images(rescale=True, base_size=256, crop_size=256):
     if not os.path.exists(target_dir):
         os.makedirs(target_dir)
 
-    print('   > Convert DICOM images to PNG')
+    print('   > Convertirea fisierelor DICOM in fisiere PNG')
 
     file_count = 0
     for dicom_data in utils.enumerate_sax_files():

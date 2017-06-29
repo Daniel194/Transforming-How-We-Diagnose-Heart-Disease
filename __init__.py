@@ -7,27 +7,29 @@ import utils.settings as settings
 
 import pandas
 
-print("Start - Step 1 - Preprocess")
+print("Inceput - Pas 1 - Preprocesare")
 
 preprocess.convert_sax_images(rescale=True, base_size=256, crop_size=256)
 preprocess.create_csv_data()
 preprocess.enrich_dicom_csvdata()
 preprocess.enrich_traindata()
 
-print("Done - Step 1 - Preprocess")
+print("Terminat - Pas 1 - Preprocesare")
 
 slice_data = pandas.read_csv(settings.RESULT_DIR + "dicom_data_enriched.csv", sep=";")
 predict.predict_patient(148, slice_data, '')
 
-print("Start - Step 4 - Calibrate")
-print("   > Calibrate prediction")
+print("Inceput - Pas 4 - Calibrare")
+print("   > Calibrarea prezicerilor")
 
 calibrate.calibrate_volume()
 
-print("Done - Step 4 - Calibrate")
+print("Terminat - Pas 4 - Calibrare")
 
-print("Start - Step 4 - Ejection fraction")
-print("   > Calculate ejection fraction")
+print("Inceput - Pas 5 - Fractia de ejectie")
+
+print("   > Calcularea fractiei de ejectie")
+print("   > Stabilirea diagnosticului")
 
 print('---------------------------------------------------------------------------------------------------')
 
@@ -39,4 +41,4 @@ diagnostic.calculate_ej_real()
 
 print('---------------------------------------------------------------------------------------------------')
 
-print("Done - Step 4 - Ejection fraction")
+print("Terminat - Pas 5 - Fractia de ejectie")

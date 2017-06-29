@@ -15,13 +15,13 @@ def diagnostic(ej):
     if (ej >= 75):
         d = "Hiperdinamic"
     elif (ej < 75 and ej >= 55):
-        d = "Normala"
+        d = "Normal"
     elif (ej < 55 and ej >= 45):
-        d = "Usor anormala"
+        d = "Usor anormal"
     elif (ej < 45 and ej >= 35):
-        d = "Moderat anormala"
+        d = "Moderat anormal"
     else:
-        d = "Sever anormala"
+        d = "Sever anormal"
 
     print("Diagnostic : ", d)
 
