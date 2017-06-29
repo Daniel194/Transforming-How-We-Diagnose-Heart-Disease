@@ -1,9 +1,15 @@
 import os
+
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+
+import tensorflow as tf
+
+tf.logging.set_verbosity(tf.logging.ERROR)
+
 import sys
 import random
 import math
 import pickle
-import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
 import functools
@@ -288,7 +294,6 @@ class LVSegmentation(object):
         :param padding: optional parameter
         :return: the output of the deconvolutional layer.
         """
-
 
         nr_units = functools.reduce(lambda x, y: x * y, W_shape)
         stddev = 1.0 / math.sqrt(float(nr_units))

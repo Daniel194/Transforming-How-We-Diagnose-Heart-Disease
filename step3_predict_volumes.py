@@ -609,11 +609,22 @@ def predict_patient(patient_id, all_slice_data, pred_model_name, debug_info=Fals
         if PROCESS_IMAGES:
             prepare_patient_images(patient_id, intermediate_crop=intermediate_crop)
 
+        print("Start - Step 2 - Segment")
+        print("   > Segment images")
+
         if SEGMENT_IMAGES:
             predict_overlays_patient(patient_id, save_transparents=True)
 
+        print("Done - Step 2 - Segment")
+
+        print("Start - Step 3 - Predict volume")
+
+        print("   > Count pixels")
+
         if COUNT_PIXELS:
             pixel_frame = count_pixels(patient_id, all_slice_data, pred_model_name)
+
+        print("   > Compute volume")
 
         if COMPUTE_VOLUMES:
             diastole_vol, systole_vol, diastole_lowconf_vol, systole_lowconf_vol, diastole_frame, systole_frame, diastole_max, systole_max = compute_volumes(
@@ -625,6 +636,8 @@ def predict_patient(patient_id, all_slice_data, pred_model_name, debug_info=Fals
                 scale *= scale
                 diastole_vol *= scale
                 systole_vol *= scale
+
+        print("Done - Step 3 - Predict volume")
 
         if debug_info:
             current_debug_line.append(str(round(diastole_vol, 2)))
