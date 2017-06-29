@@ -34,8 +34,6 @@ current_debug_line = []
 global_dia_errors = []
 global_sys_errors = []
 
-segmenter = LVSegmentation()
-
 
 def prepare_patient_images(patient_id, intermediate_crop=0):
     """
@@ -80,6 +78,8 @@ def predict_overlays_patient(patient_id, save_transparents=False):
     :param save_transparents: boolean value
     :return: nothing
     """
+
+    segmenter = LVSegmentation()
 
     src_image_dir = utils.get_pred_patient_img_dir(patient_id)
     overlay_dir = utils.get_pred_patient_overlay_dir(patient_id)
@@ -136,6 +136,8 @@ def predict_overlays_patient(patient_id, save_transparents=False):
 
                 transparent_overlay = cv2.merge(channels)
                 cv2.imwrite(transparent_overlay_dir + file_name, transparent_overlay)
+
+    segmenter.session.close()
 
 
 def get_filename(file_path):
