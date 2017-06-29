@@ -34,13 +34,6 @@ current_debug_line = []
 global_dia_errors = []
 global_sys_errors = []
 
-slice_data = pandas.read_csv(settings.RESULT_DIR + "dicom_data_enriched.csv", sep=";")
-current_debug_line = ["patient", "dia_col", "sys_col", "dia_vol", "sys_vol", "dia_err", "sys_err"]
-
-model_name = MODEL_NAME + "_folder"
-range_start = 1
-range_end = 1141
-
 segmenter = LVSegmentation()
 
 
@@ -664,6 +657,13 @@ def predict_patient(patient_id, all_slice_data, pred_model_name, debug_info=Fals
 
 
 if __name__ == "__main__":
+    slice_data = pandas.read_csv(settings.RESULT_DIR + "dicom_data_enriched.csv", sep=";")
+    current_debug_line = ["patient", "dia_col", "sys_col", "dia_vol", "sys_vol", "dia_err", "sys_err"]
+
+    model_name = MODEL_NAME + "_folder"
+    range_start = 1
+    range_end = 1141
+
     print("\t".join(map(lambda x: str(x).rjust(10), current_debug_line)))
 
     print("Predicting model " + model_name)

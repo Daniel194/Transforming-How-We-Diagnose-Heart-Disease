@@ -4,6 +4,7 @@ import scipy
 import scipy.misc
 import cv2
 import numpy as np
+import os
 import utils.sunnybrook as sunnybrook
 import utils.utils as utils
 import utils.settings as settings
@@ -242,6 +243,9 @@ def convert_sax_images(rescale=True, base_size=256, crop_size=256):
     target_dir = settings.BASE_PREPROCESSEDIMAGES_DIR
 
     utils.delete_files(target_dir, "*.png")
+
+    if not os.path.exists(target_dir):
+        os.makedirs(target_dir)
 
     file_count = 0
     for dicom_data in utils.enumerate_sax_files():
