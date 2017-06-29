@@ -10,7 +10,7 @@ import scipy
 import scipy.misc
 import random
 
-warnings.filterwarnings('ignore')  # we ignore a RuntimeWarning produced from dividing by zero
+warnings.filterwarnings('ignore')
 random.seed(1301)
 
 SUNNYBROOK_ROOT_PATH = "../../data/"
@@ -123,7 +123,6 @@ def __get_all_contours(contour_path):
                 for dirpath, dirnames, files in os.walk(contour_path)
                 for f in fnmatch.filter(files, 'IM-0001-*-icontour-manual.txt')]
 
-    print("Number of examples: {:d}".format(len(contours)))
     extracted = list(map(Contour, contours))
 
     return extracted
@@ -149,7 +148,6 @@ def __export_all_contours(batch, img_path):
             labels.append(label)
 
             if idx % 50 == 0:
-                print(ctr)
                 plt.imshow(img, cmap='gray')
                 plt.show()
                 plt.imshow(label)

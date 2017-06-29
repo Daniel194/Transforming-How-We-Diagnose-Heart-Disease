@@ -16,7 +16,7 @@ def create_csv_data():
     :return: nothing
     """
 
-    print("Creating csv file from dicom data")
+    print("Creating csv file from DICOM data")
 
     row_no = 0
 
@@ -29,8 +29,6 @@ def create_csv_data():
 
         for dicom_data in utils.enumerate_sax_files():
             row_no += 1
-            if row_no % 1000 == 0:
-                print(row_no)
 
             csv_writer.writerow([
                 str(dicom_data.patient_id),
@@ -116,24 +114,20 @@ def enrich_dicom_csvdata():
     dicom_data["patient_id_frame"] = dicom_data["patient_id"].map(str) + "_" + dicom_data["frame_no"].map(str)
     dicom_data = dicom_data.sort(["patient_id", "frame_no", "slice_location", "file_name"], ascending=[1, 1, 1, 1])
 
-    # aggrageted updown information < 0 means slice location increased from apex to base and > 0 from base to apex, we want everything from base to apex..
     patient_grouped = dicom_data.groupby("patient_id_frame")
     dicom_data['up_down'] = patient_grouped['time'].apply(lambda x: up_down(x, x.shift(1)))
     dicom_data['up_down_agg'] = patient_grouped["up_down"].transform(lambda x: sum(x))
     dicom_data['slice_location_sort'] = dicom_data['slice_location'] * dicom_data['up_down_agg']
     dicom_data = dicom_data.sort(["patient_id", "frame_no", "slice_location_sort", "slice_location", "file_name"])
 
-    # now compute the deltas between slices
     patient_grouped = dicom_data.groupby("patient_id_frame")
     dicom_data['slice_location_delta'] = patient_grouped['slice_location'].apply(lambda x: slice_delta(x, x.shift(-1)))
     dicom_data['small_slice_count'] = patient_grouped['slice_location_delta'].transform(lambda x: count_small_deltas(x))
     dicom_data["slice_count"] = patient_grouped["up_down"].transform("count")
     dicom_data["normal_slice_count"] = dicom_data["slice_count"] - dicom_data['small_slice_count']
 
-    # delete all slices with delta '0'
     dicom_data = dicom_data[dicom_data["slice_location_delta"] != 0]
 
-    # again determine updown for some special cases (341)
     patient_grouped = dicom_data.groupby("patient_id_frame")
     dicom_data['up_down'] = patient_grouped['time'].apply(lambda x: up_down(x, x.shift(1)))
     dicom_data['up_down_agg'] = patient_grouped["up_down"].transform(lambda x: sum(x))
@@ -247,6 +241,8 @@ def convert_sax_images(rescale=True, base_size=256, crop_size=256):
     if not os.path.exists(target_dir):
         os.makedirs(target_dir)
 
+    print('Convert DICOM images to PNG')
+
     file_count = 0
     for dicom_data in utils.enumerate_sax_files():
         file_count += 1
@@ -256,12 +252,6 @@ def convert_sax_images(rescale=True, base_size=256, crop_size=256):
 
         if dicom_data.spacing[0] != dicom_data.spacing[1]:
             raise Exception("Data spacings not equal")
-
-        print(str(dicom_data.patient_id) + "\t" + str(dicom_data.rows) + "\t" + str(dicom_data.columns) + "\t" + str(
-            dicom_data.series_number) + "\t" + str(dicom_data.spacing) + "\t" + str(
-            dicom_data.slice_thickness) + "\t" + str(dicom_data.sequence_name) + "\t" + str(
-            dicom_data.image_position) + "\t" + str(
-            dicom_data.slice_location) + "\t" + dicom_data.in_plane_encoding_direction)
 
         location_id = int(dicom_data.slice_location) + 10000
         location_id_str = str(location_id).rjust(5, '0')
@@ -274,10 +264,8 @@ def convert_sax_images(rescale=True, base_size=256, crop_size=256):
 
         img = cv2.imread(img_path, 0)
         if dicom_data.in_plane_encoding_direction == "COL":
-            # rotate counter clockwise when image is column oriented..
             img = cv2.transpose(img)
             img = cv2.flip(img, 0)
-            print("")
 
         if rescale:
             scale = dicom_data.spacing[0]
@@ -295,9 +283,6 @@ if __name__ == "__main__":
     enrich_dicom_csvdata()
     enrich_traindata()
 
-    # Convert Sunnybrook dataset from DICOM form to PNG format
     train, val = sunnybrook.get_all_contours()
     ctrs = np.append(train, val)
     sunnybrook.convert_dicom_to_png(ctrs)
-
-    print("Done")

@@ -89,6 +89,7 @@ def predict_overlays_patient(patient_id, save_transparents=False):
 
     num_lines = sum(1 for l in open(src_image_dir + "pred.lst"))
     batch_size = 1
+
     for try_size in [2, 3, 4, 5]:
         if num_lines % try_size == 0:
             batch_size = try_size
@@ -109,8 +110,8 @@ def predict_overlays_patient(patient_id, save_transparents=False):
 
         original_images = images
 
-        images -= np.mean(images, dtype=np.float32)  # zero-centered
-        images /= np.std(images, dtype=np.float32)  # normalization
+        images -= np.mean(images, dtype=np.float32)
+        images /= np.std(images, dtype=np.float32)
 
         images = np.reshape(images, (-1, 224, 224, 1))
 
@@ -128,7 +129,6 @@ def predict_overlays_patient(patient_id, save_transparents=False):
 
             if save_transparents:
                 channels = cv2.split(image)
-                # make argb
                 empty = numpy.zeros(channels[0].shape, dtype=numpy.float32)
                 alpha = channels[0].copy()
                 alpha[alpha == 255] = 75
@@ -147,7 +147,6 @@ def get_filename(file_path):
     :return: return the file name
     """
 
-    #  Format of a file is : 0350_00000sax_02_10053_IM-6068-0002.png
     file_name = ntpath.basename(file_path)
     parts = file_name.split('_')
     file_name = parts[4].replace(".png", "")
@@ -162,7 +161,6 @@ def get_frame_no(file_path):
     :return: number of the frame
     """
 
-    #  Format of a file is : 0350_00000sax_02_10053_IM-6068-0002.png
     file_name = ntpath.basename(file_path)
     parts = file_name.split('_')
     frame_no = parts[2]
@@ -224,8 +222,10 @@ def interpolate_series(pixel_series):
 
     if not INTERPOLATE_SERIES:
         return pixel_series
+
     max_index = 0
     max_value = 0
+
     for i in range(len(pixel_series)):
         if pixel_series[i] >= max_value:
             max_index = i
@@ -233,31 +233,44 @@ def interpolate_series(pixel_series):
 
     max_start = 0
     start_index = 0
+
     while start_index < max_index:
+
         if pixel_series[start_index] < max_start:
             next_index = start_index
             next_value = max_value
+
             while next_index <= max_index:
+
                 if pixel_series[next_index] > max_start:
                     next_value = pixel_series[next_index]
                     break
+
                 next_index += 1
+
             pixel_series[start_index] = (max_start + next_value) / 2
+
         max_start = max(max_start, pixel_series[start_index])
         start_index += 1
 
     max_end = 0
     end_index = len(pixel_series) - 1
+
     while end_index > max_index:
+
         if pixel_series[end_index] < max_end:
             next_index = end_index
             next_value = max_value
+
             while next_index >= max_index:
                 if pixel_series[next_index] > max_end:
                     next_value = pixel_series[next_index]
                     break
+
                 next_index -= 1
+
             pixel_series[end_index] = (max_end + next_value) / 2
+
         max_end = max(max_end, pixel_series[end_index])
         end_index -= 1
 
@@ -278,31 +291,18 @@ def count_pixels(patient_id, all_slice_data, model_name):
         "slice_location"].map(str)
     slices = patient_slice_data["slice_noloc"].unique().tolist()
     frames = patient_slice_data["frame_no"].unique().tolist()
-    frame_count = len(frames)
 
-    # find lowest common set of frames that are present in every slice
     for name, records in patient_slice_data.groupby("slice_noloc"):
         slice_frames = records["frame_no"].unique()
 
         if (len(frames) / 2) >= len(slice_frames):
-            # throw away small slices (416)
-            print("Patient " + str(patient_id) + ": throw away slice : " + str(name))
             slices.remove(name)
             continue
 
         frames = list(set(frames) & set(slice_frames))
 
-    new_frame_count = len(frames)
-
-    if new_frame_count != frame_count:
-        print(
-            "Patient " + str(patient_id) + ": frames not the same for every slice : " + str(frame_count) + " <> " + str(
-                new_frame_count))
-
     file_name_slices = patient_slice_data.set_index('file_name')['slice_noloc'].to_dict()
     file_name_frames = patient_slice_data.set_index('file_name')['frame_no'].to_dict()
-
-    # set up matrix indexed by slice_no and frame_no
     slice_index = {}
 
     for slice_no in slices:
@@ -367,9 +367,6 @@ def count_pixels(patient_id, all_slice_data, model_name):
 
     deltas = abs(abs(data_frame["slice_dist"]) - abs(data_frame["slice_dist2"])).sum()
 
-    if deltas > 1:
-        print("slice_dist != slice_dist2 (" + str(deltas) + ")")
-
     data_frame["time"] = patient_slice_data_frame1["time"].values
 
     for frame_no in frames:
@@ -423,8 +420,6 @@ def compute_volumne_frustum(pixel_series, distance_series, low_confidence_calc=F
     val_list.append(0)
 
     if abs(dist_list[0]) > 25:
-        print("First element slice location completely out of range.. removing. " + str(dist_list[0]))
-
         dist_list[0] = 0
 
     if USE_EMPTY_FIRST_ITEMIN_FRUSTUM:
@@ -439,9 +434,6 @@ def compute_volumne_frustum(pixel_series, distance_series, low_confidence_calc=F
 
         if val > max_val:
             max_val = val
-
-        if dist > 15:
-            print("Suspicious.. dist > 15. (" + str(dist) + ")")
 
         next_val = val_list[i + 1]
 
@@ -641,12 +633,9 @@ def predict_patient(patient_id, all_slice_data, pred_model_name, debug_info=Fals
         err_dia, err_sys = evaluate_volume(patient_id, diastole_vol, systole_vol, pred_model_name, scale,
                                            diastole_lowconf_vol, systole_lowconf_vol, diastole_frame, systole_frame,
                                            diastole_max, systole_max, debug_info=debug_info)
-        if debug_info:
-            print("\t".join(map(lambda x: str(x).rjust(10), current_debug_line)))
 
         if diastole_vol > 340 and round_no == 0 and SEGMENT_IMAGES:
             intermediate_crop = 220
-            print("Volume > 300, resizing so that everything is a bit smaller")
             current_debug_line = [str(patient_id)]
             round_no = 1
         else:

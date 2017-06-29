@@ -225,7 +225,6 @@ def compute_mean_pixel_values_dir(src_dir, wildcard, channels):
             break
 
     res = sum(means) / len(means)
-    print(res)
 
     return res
 
@@ -325,7 +324,6 @@ def prepare_overlay_image(src_overlay_path, target_size, antialias=False):
         overlay = overlay.swapaxes(0, 2)
         overlay = overlay.swapaxes(1, 2)
         overlay = overlay[0]
-        # overlay = overlay.reshape((overlay.shape[1], overlay.shape[2])
         interpolation = cv2.INTER_AREA if antialias else cv2.INTER_NEAREST
         overlay = cv2.resize(overlay, (target_size, target_size), interpolation=interpolation)
     else:
